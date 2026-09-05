@@ -495,3 +495,9 @@ The following components and layouts were recently added via an Agentic Workflow
 - **Cloudinary Media Uploads**: Upgraded the file input to capture actual cropped `File` objects. The `problemStore` intercepts these files and transforms the payload into a native `multipart/form-data` request. The backend streams these files directly to Cloudinary, ensuring scalable and secure cloud storage.
 - **Dynamic Toasts**: Hooked into `useToastStore` to provide instant, beautiful feedback messages when a location is fetched, an image is processed, a problem is successfully submitted, or a problem is securely deleted.
 - **Full-Screen Previews**: Added premium modal overlays with dark backdrops to elegantly view cropped images before submission and attached evidence on the Problem Details page.
+
+## Global UI & Route Security Update (Phase 2)
+- **Public Layout**: A new `PublicLayout.jsx` orchestrates the presentation of the global `<Navbar />` and `<Footer />` exclusively across public-facing routes (`/`, `/login`, `/signup`, `/map`).
+- **Navbar Extraction**: The embedded navigation was extracted from the Landing page into a reusable component featuring dynamic routing and active-state styling.
+- **Premium Footer**: A new, modern, 4-column footer was integrated featuring glassmorphic effects, lucid icons, and responsive stacking behavior.
+- **Route Hardening**: Addressed a critical security vulnerability where HEI (`/hei/*`) and Industry (`/industry/*`) routes were publicly accessible. These routes are now strictly wrapped inside `<ProtectedRoute>` components with exact role validation (`hei`, `hei_admin`, `industry_csr`, `industry_admin`).
