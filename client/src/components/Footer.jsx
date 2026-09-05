@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Activity, Mail, ArrowUpRight, Github, Twitter, Linkedin } from 'lucide-react';
+import { ShieldCheck, Activity, Mail, ArrowUpRight, Globe } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -93,13 +93,7 @@ export default function Footer() {
           
           <div className="flex items-center gap-5">
             <a href="#" className="text-slate-500 hover:text-emerald-400 transition-colors hover:scale-110 transform">
-              <Github size={18} />
-            </a>
-            <a href="#" className="text-slate-500 hover:text-emerald-400 transition-colors hover:scale-110 transform">
-              <Twitter size={18} />
-            </a>
-            <a href="#" className="text-slate-500 hover:text-emerald-400 transition-colors hover:scale-110 transform">
-              <Linkedin size={18} />
+              <Globe size={18} />
             </a>
           </div>
         </div>
