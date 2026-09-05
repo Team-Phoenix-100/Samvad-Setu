@@ -886,6 +886,44 @@ improvement before making major architectural changes.
 
 ------------------------------------------------------------------------
 
+## 🤖 AI Engine: Severity, Priority & Department Routing
+
+The platform integrates intelligent grievance triage and municipal department routing within `ai_chatbot/`:
+
+### 1. Severity & Priority Engine (`ai_chatbot/app/severity.py`)
+- **Canonical Severity Levels**: `Low`, `Medium`, `High`, `Critical`.
+- **Hardcoded Emergency Keyword Safety Layer**: Mandatory escalation to `"Critical"` whenever emergency keywords (`contaminated`, `collapse`, `fire`, or Hindi/Hinglish terms like `आग`, `दूषित पानी`, `पुल ढह गया`, `aag`, `gir gaya`, `dooshit`, `blast`, `khula manhole`, `current lag gaya`) are present, overriding any ML prediction.
+- **Fixed Priority Formula (Deterministic 1–100 Score)**:
+  $$\text{Priority} = \min(100, \max(1, S + D + R))$$
+  - **Severity Weight ($S$)**: Critical = 50, High = 35, Medium = 20, Low = 10.
+  - **Duplicate Boost ($D$)**: $\min(25, \text{duplicate\_count} \times 5)$ (+5 points per duplicate report, capped at 25).
+  - **Recency Score ($R$)**: Age $\le 2\text{h} = 25\text{ pts}$, $2\text{--}12\text{h} = 20\text{ pts}$, $12\text{--}24\text{h} = 15\text{ pts}$, $24\text{--}48\text{h} = 10\text{ pts}$, $> 48\text{h} = 5\text{ pts}$.
+- **Output Schema**:
+  ```json
+  {
+      "severity": "Critical",
+      "priority": 100
+  }
+  ```
+
+### 2. Department Recommendation (`ai_chatbot/app/department.py`)
+Deterministic lookup mapping table (strictly rule-based, no ML model):
+- `education` $\rightarrow$ Education Department
+- `agriculture` $\rightarrow$ Agriculture Department
+- `healthcare` $\rightarrow$ Health Department
+- `water` $\rightarrow$ Water Department
+- `environment` $\rightarrow$ Environment Department
+- `energy` $\rightarrow$ Energy Department
+- `urban_development` $\rightarrow$ Urban Development Department
+- `accessibility` $\rightarrow$ Accessibility Department
+- `public_admin` $\rightarrow$ Public Administration Department
+- `rural_livelihoods` $\rightarrow$ Rural Livelihoods Department
+- Unmapped / Other $\rightarrow$ General Administration Department
+
+Function: `get_department(category)`
+
+------------------------------------------------------------------------
+
 ## 👥 Project Team
 
 Add your team information here:
