@@ -180,7 +180,7 @@ class DuplicateDetector:
         if self.index is None:
             self.dimension = embedding.shape[1]
             self.index = faiss.IndexFlatIP(self.dimension)
-
+    
         self.index.add(embedding)
         self.metadata.append({
             "id": complaint_id,
@@ -202,7 +202,7 @@ class DuplicateDetector:
         Args:
             complaint_text: Citizen complaint in English, Hindi, or Hinglish.
             threshold: Similarity threshold (default: 0.85).
-
+        
         Returns:
             Dict matching format:
             {

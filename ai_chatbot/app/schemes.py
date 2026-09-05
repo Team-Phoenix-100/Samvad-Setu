@@ -26,3 +26,19 @@ class DuplicateCheckResponse(BaseModel):
     matchedComplaintId: Optional[str] = None
     matchedComplaintText: Optional[str] = None
 
+class SeverityRequest(BaseModel):
+    text: str
+    duplicate_count: Optional[int] = 0
+    recency: Optional[float] = 0.0
+    model_prediction: Optional[str] = None
+
+class SeverityResponse(BaseModel):
+    severity: str
+    priority: int
+
+class DepartmentRequest(BaseModel):
+    category: str
+
+class DepartmentResponse(BaseModel):
+    category: str
+    department: str
