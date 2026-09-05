@@ -19,6 +19,7 @@ import IndustryTracking from "./pages/industry/IndustryTracking";
 import Toast from "./components/ui/Toast";
 import SidebarLayout from "./components/layout/SidebarLayout";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
+import PublicLayout from "./components/layout/PublicLayout";
 import Profile from "./pages/citizen/Profile";
 import Settings from "./pages/citizen/Settings";
 
@@ -46,15 +47,17 @@ export default function App() {
         {/* Design System Preview Route (Section 0.2)[cite: 1] */}
         <Route path="/dev/components" element={<ComponentLibrary />} />
 
-        {/* Public Module Routes (Section 1)[cite: 1] */}
-        <Route path="/" element={<Landing />} />
-        <Route
-          path="/how-it-works"
-          element={<PageStub title="How It Works" category="Public (P1)" />}
-        />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/map" element={<PublicMap />} />
+        {/* Public Module Routes */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<Landing />} />
+          <Route
+            path="/how-it-works"
+            element={<PageStub title="How It Works" category="Public (P1)" />}
+          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/map" element={<PublicMap />} />
+        </Route>
 
         {/* Citizen Module Routes (Section 1)[cite: 1] */}
         <Route element={<ProtectedRoute allowedRoles={['citizen']} />}>
@@ -77,51 +80,59 @@ export default function App() {
           <Route path="/problem/:id" element={<ProblemDetail />} />
         </Route>
 
-        {/* HEI / Faculty Module Routes (Section 1)[cite: 1] */}
-        <Route path="/hei/dashboard" element={<HeiDashboard />} />
-        <Route path="/hei/review" element={<HeiProblemReview />} />
-        <Route path="/hei/tracking" element={<HeiTracking />} />
-        <Route
-          path="/hei/team-formation"
-          element={
-            <PageStub
-              title="Team Formation"
-              category="Faculty/HEI Admin (P1)"
+        {/* HEI / Faculty Module Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['hei', 'hei_admin']} />}>
+          <Route element={<SidebarLayout />}>
+            <Route path="/hei/dashboard" element={<HeiDashboard />} />
+            <Route path="/hei/review" element={<HeiProblemReview />} />
+            <Route path="/hei/tracking" element={<HeiTracking />} />
+            <Route
+              path="/hei/team-formation"
+              element={
+                <PageStub
+                  title="Team Formation"
+                  category="Faculty/HEI Admin (P1)"
+                />
+              }
             />
-          }
-        />
-        <Route
-          path="/hei/workspace"
-          element={
-            <PageStub
-              title="Project Workspace"
-              category="Faculty / Students (P0)"
+            <Route
+              path="/hei/workspace"
+              element={
+                <PageStub
+                  title="Project Workspace"
+                  category="Faculty / Students (P0)"
+                />
+              }
             />
-          }
-        />
-        <Route
-          path="/hei/analytics"
-          element={
-            <PageStub title="HEI Analytics" category="Faculty/HEI Admin (P2)" />
-          }
-        />
+            <Route
+              path="/hei/analytics"
+              element={
+                <PageStub title="HEI Analytics" category="Faculty/HEI Admin (P2)" />
+              }
+            />
+          </Route>
+        </Route>
 
-        {/* Industry / CSR Module Routes (Section 1)[cite: 1] */}
-        <Route path="/industry/dashboard" element={<IndustryDashboard />} />
-        <Route path="/industry/browse" element={<IndustryBrowse />} />
-        <Route path="/industry/tracking" element={<IndustryTracking />} />
-        <Route
-          path="/industry/pledge"
-          element={
-            <PageStub title="Pledge Support Flow" category="Industry (P0)" />
-          }
-        />
-        <Route
-          path="/industry/csr-report"
-          element={
-            <PageStub title="CSR Compliance Report" category="Industry (P1)" />
-          }
-        />
+        {/* Industry / CSR Module Routes */}
+        <Route element={<ProtectedRoute allowedRoles={['industry_csr', 'industry_admin']} />}>
+          <Route element={<SidebarLayout />}>
+            <Route path="/industry/dashboard" element={<IndustryDashboard />} />
+            <Route path="/industry/browse" element={<IndustryBrowse />} />
+            <Route path="/industry/tracking" element={<IndustryTracking />} />
+            <Route
+              path="/industry/pledge"
+              element={
+                <PageStub title="Pledge Support Flow" category="Industry (P0)" />
+              }
+            />
+            <Route
+              path="/industry/csr-report"
+              element={
+                <PageStub title="CSR Compliance Report" category="Industry (P1)" />
+              }
+            />
+          </Route>
+        </Route>
 
         {/* Government / DHTE Module Routes (Section 1)[cite: 1] */}
         <Route element={<ProtectedRoute allowedRoles={['government_admin', 'admin', 'govt_admin', 'platform_admin']} />}>

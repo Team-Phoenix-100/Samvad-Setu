@@ -6,24 +6,7 @@ import Button from '../../components/ui/Button';
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-[#0F1B1E] text-[#F2EFE9] flex flex-col justify-between">
-      {/* Top Header / Brand Bar */}
-      <header className="border-b border-[#1D3238] bg-[#16262A]/60 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <SignalDot status="unresolved" size="md" />
-          <span className="font-display font-bold text-xl tracking-tight text-[#F2EFE9]">
-            Samvad-Setu <span className="text-[#E8A33D] font-mono text-xs font-normal ml-1">PS 26043</span>
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <Link to="/map" className="text-sm text-[#9BA8A6] hover:text-[#F2EFE9] transition-colors">
-            Public Map
-          </Link>
-          <Link to="/login">
-            <Button variant="outline" className="text-sm py-1.5 px-3">Sign In</Button>
-          </Link>
-        </div>
-      </header>
+    <div className="bg-[#0F1B1E] text-[#F2EFE9] flex flex-col justify-between">
 
       <main className="max-w-6xl mx-auto px-6 py-12 space-y-16 flex-1">
         {/* Hero Section */}
@@ -142,17 +125,6 @@ export default function Landing() {
         </section>
       </main>
 
-      {/* Institutional Footer */}
-      <footer className="border-t border-[#1D3238] bg-[#16262A] px-6 py-6 text-xs text-[#9BA8A6] flex flex-col md:flex-row items-center justify-between gap-4">
-        <div>
-          <p className="text-[#F2EFE9] font-semibold">Government of Jharkhand | DHTE Collaboration</p>
-          <p>Smart India Hackathon 2026 Project (PS 26043)</p>
-        </div>
-        <div className="flex gap-6">
-          <Link to="/map" className="hover:text-[#F2EFE9]">Public Map Explorer</Link>
-          <Link to="/dev/components" className="hover:text-[#E8A33D] font-mono">/dev/components</Link>
-        </div>
-      </footer>
     </div>
   );
 }

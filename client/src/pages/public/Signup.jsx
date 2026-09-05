@@ -86,15 +86,7 @@ export default function Signup() {
   const goToPreviousStep = () => setStep((current) => Math.max(1, current - 1));
 
   return (
-    <div className="min-h-screen bg-[#0F1B1E] text-[#F2EFE9] flex flex-col justify-between p-6">
-      <header className="flex items-center gap-3 max-w-lg mx-auto w-full">
-        <Link to="/" className="flex items-center gap-2">
-          <SignalDot status="unresolved" size="sm" />
-          <span className="font-display font-bold text-lg text-[#F2EFE9]">
-           Samvad-Setu
-          </span>
-        </Link>
-      </header>
+    <div className="bg-[#0F1B1E] text-[#F2EFE9] flex flex-col items-center justify-center py-12 px-6 flex-1">
 
       <main className="max-w-lg mx-auto w-full bg-[#16262A] p-8 rounded-xl border border-[#1D3238] space-y-6">
         <div className="space-y-2 text-center">
@@ -306,9 +298,6 @@ export default function Signup() {
         </p>
       </main>
 
-      <footer className="text-center text-xs text-[#9BA8A6]">
-        SICP PS 26043 | Government of Jharkhand DHTE Collaboration[cite: 1]
-      </footer>
     </div>
   );
 }

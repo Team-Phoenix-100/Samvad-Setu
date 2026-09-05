@@ -33,7 +33,7 @@ export default function PublicMap() {
     : problems.filter(p => p.status === filter);
 
   return (
-    <div className="h-screen bg-[#0F1B1E] text-[#F2EFE9] flex flex-col">
+    <div className="flex-1 min-h-[calc(100vh-140px)] bg-[#0F1B1E] text-[#F2EFE9] flex flex-col">
       {/* Map Header Overlay */}
       <header className="border-b border-[#1D3238] bg-[#16262A]/90 backdrop-blur-md px-6 py-4 flex flex-wrap items-center justify-between gap-4 z-10">
         <div className="flex items-center gap-3">
