@@ -29,6 +29,17 @@ const userSchema = new mongoose.Schema(
     institutionName: { type: String }, // for 'hei'
     companyName: { type: String }, // for 'industry_csr'
     department: { type: String }, // for 'government_admin'
+    regId: { type: String }, // AISHE Code / CIN
+
+    // Demographic and Location fields
+    phone: { type: String },
+    dateOfBirth: { type: Date },
+    gender: { type: String, enum: ["Female", "Male", "Other", "prefer-not-to-say"] },
+    address: { type: String },
+    city: { type: String },
+    state: { type: String },
+    district: { type: String },
+    pinCode: { type: String },
   },
   { timestamps: true }, // adds createdAt & updatedAt automatically
 );

@@ -23,6 +23,15 @@ router.post("/register", async (req, res) => {
       institutionName,
       companyName,
       department,
+      regId,
+      phone,
+      dateOfBirth,
+      gender,
+      address,
+      city,
+      state,
+      district,
+      pinCode,
     } = req.body;
 
     // Check if user already exists
@@ -42,6 +51,15 @@ router.post("/register", async (req, res) => {
       institutionName,
       companyName,
       department,
+      regId,
+      phone,
+      dateOfBirth,
+      gender,
+      address,
+      city,
+      state,
+      district,
+      pinCode,
     });
 
     const token = generateToken(user._id, user.role);

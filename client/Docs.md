@@ -501,3 +501,7 @@ The following components and layouts were recently added via an Agentic Workflow
 - **Navbar Extraction**: The embedded navigation was extracted from the Landing page into a reusable component featuring dynamic routing and active-state styling.
 - **Premium Footer**: A new, modern, 4-column footer was integrated featuring glassmorphic effects, lucid icons, and responsive stacking behavior.
 - **Route Hardening**: Addressed a critical security vulnerability where HEI (`/hei/*`) and Industry (`/industry/*`) routes were publicly accessible. These routes are now strictly wrapped inside `<ProtectedRoute>` components with exact role validation (`hei`, `hei_admin`, `industry_csr`, `industry_admin`).
+
+## Theme Refactoring Update
+- **Settings Component**: The `ThemeSwitcher` has been refactored out of the Sidebar and integrated into the `Settings.jsx` page under an "Appearance" section. It features an animated, 3-state segment control (Light, Dark, System) built with Framer Motion.
+- **Navbar Toggle**: Added a smart toggle button directly into the `Navbar.jsx` that loops through the 3 states (Light -> Dark -> System -> Light) for easy public access.

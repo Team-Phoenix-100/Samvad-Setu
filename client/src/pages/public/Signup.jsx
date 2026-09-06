@@ -10,12 +10,14 @@ import {
 import SignalDot from "../../components/ui/SignalDot";
 import Button from "../../components/ui/Button";
 import { useToastStore } from "../../store/toastStore";
+import { useAuthStore } from "../../store/authStore";
 
 export default function Signup() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialRole = searchParams.get("role") || "citizen";
   const { showToast } = useToastStore();
+  const { signup, isLoading, error } = useAuthStore();
 
   const [role, setRole] = useState(initialRole);
   const [step, setStep] = useState(1);
@@ -41,10 +43,6 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (role !== "citizen") {
-      showToast("Institutional registration will be enabled in the next verification phase.", "success");
-      return;
-    }
     if (formData.password !== formData.confirmPassword) {
       showToast("Passwords do not match.", "error");
       return;
@@ -54,13 +52,37 @@ export default function Signup() {
       return;
     }
 
-    localStorage.setItem("samvad-setu-registration-draft", JSON.stringify({
+    let dbRole = role;
+    if (role === "university") dbRole = "hei";
+    if (role === "industry") dbRole = "industry_csr";
+
+    const payload = {
       ...formData,
       name: `${formData.firstName} ${formData.lastName}`.trim(),
-      role: "citizen",
-    }));
-    showToast("Profile details saved. You can now sign in once backend registration is connected.", "success");
-    navigate("/login");
+      role: dbRole,
+      institutionName: role === "university" ? formData.orgName : "",
+      companyName: role === "industry" ? formData.orgName : "",
+    };
+
+    const success = await signup(payload);
+
+    if (success) {
+      showToast("Account created successfully! Redirecting...", "success");
+
+      // 4. Navigate based on selected UI registration path
+      if (role === "citizen") {
+        navigate("/citizen/dashboard");
+      } else if (role === "university") {
+        navigate("/hei/dashboard");
+      } else {
+        navigate("/industry/dashboard");
+      }
+    } else {
+      const errorMessage =
+        useAuthStore.getState().error ||
+        "Registration failed. Please try again.";
+      showToast(errorMessage, "error");
+    }
   };
 
   const updateField = (field, value) => {
@@ -92,9 +114,15 @@ export default function Signup() {
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-bold font-display">Create an Account</h1>
           <p className="text-xs text-[#9BA8A6]">
-            Create your civic profile. Registration is currently frontend-only.
+            Create your civic profile to connect with institutions and industry.
           </p>
         </div>
+        
+        {error && (
+          <div className="p-3 bg-red-900/30 border border-red-500/50 rounded-lg text-red-400 text-xs text-center">
+            {error}
+          </div>
+        )}
 
         {/* Step 1: Role Selector Cards (Section 3.3)[cite: 1] */}
         <div className="grid grid-cols-3 gap-2">
@@ -268,9 +296,10 @@ export default function Signup() {
           <Button
             variant="primary"
             type="submit"
-            className="w-full py-2.5"
+            disabled={isLoading}
+            className="w-full py-2.5 disabled:opacity-50"
           >
-            Complete Registration <ArrowRight size={16} />
+            {isLoading ? "Creating Account..." : <><span className="mr-2">Complete Registration</span> <ArrowRight size={16} /></>}
           </Button>
           </>}
 
