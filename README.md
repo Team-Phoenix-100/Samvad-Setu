@@ -922,6 +922,25 @@ Deterministic lookup mapping table (strictly rule-based, no ML model):
 
 Function: `get_department(category)`
 
+### 3. Human Review & Feedback (`ai_chatbot/app/feedback.py`)
+- **Review Threshold**: If classification `confidence < 0.70`, response sets `needsHumanReview = true`.
+- **Feedback Storage**: Human corrections stored in `dataset/human_feedback.csv` with columns:
+  `complaint`, `predicted_category`, `correct_category`, `timestamp`.
+- **API Endpoint**: `POST /api/feedback`.
+
+### 4. Multilingual FAQ Chatbot (`ai_chatbot/app/chatbot.py`)
+- **Knowledge Base**: 50 curated civic FAQs in `chatbot/faq.csv` covering 10 core civic domains.
+- **Dedicated FAISS Index**: Isolated `embeddings/faq.index` using `paraphrase-multilingual-MiniLM-L12-v2`.
+- **Exact Fallback Contract**: Returns matched answer if similarity $\ge 0.65$; otherwise returns **exactly**:
+  `"Want to report this as a problem instead?"`
+### 5. Internal AI Microservice Endpoints (`ai_chatbot/app/main.py`)
+Provides internal REST endpoints for communication with the **Node.js** backend:
+- `POST /internal/ai/classify`: Unified triage endpoint returning `category`, `confidence`, `needsHumanReview`, `severity`, `priority`, and `department`.
+- `POST /internal/ai/dedup`: Duplicate complaint detection via FAISS.
+- `POST /internal/ai/chatbot/message`: Multilingual FAQ chatbot message routing.
+- `POST /internal/ai/feedback`: Human review correction logging.
+- `GET /internal/health`: AI engine service health check.
+
 ------------------------------------------------------------------------
 
 ## 👥 Project Team

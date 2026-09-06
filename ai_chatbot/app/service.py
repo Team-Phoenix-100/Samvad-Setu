@@ -51,6 +51,12 @@ Classify the complaint into exactly ONE of these categories:
 - Public Administration
 - Rural Livelihoods
 
+Also estimate the problem severity:
+- Low
+- Medium
+- High
+- Critical
+
 IMPORTANT RULE:
 If the complaint does NOT clearly belong to any of the above categories:
 - category MUST be "other"
@@ -58,7 +64,12 @@ If the complaint does NOT clearly belong to any of the above categories:
 
 If category is "other", NEVER return confidence greater than 0.0.
 
-Return ONLY valid JSON.
+Return ONLY valid JSON in format:
+{{
+  "category": "...",
+  "confidence": 0.0 to 1.0,
+  "severity": "Low" | "Medium" | "High" | "Critical"
+}}
 
 Text to classify:
 {text}
