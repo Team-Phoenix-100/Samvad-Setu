@@ -71,6 +71,12 @@ EMERGENCY_KEYWORDS_EN: List[str] = [
     "collapsing",
     "fire",
     "massive fire",
+    # Urgency & Priority Indicators
+    "highest priority",
+    "top priority",
+    "emergency",
+    "critical",
+    "life threatening",
     # Fire & Explosions
     "explosion",
     "blast",
@@ -121,6 +127,10 @@ EMERGENCY_KEYWORDS_EN: List[str] = [
 
 # 2. Hindi (Devanagari) Emergency Keywords
 EMERGENCY_KEYWORDS_HI: List[str] = [
+    # Emergency / Urgency
+    "इमरजेंसी",
+    "आपातकालीन",
+    "अति आवश्यक",
     # Fire / Blast
     "आग",
     "भीषण आग",
@@ -169,6 +179,14 @@ EMERGENCY_KEYWORDS_HI: List[str] = [
 
 # 3. Hinglish (Romanized) Emergency Keywords
 EMERGENCY_KEYWORDS_HINGLISH: List[str] = [
+    # Emergency / Priority Indicators
+    "highest priority",
+    "top priority",
+    "emergency",
+    "critical",
+    "jaan leva",
+    "sabse zaroori",
+    "turant madad",
     # Fire / Blast
     "aag",
     "aag lagi",
@@ -228,22 +246,48 @@ _EMERGENCY_PATTERNS = [
 # RULE-BASED SEVERITY KEYWORDS (Fallback when no model prediction is provided)
 # ==============================================================================
 HIGH_KEYWORDS = [
-    "severe", "serious", "major", "heavy flooding", "deep pothole",
-    "completely blocked", "fully blocked", "road cave", "traffic hazard",
-    "transformer burnt", "power blackout", "pipeline burst", "sewage overflow",
-    "hospital access blocked", "badi samasya", "bhaari jal-bharaav", "sadak band"
+    # Priority & Urgency Markers
+    "high priority", "urgent", "urgently", "immediate", "immediately",
+    "asap", "serious", "severe", "major", "crucial", "severe issue",
+    # Danger, Risk & Accidents
+    "danger", "dangerous", "accident", "accidents", "risk of accident",
+    "hazard", "hazardous", "safety hazard", "unsafe", "threat",
+    "traffic hazard", "injury", "injured",
+    # Water Crises
+    "no water", "no drinking water", "drinking water", "water shortage",
+    "water crisis", "pipeline burst", "burst pipe", "pipeline broken",
+    "heavy flooding", "water contamination", "paani nahi", "pani nahi",
+    # Electricity & Power Crises
+    "no electricity", "no power", "power cut", "blackout", "power outage",
+    "transformer burnt", "transformer blast", "feeder breakdown", "sparking",
+    "high voltage", "bijli nahi", "bijli gul",
+    # Road, Infrastructure & Traffic Failures
+    "deep pothole", "big pothole", "huge pothole", "large pothole",
+    "road cave", "completely blocked", "fully blocked", "road blocked",
+    "traffic blocked", "broken road", "damaged road", "accident prone",
+    "bada pothole", "sadak tooti", "sadak band",
+    # Healthcare & Sanitation Failures
+    "hospital", "ambulance", "hospital access blocked", "epidemic",
+    "dengue", "malaria", "cholera", "falling sick", "patient",
+    "doctor not available", "sewage overflow", "sewage entering house",
+    "drain overflow", "dead animal",
+    # Hindi / Hinglish Markers
+    "badi samasya", "turant", "jaldi", "khatra", "khatarnak",
+    "accident ho gaya", "bhaari jal-bharaav", "paani nahi aa raha",
+    "peene ka pani"
 ]
 
 MEDIUM_KEYWORDS = [
     "damaged", "broken", "pothole", "leakage", "garbage", "waste",
     "dustbin", "traffic light", "street light", "overflowing", "drain blocked",
     "crack", "dumpster full", "kachra", "gandagi", "toota hua", "kharaab",
-    "light band", "paani nahi aa raha", "sadak toot gayi", "gutter jam"
+    "light band", "gutter jam", "repair", "litter", "uncollected garbage"
 ]
 
 LOW_KEYWORDS = [
     "minor", "small", "slight", "delay", "faded paint", "aesthetic",
-    "cleanliness query", "noise", "slow", "tree trimming", "chhota",
+    "cleanliness query", "noise", "slow", "tree trimming", "query",
+    "inquiry", "suggestion", "feedback", "routine", "chhota",
     "halka", "thoda", "safai request"
 ]
 
@@ -313,20 +357,20 @@ def assess_severity(
 
     text_lower = text.lower()
 
-    # Check High
+    # Check High first (safety hazards, major infrastructure failures, water/electricity outage)
     for kw in HIGH_KEYWORDS:
         if re.search(r"(?<!\w)" + re.escape(kw) + r"(?!\w)", text_lower):
             return "High"
 
-    # Check Medium
-    for kw in MEDIUM_KEYWORDS:
-        if re.search(r"(?<!\w)" + re.escape(kw) + r"(?!\w)", text_lower):
-            return "Medium"
-
-    # Check Low
+    # Check Low next (explicit indicators of minor/slight issues, routine queries, aesthetic fixes)
     for kw in LOW_KEYWORDS:
         if re.search(r"(?<!\w)" + re.escape(kw) + r"(?!\w)", text_lower):
             return "Low"
+
+    # Check Medium (standard civic issues: garbage, potholes, normal street light/drain faults)
+    for kw in MEDIUM_KEYWORDS:
+        if re.search(r"(?<!\w)" + re.escape(kw) + r"(?!\w)", text_lower):
+            return "Medium"
 
     # Default baseline
     return "Medium"

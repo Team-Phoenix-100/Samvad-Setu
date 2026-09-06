@@ -9,12 +9,16 @@ from .schemes import (
     SeverityRequest,
     SeverityResponse,
     DepartmentRequest,
-    DepartmentResponse
+    DepartmentResponse,
+    HumanFeedbackRequest,
+    HumanFeedbackResponse
 )
 from .service import AIService
 from .duplicate import check_duplicate
 from .severity import assess_severity_and_priority
 from .department import get_department
+from .feedback import check_needs_human_review, save_human_feedback
+from .chatbot import answer_faq_query
 
 router = APIRouter(
     prefix="/api",
@@ -24,24 +28,27 @@ router = APIRouter(
 ai_service = AIService()
 
 
-# chat responce from ai
+# chat response from offline FAQ chatbot (no paid LLM required)
 
 @router.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     try:
-        answer = ai_service.generate_response(request.message)
+        answer = answer_faq_query(request.message)
         return ChatResponse(status="success", response=answer)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Chatbot error: {str(e)}")
  
-#  classify 
+# classify with human review check
 @router.post("/classify", response_model=ClassificationResponse)
 async def classify(request: ClassificationRequest):
     try:
         result = ai_service.classify_complaint(request.text)
+        conf = float(result.get("confidence", 0.0))
+        needs_review = check_needs_human_review(conf)
         return ClassificationResponse(
             category=result.get("category", "other"),
-            confidence=result.get("confidence", 0.0)
+            confidence=conf,
+            needsHumanReview=needs_review
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Classification error: {str(e)}")
@@ -85,3 +92,24 @@ async def recommend_department(request: DepartmentRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Department routing error: {str(e)}")
+
+
+# human review feedback / corrections
+
+@router.post("/feedback", response_model=HumanFeedbackResponse)
+async def submit_human_feedback(request: HumanFeedbackRequest):
+    try:
+        res = save_human_feedback(
+            complaint=request.complaint,
+            predicted_category=request.predicted_category,
+            correct_category=request.correct_category,
+            timestamp=request.timestamp
+        )
+        return HumanFeedbackResponse(
+            status="success",
+            message=res["message"],
+            total_records=res["total_records"]
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Feedback submission error: {str(e)}")
+
