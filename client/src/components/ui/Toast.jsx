@@ -10,7 +10,7 @@ export default function Toast() {
   const isSuccess = toast.type === "success";
 
   return (
-    <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 w-full max-w-md px-4 transition-all duration-300 ease-out animate-in fade-in slide-in-from-top-4">
+    <div className="fixed top-5 left-1/2 -translate-x-1/2 z-[100] w-full max-w-md px-4 transition-all duration-300 ease-out animate-in fade-in slide-in-from-top-4">
       <div
         className={`flex items-center justify-between p-4 rounded-xl border backdrop-blur-md shadow-2xl ${
           isSuccess

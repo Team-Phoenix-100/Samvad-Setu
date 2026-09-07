@@ -38,6 +38,11 @@ export default function SubmitProblem() {
 
   // Simulated AI Engine Auto-Classification (Section 3.6)
   const handleNextToAI = () => {
+    if (!formData.imageUploaded) {
+      showToast("Uploading valid proof is required before continuing.", "error");
+      return;
+    }
+
     // Basic heuristic to demonstrate dynamic AI suggestions
     if (formData.description.toLowerCase().includes('water') || formData.description.toLowerCase().includes('pump')) {
       setFormData(prev => ({ ...prev, category: 'Renewable Energy & Water', urgency: 'urgent' }));

@@ -3,7 +3,6 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, User, Settings as SettingsIcon, LogOut, Menu, ShieldCheck, Building2, Briefcase } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useToastStore } from '../../store/toastStore';
-import { ThemeSwitcher } from '../../context/ThemeContext';
 
 export default function SidebarLayout() {
   const { logout, user } = useAuthStore();
@@ -84,7 +83,6 @@ export default function SidebarLayout() {
         </nav>
 
         <div className="p-4 border-t border-[#1D3238]">
-          <div className="mb-3"><ThemeSwitcher /></div>
           <div className="flex items-center gap-3 px-4 py-3 mb-2 bg-[#0F1B1E] rounded-lg border border-[#1D3238]">
             <div className="w-8 h-8 rounded-full bg-[#1D3238] flex items-center justify-center text-[#E8A33D] font-bold">
               {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}

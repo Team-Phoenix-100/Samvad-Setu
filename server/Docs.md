@@ -174,3 +174,6 @@ Content-Type: application/json
 - **Navbar Extraction**: The embedded navigation was extracted from the Landing page into a reusable component featuring dynamic routing and active-state styling.
 - **Premium Footer**: A new, modern, 4-column footer was integrated featuring glassmorphic effects, lucid icons, and responsive stacking behavior.
 - **Route Hardening**: Addressed a critical security vulnerability where HEI (`/hei/*`) and Industry (`/industry/*`) routes were publicly accessible. These routes are now strictly wrapped inside `<ProtectedRoute>` components with exact role validation (`hei`, `hei_admin`, `industry_csr`, `industry_admin`).
+
+## Evidence Mandate
+- **POST /api/problems**: The route now enforces a mandatory image array (`req.files`). If an image is missing, it returns a `400 Bad Request` with an explicit message to prevent ghost submissions.

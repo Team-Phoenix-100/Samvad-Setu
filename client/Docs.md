@@ -505,3 +505,7 @@ The following components and layouts were recently added via an Agentic Workflow
 ## Theme Refactoring Update
 - **Settings Component**: The `ThemeSwitcher` has been refactored out of the Sidebar and integrated into the `Settings.jsx` page under an "Appearance" section. It features an animated, 3-state segment control (Light, Dark, System) built with Framer Motion.
 - **Navbar Toggle**: Added a smart toggle button directly into the `Navbar.jsx` that loops through the 3 states (Light -> Dark -> System -> Light) for easy public access.
+
+## Evidence Mandate & Problem UI
+- **SubmitProblem Validation**: Blocked problem submission progression to Phase 4 (AI Engine) unless `imageUploaded === true`.
+- **ProblemDetail Redesign**: Overhauled the ProblemDetail page to feature a 6-stage dynamic Resolution Tracker, a Citizen Impact Upvote widget, and a high-end glassmorphic UI.
