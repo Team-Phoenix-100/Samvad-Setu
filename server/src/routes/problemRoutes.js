@@ -20,6 +20,10 @@ router.get("/public", async (req, res) => {
 // Role-Restricted Route: Only 'citizen' can submit a problem
 router.post("/", protect, authorize("citizen"), upload.array("images", 3), async (req, res) => {
   try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "Uploading valid proof (image) is required to report a problem." });
+    }
+
     // 1. Resolve Category (Default / User-provided / AI Classifier)
     let category = req.body.category || "other";
     try {
