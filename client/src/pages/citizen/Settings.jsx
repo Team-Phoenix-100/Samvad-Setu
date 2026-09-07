@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { Bell, Shield, Eye, Moon, Smartphone, Globe, Check } from 'lucide-react';
+import { Bell, Shield, Eye, Moon, Sun, Monitor, Smartphone, Globe, Check } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Button from '../../components/ui/Button';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function Settings() {
   const [emailNotif, setEmailNotif] = useState(true);
   const [smsNotif, setSmsNotif] = useState(false);
   const [publicProfile, setPublicProfile] = useState(true);
-  const [darkMode, setDarkMode] = useState(true);
+  
+  const { mode, setThemeMode } = useTheme();
 
   // A reusable toggle switch component styled for the app
   const Toggle = ({ checked, onChange }) => (
@@ -23,6 +26,12 @@ export default function Settings() {
       />
     </button>
   );
+
+  const themeOptions = [
+    { value: 'light', label: 'Light', icon: Sun },
+    { value: 'dark', label: 'Dark', icon: Moon },
+    { value: 'system', label: 'System', icon: Monitor },
+  ];
 
   return (
     <div className="min-h-screen bg-[#0F1B1E] text-[#F2EFE9] p-6 md:p-8 max-w-4xl mx-auto space-y-8">
@@ -86,7 +95,7 @@ export default function Settings() {
         </div>
 
         {/* Appearance Section */}
-        <div className="bg-[#16262A] border border-[#1D3238] rounded-xl overflow-hidden">
+        <div className="bg-[#16262A] border border-[#1D3238] rounded-xl overflow-hidden shadow-lg">
           <div className="p-6 border-b border-[#1D3238] flex items-center gap-3">
             <div className="p-2 bg-[#1D3238] rounded-lg text-[#E8A33D]">
               <Eye size={20} />
@@ -96,13 +105,34 @@ export default function Settings() {
               <p className="text-xs text-[#9BA8A6]">Customize the look and feel of the application.</p>
             </div>
           </div>
-          <div className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
+          <div className="p-6">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-[#F2EFE9]">Dark Mode</p>
-                <p className="text-xs text-[#9BA8A6] mt-1">Use the dark theme for the interface.</p>
+                <p className="text-sm font-medium text-[#F2EFE9]">Theme Mode</p>
+                <p className="text-xs text-[#9BA8A6] mt-1">Select your preferred color theme or sync with your system.</p>
               </div>
-              <Toggle checked={darkMode} onChange={setDarkMode} />
+              
+              <div className="relative flex items-center p-1 bg-[#0F1B1E] border border-[#1D3238] rounded-xl w-full md:w-auto">
+                {themeOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => setThemeMode(option.value)}
+                    className={`relative flex-1 md:flex-none flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg z-10 transition-colors ${
+                      mode === option.value ? 'text-[#F2EFE9]' : 'text-[#9BA8A6] hover:text-[#F2EFE9]'
+                    }`}
+                  >
+                    {mode === option.value && (
+                      <motion.div
+                        layoutId="theme-active-tab"
+                        className="absolute inset-0 bg-[#1D3238] rounded-lg -z-10"
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      />
+                    )}
+                    <option.icon size={16} className={mode === option.value ? 'text-[#E8A33D]' : ''} />
+                    {option.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
