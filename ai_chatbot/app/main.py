@@ -21,6 +21,7 @@ for p in [parent_dir, current_dir]:
     if p not in sys.path:
         sys.path.insert(0, p)
 
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -37,8 +38,8 @@ try:
         HumanFeedbackResponse,
     )
     from app.service import AIService
-    from app.classifier import classify as local_classify
-    from app.duplicate import check_duplicate
+    from app.classifier import classify as local_classify, get_classifier
+    from app.duplicate import check_duplicate, get_duplicate_detector
     from app.severity import assess_severity_and_priority
     from app.department import get_department
     from app.feedback import check_needs_human_review, save_human_feedback
@@ -57,8 +58,8 @@ except ImportError:
         HumanFeedbackResponse,
     )
     from service import AIService
-    from classifier import classify as local_classify
-    from duplicate import check_duplicate
+    from classifier import classify as local_classify, get_classifier
+    from duplicate import check_duplicate, get_duplicate_detector
     from severity import assess_severity_and_priority
     from department import get_department
     from feedback import check_needs_human_review, save_human_feedback
@@ -67,10 +68,45 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
+# ==============================================================================
+# APPLICATION LIFESPAN (Pre-load models once at application startup)
+# ==============================================================================
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """
+    Loads all AI models and FAISS indexes ONCE during application startup.
+    Ensures models are resident in memory and NOT reloaded on every API request.
+    """
+    logger.info("Initializing Samvad-Setu AI Service: Pre-loading all models into memory...")
+    try:
+        get_classifier()
+        logger.info("Complaint classifier loaded successfully.")
+    except Exception as e:
+        logger.warning(f"Complaint classifier initialization notice: {e}")
+
+    try:
+        get_duplicate_detector()
+        logger.info("Duplicate detector and FAISS complaints index loaded successfully.")
+    except Exception as e:
+        logger.warning(f"Duplicate detector initialization notice: {e}")
+
+    try:
+        get_faq_chatbot()
+        logger.info("FAQ chatbot and FAISS FAQ index loaded successfully.")
+    except Exception as e:
+        logger.warning(f"FAQ chatbot initialization notice: {e}")
+
+    logger.info("Startup complete: All AI models and FAISS indexes are resident in memory.")
+    yield
+    logger.info("Shutting down Samvad-Setu AI Service.")
+
+
 app = FastAPI(
     title="Samvad-Setu AI Service",
     description="Internal AI-service endpoints for Node.js backend communication.",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Enable CORS for internal microservice communication
@@ -117,18 +153,16 @@ def _predict_category_and_confidence(text: str) -> Tuple[str, float, Any]:
         return "other", 0.0, None
 
 
-#  INTERNAL AI-SERVICE ENDPOINTS FOR NODE.JS
+# ==============================================================================
+# INTERNAL AI-SERVICE ENDPOINTS FOR NODE.JS
+# ==============================================================================
 
 @app.get("/internal/health", response_model=InternalHealthResponse, tags=["Internal AI"])
 async def internal_health():
     """
     Health check endpoint for Node.js backend to verify AI service availability.
     """
-    return InternalHealthResponse(
-        status="healthy",
-        service="samvad-setu-ai-engine",
-        version="1.0.0"
-    )
+    return InternalHealthResponse(status="ok")
 
 
 @app.post("/internal/ai/classify", response_model=InternalClassifyResponse, tags=["Internal AI"])
@@ -209,7 +243,11 @@ async def internal_dedup(request: InternalDedupRequest):
     try:
         threshold = request.threshold if request.threshold is not None else 0.85
         result = check_duplicate(text_to_check, threshold=threshold)
-        return InternalDedupResponse(**result)
+        return InternalDedupResponse(
+            isDuplicate=result["isDuplicate"],
+            similarity=result["similarity"],
+            matchedComplaintId=result.get("matchedComplaintId")
+        )
     except Exception as e:
         logger.error(f"Internal dedup error: {e}")
         raise HTTPException(status_code=500, detail=f"Duplicate detection error: {str(e)}")
@@ -231,9 +269,8 @@ async def internal_chatbot_message(request: InternalChatbotRequest):
         bot = get_faq_chatbot()
         res = bot.search_faq(msg)
         return InternalChatbotResponse(
-            response=res["answer"],
             matched=res["matched"],
-            similarity=res["similarity"]
+            answer=res["answer"]
         )
     except Exception as e:
         logger.error(f"Internal chatbot error: {e}")
