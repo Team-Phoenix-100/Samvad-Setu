@@ -20,7 +20,7 @@ export default function LoginScreen() {
       return;
     }
 
-    const success = await login({ identifier: identifier.trim(), password });
+    const success = await login({ email: identifier.trim(), password });
 
     if (success) {
       showToast('Successfully signed in!', 'success');

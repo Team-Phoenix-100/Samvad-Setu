@@ -1,70 +1,57 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, Share, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, Share, ActivityIndicator, Modal, Platform, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { 
-  ArrowLeft, 
-  MapPin, 
-  Share2, 
-  CheckCircle2, 
-  Sparkles, 
-  GraduationCap, 
-  Briefcase, 
-  Layers, 
-  Calendar,
-  AlertCircle
+  ArrowLeft, MapPin, Share2, CheckCircle2, Building2, ShieldCheck,
+  Calendar, AlertCircle, Clock, ThumbsUp, Camera, Activity, FileCheck, Wrench, X, Trash2
 } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme } from '../../context/ThemeContext'; // Import theme hook
+import { useProblemStore } from '../../store/problemStore';
+import { useAuthStore } from '../../store/authStore';
+import { useToastStore } from '../../store/toastStore';
 
 const LIFECYCLE_STAGES = [
-  { key: 'Submitted', label: '1. Grassroots Crowdsourced', desc: 'Reported with geo-tag and multimedia evidence by citizen.' },
-  { key: 'AI Validated', label: '2. AI Categorized & Routed', desc: 'Thematic domain matched and mapped to target university departments.' },
-  { key: 'Claimed by University', label: '3. HEI Project Team Formed', desc: 'Faculty mentor and student multidisciplinary research team actively working on prototype.' },
-  { key: 'Industry Pledged', label: '4. CSR & Industry Mentorship', desc: 'Corporate grant, lab testing, or domain mentorship linked.' },
-  { key: 'Deployed Solution', label: '5. Field Deployment & Social Impact', desc: 'Solution successfully piloted and operational in the community.' }
+  { stage: "Reported & Classified", actor: "Citizen & AI Engine", icon: FileCheck, color: '#3B82F6', active: true },
+  { stage: "Verified by Authority", actor: "Municipal Admin", icon: ShieldCheck, color: '#10B981', active: true },
+  { stage: "Assigned to Tech Partner", actor: "Ranchi University", icon: Building2, color: '#8B5CF6', active: true },
+  { stage: "CSR Funds Pledged", actor: "Tata Steel CSR", icon: AlertCircle, color: '#E8A33D', active: true },
+  { stage: "Work in Progress", actor: "Local Contractor", icon: Wrench, color: '#1D3238', active: false },
+  { stage: "Resolved", actor: "Admin", icon: CheckCircle2, color: '#1D3238', active: false }
 ];
 
-export default function ProblemTimelineScreen() {
+export default function ProblemDetailScreen() {
   const router = useRouter();
   const { id } = useLocalSearchParams();
-  const { theme, isDarkMode } = useTheme(); // Pull dynamic theme
+  const { problems, fetchProblems, deleteProblem } = useProblemStore() as any;
+  const { user } = useAuthStore() as any;
+  const { showToast } = useToastStore();
 
   const [problem, setProblem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  
+  const [upvotes, setUpvotes] = useState(142);
+  const [hasUpvoted, setHasUpvoted] = useState(false);
 
   useEffect(() => {
-    loadProblemDetails();
-  }, [id]);
+    if (problems.length === 0) {
+      fetchProblems();
+    }
+  }, []);
 
-  const loadProblemDetails = async () => {
-    try {
-      const stored = await AsyncStorage.getItem('@citizen_tickets');
-      if (stored) {
-        const list = JSON.parse(stored);
-        const match = list.find((item: any) => item.id === id);
-        if (match) {
-          setProblem(match);
-        } else {
-          setProblem({
-            id: id || 'CHAL-2026-8432',
-            title: 'Solar-Powered Cold Storage for Tribal Farmers',
-            domain: 'Agriculture & Rural Livelihoods',
-            description: 'Low-cost decentralized preservation units needed for minor forest produce in Khunti district.',
-            stage: 'Claimed by University',
-            status: 'Team Formed',
-            assignedDept: 'AgriTech & Bioengineering',
-            suggestedHEI: 'Birsa Agricultural University',
-            industryPledge: 'Tata Steel CSR (Mentorship + ₹75,000 Grant)',
-            location: 'Khunti, Jharkhand',
-            date: 'Just now'
-          });
-        }
-      }
-    } catch (e) {
-      console.error('Failed to load challenge details', e);
-    } finally {
+  useEffect(() => {
+    if (problems && problems.length > 0) {
+      const found = problems.find((p: any) => p.id === id || p._id === id);
+      setProblem(found || problems[0]);
       setLoading(false);
+    }
+  }, [id, problems]);
+
+  const handleUpvote = () => {
+    if (!hasUpvoted) {
+      setUpvotes(prev => prev + 1);
+      setHasUpvoted(true);
+      showToast("Thank you for supporting this issue!", "success");
     }
   };
 
@@ -72,190 +59,241 @@ export default function ProblemTimelineScreen() {
     if (!problem) return;
     try {
       await Share.share({
-        message: `SICP Challenge [${problem.id}]: ${problem.title || problem.description}\nDomain: ${problem.domain}\nTracking collaborative innovation progress on Jharkhand SICP Portal.`
+        message: `Samvad-Setu Issue [${problem._id || problem.id}]: ${problem.title}\nCategory: ${problem.category}\nView on Samvad Setu.`
       });
     } catch (error) {
-      console.error('Error sharing challenge', error);
+      console.error('Error sharing', error);
     }
   };
 
-  if (loading) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color={theme.citizenPrimary} />
-        <Text style={{ color: theme.subtext, marginTop: 12, fontSize: 13 }}>Loading innovation lifecycle...</Text>
-      </SafeAreaView>
+  const handleDelete = () => {
+    Alert.alert(
+      "Delete Problem",
+      "Are you sure you want to delete this problem?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Delete", 
+          style: "destructive",
+          onPress: async () => {
+            const success = await deleteProblem(problem._id || problem.id);
+            if (success) {
+              showToast("Problem deleted successfully.", "success");
+              router.replace('/(citizen)/home');
+            } else {
+              showToast("Failed to delete the problem.", "error");
+            }
+          }
+        }
+      ]
     );
-  }
-
-  if (!problem) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center', padding: 20 }}>
-        <AlertCircle size={36} color={theme.error} style={{ marginBottom: 12 }} />
-        <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>Challenge not found</Text>
-        <TouchableOpacity onPress={() => router.back()} style={{ marginTop: 16, backgroundColor: theme.card, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 10 }}>
-          <Text style={{ color: theme.citizenPrimary, fontWeight: '700' }}>Go Back</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    );
-  }
-
-  const stageIndexMap: Record<string, number> = {
-    'Submitted': 0, 'AI Validated': 1, 'Claimed by University': 2, 'Industry Pledged': 3, 'Deployed Solution': 4
   };
-  const currentStageIndex = stageIndexMap[problem.stage] ?? 1;
+
+  if (loading || !problem) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#0F1B1E', justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#E8A33D" />
+        <Text style={{ color: '#9BA8A6', marginTop: 12 }}>Loading problem details...</Text>
+      </SafeAreaView>
+    );
+  }
+
+  const slaHours = problem.urgency === 'urgent' ? 168 : 336;
+  const reportedAt = new Date(problem.createdAt || Date.now()).getTime();
+  const dueAt = reportedAt + slaHours * 60 * 60 * 1000;
+  const remainingHours = Math.max(0, Math.ceil((dueAt - Date.now()) / (60 * 60 * 1000)));
+
+  const getStatusColor = (status: string) => {
+    if (status === 'new' || status === 'open') return '#E8A33D';
+    if (status === 'in-progress') return '#3B82F6';
+    if (status === 'resolved' || status === 'closed') return '#2F9E8F';
+    return '#9BA8A6';
+  };
+
+  const isOwner = user && (
+    user.id === problem.reportedBy?._id || 
+    user.id === problem.reportedBy?.id || 
+    user.id === problem.reportedBy || 
+    user._id === problem.reportedBy?._id || 
+    user._id === problem.reportedBy
+  );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background, padding: 16 }}>
-      <ScrollView contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0F1B1E' }}>
+      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 60 }} showsVerticalScrollIndicator={false}>
         
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
-          <TouchableOpacity 
-            onPress={() => router.back()}
-            style={{ backgroundColor: theme.card, padding: 10, borderRadius: 12, borderWidth: 1, borderColor: theme.border }}
-          >
-            <ArrowLeft size={20} color={theme.text} />
+        {/* Header Navigation */}
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <TouchableOpacity onPress={() => router.back()} style={{ flexDirection: 'row', alignItems: 'center', padding: 8, marginLeft: -8 }}>
+            <ArrowLeft size={20} color="#9BA8A6" />
+            <Text style={{ color: '#9BA8A6', marginLeft: 8, fontSize: 14 }}>Back</Text>
           </TouchableOpacity>
-          <View style={{ alignItems: 'center' }}>
-            <Text style={{ color: theme.subtext, fontSize: 10, letterSpacing: 1, fontWeight: '700' }}>SICP LIFECYCLE</Text>
-            <Text style={{ color: theme.citizenPrimary, fontWeight: '800', fontSize: 14 }}>{problem.id}</Text>
-          </View>
-          <TouchableOpacity 
-            onPress={handleShare}
-            style={{ backgroundColor: theme.card, padding: 10, borderRadius: 12, borderWidth: 1, borderColor: theme.border }}
-          >
-            <Share2 size={20} color={theme.authorityPrimary} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={{ backgroundColor: theme.card, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: theme.border, marginBottom: 16 }}>
-          <View style={{ backgroundColor: isDarkMode ? 'rgba(232, 163, 61, 0.12)' : 'rgba(212, 138, 34, 0.12)', alignSelf: 'flex-start', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, borderWidth: 1, borderColor: theme.citizenPrimary, marginBottom: 10 }}>
-            <Text style={{ color: theme.citizenPrimary, fontSize: 11, fontWeight: '800', textTransform: 'uppercase' }}>
-              {problem.domain || 'Thematic Innovation Challenge'}
+          <View style={{ backgroundColor: 'rgba(232, 163, 61, 0.1)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12, borderWidth: 1, borderColor: 'rgba(232, 163, 61, 0.2)' }}>
+            <Text style={{ color: '#E8A33D', fontSize: 10, fontWeight: '800', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' }}>
+              REF: #{String(problem._id || problem.id).substring(0, 8).toUpperCase()}
             </Text>
           </View>
-          
-          <Text style={{ color: theme.text, fontSize: 20, fontWeight: '800', marginBottom: 10, lineHeight: 26 }}>
-            {problem.title || problem.description}
-          </Text>
+        </View>
 
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <MapPin size={13} color={theme.subtext} style={{ marginRight: 4 }} />
-              <Text style={{ color: theme.subtext, fontSize: 12 }}>{problem.location || 'Jharkhand Region'}</Text>
+        {/* Hero Card */}
+        <View style={{ backgroundColor: '#16262A', borderRadius: 20, borderWidth: 1, borderColor: '#1D3238', overflow: 'hidden', marginBottom: 20 }}>
+          <View style={{ padding: 20 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
+              <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: getStatusColor(problem.status) }} />
+              <View style={{ backgroundColor: '#1D3238', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 }}>
+                <Text style={{ color: '#9BA8A6', fontSize: 10, fontWeight: '800', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' }}>
+                  URGENCY: <Text style={{ color: '#E8A33D' }}>{problem.urgency?.toUpperCase() || 'MEDIUM'}</Text>
+                </Text>
+              </View>
+              <TouchableOpacity onPress={handleShare} style={{ marginLeft: 'auto', padding: 4 }}>
+                <Share2 size={20} color="#9BA8A6" />
+              </TouchableOpacity>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Calendar size={13} color={theme.subtext} style={{ marginRight: 4 }} />
-              <Text style={{ color: theme.subtext, fontSize: 12 }}>{problem.date || 'Active'}</Text>
+
+            <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
+              <Text style={{ flex: 1, color: '#F2EFE9', fontSize: 26, fontWeight: '800', lineHeight: 32 }}>
+                {problem.title}
+              </Text>
+              {isOwner && (
+                <TouchableOpacity onPress={handleDelete} style={{ padding: 8, backgroundColor: 'rgba(248, 113, 113, 0.1)', borderRadius: 12, borderWidth: 1, borderColor: 'rgba(248, 113, 113, 0.3)' }}>
+                  <Trash2 size={20} color="#F87171" />
+                </TouchableOpacity>
+              )}
             </View>
+
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16, marginBottom: 20 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <MapPin size={14} color="#E8A33D" style={{ marginRight: 6 }} />
+                <Text style={{ color: '#9BA8A6', fontSize: 13 }}>{problem.location?.district || "Jharkhand"}, {problem.location?.block || "Block"}</Text>
+              </View>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Calendar size={14} color="#2F9E8F" style={{ marginRight: 6 }} />
+                <Text style={{ color: '#9BA8A6', fontSize: 13 }}>Reported {new Date(problem.createdAt || Date.now()).toLocaleDateString()}</Text>
+              </View>
+            </View>
+
+            <View style={{ height: 1, backgroundColor: '#1D3238', marginBottom: 20 }} />
+
+            <Text style={{ color: '#F2EFE9', fontSize: 16, lineHeight: 24, marginBottom: 20 }}>
+              {problem.description}
+            </Text>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: remainingHours === 0 ? 'rgba(193, 68, 59, 0.1)' : 'rgba(232, 163, 61, 0.1)', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: remainingHours === 0 ? 'rgba(193, 68, 59, 0.3)' : 'rgba(232, 163, 61, 0.3)' }}>
+              <Clock size={18} color={remainingHours === 0 ? '#C1443B' : '#E8A33D'} style={{ marginRight: 10 }} />
+              <Text style={{ color: remainingHours === 0 ? '#F87171' : '#E8A33D', fontSize: 13, fontWeight: '600' }}>
+                Municipal SLA: {remainingHours ? `${remainingHours} hours remaining` : 'SLA breached'} 
+                <Text style={{ opacity: 0.8, fontSize: 11 }}> ({slaHours / 24}-day target)</Text>
+              </Text>
+            </View>
+          </View>
+
+          {/* Citizen Impact Bar */}
+          <View style={{ backgroundColor: '#0F1B1E', borderTopWidth: 1, borderTopColor: '#1D3238', padding: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={{ flexDirection: 'row', marginRight: 8 }}>
+                <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#1D3238', borderWidth: 2, borderColor: '#0F1B1E', zIndex: 3, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: 'white', fontSize: 10 }}>A</Text></View>
+                <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#2F9E8F', borderWidth: 2, borderColor: '#0F1B1E', zIndex: 2, marginLeft: -12, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: 'white', fontSize: 10 }}>R</Text></View>
+                <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: '#E8A33D', borderWidth: 2, borderColor: '#0F1B1E', zIndex: 1, marginLeft: -12, alignItems: 'center', justifyContent: 'center' }}><Text style={{ color: 'white', fontSize: 10 }}>K</Text></View>
+              </View>
+              <Text style={{ color: '#9BA8A6', fontSize: 12 }}>
+                <Text style={{ color: '#F2EFE9', fontWeight: 'bold' }}>+{upvotes}</Text> impacted
+              </Text>
+            </View>
+
+            <TouchableOpacity 
+              onPress={handleUpvote}
+              style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: hasUpvoted ? '#E8A33D' : 'transparent', borderWidth: 1, borderColor: '#E8A33D', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 20 }}
+            >
+              <ThumbsUp size={14} color={hasUpvoted ? '#0F1B1E' : '#E8A33D'} style={{ marginRight: 6 }} />
+              <Text style={{ color: hasUpvoted ? '#0F1B1E' : '#E8A33D', fontSize: 12, fontWeight: '700' }}>
+                {hasUpvoted ? 'Supported' : 'Support Issue'}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 
-        {problem.imageUri && (
-          <Image 
-            source={{ uri: problem.imageUri }} 
-            style={{ width: '100%', height: 200, borderRadius: 16, marginBottom: 16, borderWidth: 1, borderColor: theme.border }} 
-          />
-        )}
-
-        <View style={{ backgroundColor: theme.card, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: theme.border, marginBottom: 16 }}>
-          <Text style={{ color: theme.text, fontSize: 14, fontWeight: '700', marginBottom: 6 }}>Grassroots Challenge Statement</Text>
-          <Text style={{ color: theme.subtext, fontSize: 13, lineHeight: 20 }}>
-            {problem.description}
-          </Text>
-        </View>
-
-        <View style={{ backgroundColor: theme.card, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: theme.border, marginBottom: 20 }}>
-          <Text style={{ color: theme.text, fontSize: 14, fontWeight: '700', marginBottom: 12 }}>Assigned Innovation Ecosystem</Text>
-          
-          <View style={{ gap: 12 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{ backgroundColor: theme.background, padding: 8, borderRadius: 10, marginRight: 10, borderWidth: 1, borderColor: theme.border }}>
-                <GraduationCap size={16} color={theme.authorityPrimary} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: theme.text, fontSize: 12, fontWeight: '700' }}>Leading Academic HEI</Text>
-                <Text style={{ color: theme.subtext, fontSize: 11 }}>{problem.suggestedHEI || 'Birsa Agricultural University'}</Text>
-              </View>
-            </View>
-
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{ backgroundColor: theme.background, padding: 8, borderRadius: 10, marginRight: 10, borderWidth: 1, borderColor: theme.border }}>
-                <Sparkles size={16} color={theme.citizenPrimary} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: theme.text, fontSize: 12, fontWeight: '700' }}>Academic Specialization</Text>
-                <Text style={{ color: theme.subtext, fontSize: 11 }}>{problem.assignedDept || 'AgriTech & Bioengineering'}</Text>
-              </View>
-            </View>
-
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{ backgroundColor: theme.background, padding: 8, borderRadius: 10, marginRight: 10, borderWidth: 1, borderColor: theme.border }}>
-                <Briefcase size={16} color="#A855F7" />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: theme.text, fontSize: 12, fontWeight: '700' }}>Industry / CSR Partnership</Text>
-                <Text style={{ color: theme.subtext, fontSize: 11 }}>{problem.industryPledge || 'Open for CSR funding & mentorship'}</Text>
-              </View>
-            </View>
+        {/* Media Evidence Display */}
+        <View style={{ backgroundColor: '#16262A', borderRadius: 20, borderWidth: 1, borderColor: '#1D3238', padding: 20, marginBottom: 20 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: '#1D3238', paddingBottom: 16, marginBottom: 16 }}>
+            <Camera size={20} color="#E8A33D" style={{ marginRight: 8 }} />
+            <Text style={{ color: '#F2EFE9', fontSize: 16, fontWeight: '700' }}>Verified Evidence</Text>
           </View>
+
+          {problem.images && problem.images.length > 0 ? (
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 12 }}>
+              {problem.images.map((img: any, idx: number) => (
+                <TouchableOpacity 
+                  key={idx} 
+                  onPress={() => setPreviewImage(img.url)}
+                  style={{ width: '47%', aspectRatio: 1, borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: '#1D3238' }}
+                >
+                  <Image source={{ uri: img.url }} style={{ width: '100%', height: '100%' }} />
+                  <View style={{ position: 'absolute', bottom: 8, right: 8, backgroundColor: '#E8A33D', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 }}>
+                    <Text style={{ color: '#0F1B1E', fontSize: 9, fontWeight: 'bold' }}>Expand</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </View>
+          ) : (
+            <View style={{ backgroundColor: 'rgba(239, 68, 68, 0.05)', borderWidth: 1, borderColor: 'rgba(239, 68, 68, 0.2)', borderStyle: 'dashed', borderRadius: 12, padding: 24, alignItems: 'center' }}>
+              <Camera size={32} color="rgba(239, 68, 68, 0.5)" style={{ marginBottom: 12 }} />
+              <Text style={{ color: '#F87171', fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', marginBottom: 4 }}>No Proof Attached</Text>
+              <Text style={{ color: 'rgba(239, 68, 68, 0.7)', fontSize: 11, textAlign: 'center' }}>Issues without evidence are highly unlikely to be processed.</Text>
+            </View>
+          )}
         </View>
 
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-          <Layers size={16} color={theme.citizenPrimary} style={{ marginRight: 6 }} />
-          <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>
-            NEP-2020 Innovation Lifecycle
-          </Text>
-        </View>
+        {/* Resolution Tracker */}
+        <View style={{ backgroundColor: '#16262A', borderRadius: 20, borderWidth: 1, borderColor: '#1D3238', padding: 20, marginBottom: 20 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 24 }}>
+            <Activity size={20} color="#2F9E8F" style={{ marginRight: 8 }} />
+            <Text style={{ color: '#F2EFE9', fontSize: 16, fontWeight: '700' }}>Resolution Tracker</Text>
+          </View>
 
-        <View style={{ backgroundColor: theme.card, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: theme.border }}>
-          {LIFECYCLE_STAGES.map((stg, idx) => {
-            const isCompleted = idx <= currentStageIndex;
-            const isCurrent = idx === currentStageIndex;
-
-            return (
-              <View key={stg.key} style={{ flexDirection: 'row', marginBottom: idx < LIFECYCLE_STAGES.length - 1 ? 20 : 0 }}>
-                <View style={{ alignItems: 'center', marginRight: 14, width: 24 }}>
-                  <View style={{
-                    width: 24, height: 24, borderRadius: 12,
-                    backgroundColor: isCompleted ? theme.authorityPrimary : theme.background,
-                    borderWidth: 2,
-                    borderColor: isCompleted ? theme.authorityPrimary : theme.border,
-                    alignItems: 'center', justifyContent: 'center'
-                  }}>
-                    {isCompleted ? (
-                      <CheckCircle2 size={14} color={isDarkMode ? '#0F1B1E' : '#FFFFFF'} />
-                    ) : (
-                      <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: theme.subtext }} />
+          <View style={{ marginLeft: 8 }}>
+            {LIFECYCLE_STAGES.map((item, index) => {
+              const isLast = index === LIFECYCLE_STAGES.length - 1;
+              return (
+                <View key={index} style={{ flexDirection: 'row', opacity: item.active ? 1 : 0.4 }}>
+                  <View style={{ alignItems: 'center', marginRight: 16 }}>
+                    <View style={{ width: 28, height: 28, borderRadius: 14, backgroundColor: item.color, alignItems: 'center', justifyContent: 'center', borderWidth: 2, borderColor: '#16262A', zIndex: 2 }}>
+                      <item.icon size={12} color={item.active ? '#0F1B1E' : '#9BA8A6'} />
+                    </View>
+                    {!isLast && (
+                      <View style={{ width: 2, height: 40, backgroundColor: '#1D3238', marginTop: -4, marginBottom: -4, zIndex: 1 }} />
                     )}
                   </View>
-                  {idx < LIFECYCLE_STAGES.length - 1 && (
-                    <View style={{
-                      width: 2, flex: 1,
-                      backgroundColor: idx < currentStageIndex ? theme.authorityPrimary : theme.border,
-                      marginTop: 4
-                    }} />
-                  )}
+                  <View style={{ paddingBottom: isLast ? 0 : 24, paddingTop: 4 }}>
+                    <Text style={{ color: item.active ? '#F2EFE9' : '#9BA8A6', fontSize: 14, fontWeight: 'bold', marginBottom: 2 }}>{item.stage}</Text>
+                    <Text style={{ color: item.active ? item.color : '#9BA8A6', fontSize: 12, marginBottom: 6 }}>{item.actor}</Text>
+                  </View>
                 </View>
-
-                <View style={{ flex: 1 }}>
-                  <Text style={{ 
-                    color: isCompleted ? theme.text : theme.subtext, 
-                    fontSize: 14, 
-                    fontWeight: isCurrent ? '800' : '600',
-                    marginBottom: 2
-                  }}>
-                    {stg.label}
-                  </Text>
-                  <Text style={{ color: theme.subtext, fontSize: 11, lineHeight: 16 }}>
-                    {stg.desc}
-                  </Text>
-                </View>
-              </View>
-            );
-          })}
+              )
+            })}
+          </View>
         </View>
+
       </ScrollView>
+
+      {/* Full Screen Image Modal */}
+      <Modal visible={!!previewImage} transparent animationType="fade">
+        <View style={{ flex: 1, backgroundColor: 'rgba(15, 27, 30, 0.95)', justifyContent: 'center', alignItems: 'center' }}>
+          <TouchableOpacity 
+            style={{ position: 'absolute', top: 50, right: 20, zIndex: 100, padding: 12, backgroundColor: '#1D3238', borderRadius: 24 }}
+            onPress={() => setPreviewImage(null)}
+          >
+            <X size={24} color="#F2EFE9" />
+          </TouchableOpacity>
+          {previewImage && (
+            <Image 
+              source={{ uri: previewImage }} 
+              style={{ width: '90%', height: '80%', borderRadius: 16 }} 
+              resizeMode="contain" 
+            />
+          )}
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }

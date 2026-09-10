@@ -18,6 +18,7 @@ interface AuthState {
   signup: (payload: any) => Promise<boolean>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
+  fetchProfile: () => Promise<any>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -86,6 +87,27 @@ export const useAuthStore = create<AuthState>((set) => ({
       }
     } catch (e) {
       set({ isLoading: false });
+    }
+  },
+
+  fetchProfile: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await api.get('/auth/me');
+      set({ user: res.data, isLoading: false });
+      await SecureStore.setItemAsync('userData', JSON.stringify(res.data));
+      return res.data;
+    } catch (error: any) {
+      set({
+        isLoading: false,
+        error: error.response?.data?.message || 'Failed to fetch profile',
+      });
+      if (error.response?.status === 401) {
+        await SecureStore.deleteItemAsync('userToken');
+        await SecureStore.deleteItemAsync('userData');
+        set({ user: null, token: null });
+      }
+      return null;
     }
   },
 }));
