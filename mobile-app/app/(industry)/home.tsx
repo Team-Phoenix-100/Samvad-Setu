@@ -15,7 +15,7 @@ import {
   X
 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 
 const PLEDGE_AMOUNTS = ['₹25,000', '₹50,000', '₹1,00,000', 'Mentorship Only'];
 
