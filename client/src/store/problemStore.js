@@ -29,8 +29,9 @@ export const useProblemStore = create((set, get) => ({
         payload.append('urgency', data.urgency);
         payload.append('location', JSON.stringify(data.location));
         
-        data.images.forEach((image) => {
-          payload.append('images', image);
+        data.images.forEach((image, index) => {
+          const fileName = image.name || `proof_${index + 1}.jpg`;
+          payload.append('images', image, fileName);
         });
       }
 
@@ -40,7 +41,8 @@ export const useProblemStore = create((set, get) => ({
     } catch (error) {
       console.error("Failed to submit problem", error);
       set({ isLoading: false });
-      return null;
+      const errorMessage = error.response?.data?.message || error.message || "Failed to submit problem.";
+      return { error: errorMessage };
     }
   },
   
