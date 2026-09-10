@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Building2, MapPin, TrendingUp, AlertTriangle, CheckCircle2, Award } from 'lucide-react';
+import { ShieldCheck, MapPin, TrendingUp, AlertTriangle, CheckCircle2, Award, Wrench, LockKeyhole } from 'lucide-react';
 import { useProblemStore } from '../../store/problemStore';
 import SignalDot from '../../components/ui/SignalDot';
 import Badge from '../../components/ui/Badge';
@@ -8,6 +8,9 @@ import Button from '../../components/ui/Button';
 
 export default function AdminAnalytics() {
   const { problems, fetchProblems } = useProblemStore();
+  const [resolution, setResolution] = useState(null);
+  const [clearance, setClearance] = useState(false);
+  const [notes, setNotes] = useState('');
 
   useEffect(() => {
     fetchProblems();
@@ -129,6 +132,11 @@ export default function AdminAnalytics() {
           </div>
         </div>
       </div>
+
+      <section className="grid lg:grid-cols-2 gap-6">
+        <div className="bg-[#16262A] p-6 rounded-xl border border-[#1D3238] space-y-4"><div className="flex items-center gap-2"><Wrench size={18} className="text-[#E8A33D]" /><h2 className="text-lg font-bold font-display">Municipal resolution attempt</h2></div><p className="text-sm text-[#9BA8A6]">Close a standard fix or record a failed/chronic recurrence to activate escalation.</p><textarea value={notes} onChange={(event) => setNotes(event.target.value)} rows={3} placeholder="Officer notes and inspection evidence" className="w-full bg-[#0F1B1E] border border-[#1D3238] rounded-lg p-3 text-sm" /><div className="flex gap-2"><Button variant="primary" onClick={() => setResolution('RESOLVED')}><CheckCircle2 size={15} /> Mark resolved</Button><Button variant="danger" onClick={() => setResolution('FAILED')}><AlertTriangle size={15} /> Mark failed</Button></div>{resolution && <p className="text-sm text-[#2F9E8F]">{resolution} recorded locally. {resolution === 'FAILED' ? 'Escalation engine can now open the HEI bank.' : 'Case can proceed to closure.'}</p>}</div>
+        <div className="bg-[#16262A] p-6 rounded-xl border border-[#1D3238] space-y-4"><div className="flex items-center gap-2"><LockKeyhole size={18} className="text-[#E8A33D]" /><h2 className="text-lg font-bold font-display">Site clearance gatekeeper</h2></div><p className="text-sm text-[#9BA8A6]">Inspect the pilot site and unlock Tranche 2 only after the ULB engineer signs off.</p><div className="p-4 bg-[#0F1B1E] rounded-lg border border-[#1D3238] text-xs space-y-2"><p><span className="text-[#9BA8A6]">Tranche 1</span><strong className="float-right text-[#2F9E8F]">RELEASED · 30%</strong></p><p><span className="text-[#9BA8A6]">Tranche 2</span><strong className={`float-right ${clearance ? 'text-[#2F9E8F]' : 'text-[#E8A33D]'}`}>{clearance ? 'UNLOCKED · 40%' : 'LOCKED · 40%'}</strong></p><p><span className="text-[#9BA8A6]">Tranche 3</span><strong className="float-right">LOCKED · 30%</strong></p></div><Button variant={clearance ? 'outline' : 'secondary'} className="w-full" onClick={() => setClearance(true)} disabled={clearance}><ShieldCheck size={15} /> {clearance ? 'Site cleared by ULB engineer' : 'Sign site clearance'}</Button></div>
+      </section>
     </div>
   );
 }

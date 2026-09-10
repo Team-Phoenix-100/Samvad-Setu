@@ -1,12 +1,37 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, MapPin, Sparkles, CheckCircle, ArrowRight, ArrowLeft, Crop, RefreshCw, Trash2, UploadCloud, Eye } from 'lucide-react';
+import { Camera, MapPin, Sparkles, CheckCircle, ArrowRight, ArrowLeft, Crop, RefreshCw, Trash2, UploadCloud, Eye, Mic, Square, Radio } from 'lucide-react';
 import { useProblemStore } from '../../store/problemStore';
 import { useToastStore } from '../../store/toastStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import Cropper from 'react-easy-crop';
+import { MapContainer, TileLayer, CircleMarker, useMap, useMapEvents } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import getCroppedImg, { compressImage } from '../../utils/cropImage';
 import Button from '../../components/ui/Button';
+
+function LocationSelector({ onSelect }) {
+  const map = useMap();
+
+  useMapEvents({
+    click: (event) => {
+      map.setView(event.latlng, map.getZoom());
+      onSelect(event.latlng.lat, event.latlng.lng);
+    },
+  });
+
+  return null;
+}
+
+function LocationViewport({ lat, lng }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.setView([lat, lng], map.getZoom());
+  }, [lat, lng, map]);
+
+  return null;
+}
 
 export default function SubmitProblem() {
   const navigate = useNavigate();
@@ -17,6 +42,12 @@ export default function SubmitProblem() {
   const [step, setStep] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingSeconds, setRecordingSeconds] = useState(0);
+  const [audioFile, setAudioFile] = useState(null);
+  const [isResolvingLocation, setIsResolvingLocation] = useState(false);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
 
   // Cropper states
   const [cropModalOpen, setCropModalOpen] = useState(false);
@@ -58,11 +89,70 @@ export default function SubmitProblem() {
     setStep(4);
   };
 
+  const toggleVoiceRecording = async () => {
+    if (isRecording) {
+      mediaRecorderRef.current?.stop();
+      return;
+    }
+
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      showToast("Voice recording is not supported in this browser.", "error");
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+      recorder.ondataavailable = (event) => audioChunksRef.current.push(event.data);
+      recorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType || 'audio/webm' });
+        setAudioFile(new File([blob], 'citizen-voice-note.webm', { type: blob.type }));
+        stream.getTracks().forEach((track) => track.stop());
+        setRecordingSeconds(0);
+        showToast("Voice note attached for transcription.", "success");
+      };
+      recorder.start();
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+      const startedAt = Date.now();
+      const timer = window.setInterval(() => {
+        setRecordingSeconds(Math.floor((Date.now() - startedAt) / 1000));
+        if (!mediaRecorderRef.current || mediaRecorderRef.current.state === 'inactive') window.clearInterval(timer);
+      }, 250);
+    } catch {
+      showToast("Microphone permission is required to record a voice note.", "error");
+    }
+  };
+
+  const updateLocationDetails = async (lat, lng) => {
+    setFormData(prev => ({ ...prev, lat, lng }));
+    setIsResolvingLocation(true);
+
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+      if (!response.ok) throw new Error('Reverse geocoding failed');
+      const data = await response.json();
+      const address = data.address || {};
+      setFormData(prev => ({
+        ...prev,
+        district: address.state_district || address.county || address.city_district || prev.district,
+        block: address.suburb || address.town || address.village || address.city || address.municipality || prev.block,
+      }));
+    } catch (error) {
+      console.error('Could not resolve selected location:', error);
+      showToast("Location selected, but district details could not be found. You can enter them manually.", "warning");
+    } finally {
+      setIsResolvingLocation(false);
+    }
+  };
+
   const handleGetLocation = () => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setFormData(prev => ({ ...prev, lat: position.coords.latitude, lng: position.coords.longitude }));
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          await updateLocationDetails(latitude, longitude);
           showToast("Location updated successfully", "success");
         },
         () => showToast("Failed to get location. Please enable GPS.", "error")
@@ -205,6 +295,7 @@ export default function SubmitProblem() {
       urgency: formData.urgency,
       location: { district: formData.district, block: formData.block, lat: formData.lat, lng: formData.lng },
       images: formData.images,
+      audio: audioFile,
     };
     
     const created = await addProblem(payload);
@@ -314,10 +405,31 @@ export default function SubmitProblem() {
 
           <div className="p-6 border border-dashed border-[#1D3238] rounded-lg bg-[#0F1B1E] text-center space-y-3">
             <MapPin className="mx-auto text-[#E8A33D]" size={32} />
-            <p className="text-xs text-[#9BA8A6]">Interactive Map Picker (GPS Auto-Location)</p>
+            <p className="text-xs text-[#9BA8A6]">Click the map or drag the marker to choose the problem location.</p>
+            <div className="h-52 overflow-hidden rounded-lg border border-[#1D3238] text-left">
+              <MapContainer
+                center={[formData.lat, formData.lng]}
+                zoom={13}
+                scrollWheelZoom={false}
+                className="h-full w-full"
+              >
+                <LocationViewport lat={formData.lat} lng={formData.lng} />
+                <TileLayer
+                  attribution='&copy; OpenStreetMap contributors'
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                />
+                <LocationSelector onSelect={updateLocationDetails} />
+                <CircleMarker
+                  center={[formData.lat, formData.lng]}
+                  radius={10}
+                  pathOptions={{ color: '#E8A33D', fillColor: '#E8A33D', fillOpacity: 0.85 }}
+                />
+              </MapContainer>
+            </div>
             <span className="block text-xs font-mono text-[#2F9E8F] bg-[#2F9E8F]/10 px-2 py-1 rounded w-max mx-auto mb-2">
               GPS Lat: {formData.lat.toFixed(4)}, Lng: {formData.lng.toFixed(4)}
             </span>
+            {isResolvingLocation && <p className="text-xs text-[#E8A33D]">Finding district and locality...</p>}
             <Button variant="outline" className="text-xs cursor-pointer" onClick={handleGetLocation}>
               Use Current Location
             </Button>
@@ -456,6 +568,20 @@ export default function SubmitProblem() {
               )}
             </Button>
           </div>
+
+          <div className="border-t border-[#1D3238] pt-4 space-y-3">
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-sm font-semibold flex items-center gap-2"><Mic size={16} className="text-[#2F9E8F]" /> Add a voice note</p>
+                <p className="text-xs text-[#9BA8A6]">Whisper transcription will enrich the triage brief.</p>
+              </div>
+              <button type="button" onClick={toggleVoiceRecording} className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold ${isRecording ? 'bg-[#C1443B] text-white' : 'bg-[#2F9E8F] text-[#0F1B1E]'}`}>
+                {isRecording ? <Square size={14} /> : <Mic size={14} />}
+                {isRecording ? `Stop ${recordingSeconds}s` : audioFile ? 'Record again' : 'Record voice'}
+              </button>
+            </div>
+            {audioFile && !isRecording && <p className="text-xs text-[#2F9E8F] flex items-center gap-2"><CheckCircle size={13} /> Voice note ready: {audioFile.name}</p>}
+          </div>
         </motion.div>
       )}
 
@@ -480,7 +606,13 @@ export default function SubmitProblem() {
               <span className="text-[#9BA8A6]">Suggested Match HEIs:</span>
               <span className="font-bold text-[#F2EFE9]">BIT Sindri, Ranchi University</span>
             </div>
+            <div className="flex justify-between">
+              <span className="text-[#9BA8A6]">Municipal SLA target:</span>
+              <span className="font-bold text-[#E8A33D]">{formData.urgency === 'urgent' ? '168' : '336'} hours</span>
+            </div>
+            {audioFile && <div className="flex items-center gap-2 text-[#2F9E8F] border-t border-[#1D3238] pt-3"><Radio size={14} /> Voice note queued for Whisper transcription</div>}
           </div>
+          <div className="p-3 rounded-lg border border-[#E8A33D]/30 bg-[#E8A33D]/10 text-xs text-[#E8A33D] flex gap-2"><MapPin size={15} className="shrink-0" /> Spatial check: a nearby report within 150m may be fused into the existing master ticket after server verification.</div>
 
           <div className="flex gap-3">
             <Button variant="outline" className="w-full cursor-pointer" onClick={() => setStep(3)}>
@@ -505,6 +637,7 @@ export default function SubmitProblem() {
             )}
             <p><strong className="text-[#9BA8A6]">Location:</strong> {formData.district}, {formData.block}</p>
             <p><strong className="text-[#9BA8A6]">Category:</strong> {formData.category}</p>
+            <p><strong className="text-[#9BA8A6]">Municipal SLA:</strong> {formData.urgency === 'urgent' ? '7 days' : '14 days'}</p>
             
             {/* Image Preview in Review */}
             {formData.previewUrls.length > 0 && (
@@ -520,6 +653,7 @@ export default function SubmitProblem() {
                 </div>
               </div>
             )}
+            {audioFile && <p className="pt-2 border-t border-[#1D3238] text-[#2F9E8F]"><Mic size={14} className="inline mr-2" />Voice note attached for Whisper</p>}
           </div>
 
           <div className="flex gap-3">
@@ -704,4 +838,4 @@ export default function SubmitProblem() {
       </AnimatePresence>
     </div>
   );
-}
+}

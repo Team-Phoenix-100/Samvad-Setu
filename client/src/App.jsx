@@ -12,6 +12,7 @@ import HeiProblemReview from "./pages/hei/HeiProblemReview";
 import PublicMap from "./pages/public/PublicMap";
 import IndustryDashboard from "./pages/industry/IndustryDashboard";
 import IndustryBrowse from "./pages/industry/IndustryBrowse";
+import HandoverCertification from "./pages/industry/HandoverCertification";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminProblems from "./pages/admin/AdminProblems";
 import HeiTracking from "./pages/hei/HeiTracking";
@@ -118,6 +119,7 @@ export default function App() {
           <Route element={<SidebarLayout />}>
             <Route path="/industry/dashboard" element={<IndustryDashboard />} />
             <Route path="/industry/browse" element={<IndustryBrowse />} />
+            <Route path="/industry/handover" element={<HandoverCertification />} />
             <Route path="/industry/tracking" element={<IndustryTracking />} />
             <Route
               path="/industry/pledge"

@@ -3,11 +3,9 @@ import { Link } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Filter, ArrowRight, ShieldCheck, MapPin } from 'lucide-react';
+import { Filter, ArrowRight } from 'lucide-react';
 import { useProblemStore } from '../../store/problemStore';
 import SignalDot from '../../components/ui/SignalDot';
-import Badge from '../../components/ui/Badge';
-import Button from '../../components/ui/Button';
 
 // Fix for default marker icons in Leaflet under Vite bundle
 delete L.Icon.Default.prototype._getIconUrl;
@@ -33,7 +31,7 @@ export default function PublicMap() {
     : problems.filter(p => p.status === filter);
 
   return (
-    <div className="flex-1 min-h-[calc(100vh-140px)] bg-[#0F1B1E] text-[#F2EFE9] flex flex-col">
+    <div className="flex-1 h-[calc(100vh-80px)] min-h-[520px] bg-[#0F1B1E] text-[#F2EFE9] flex flex-col">
       {/* Map Header Overlay */}
       <header className="border-b border-[#1D3238] bg-[#16262A]/90 backdrop-blur-md px-6 py-4 flex flex-wrap items-center justify-between gap-4 z-10">
         <div className="flex items-center gap-3">
@@ -77,12 +75,12 @@ export default function PublicMap() {
       </header>
 
       {/* Map Body */}
-      <div className="flex-1 w-full relative z-0">
+      <div className="flex-1 min-h-0 w-full relative z-0">
         <MapContainer
           center={jharkhandCenter}
           zoom={8}
           scrollWheelZoom={true}
-          className="h-full w-full"
+          className="h-full min-h-[440px] w-full"
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

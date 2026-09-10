@@ -1,22 +1,23 @@
-import React, { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Building2, MapPin, Award, CheckCircle } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Building2, Award, CheckCircle, ShieldCheck, X } from 'lucide-react';
 import { useProblemStore } from '../../store/problemStore';
 import SignalDot from '../../components/ui/SignalDot';
 import Badge from '../../components/ui/Badge';
 import Button from '../../components/ui/Button';
 
 export default function IndustryBrowse() {
-  const navigate = useNavigate();
   const { problems, fetchProblems } = useProblemStore();
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [pledged, setPledged] = useState(false);
 
   useEffect(() => {
     fetchProblems();
   }, []);
 
   const handlePledge = (problemId) => {
-    alert(`Initiating CSR Grant Pledge for ${problemId}. Redirecting to pledge workflow.`);
-    navigate('/industry/dashboard');
+    setSelectedProject(problemId);
+    setPledged(false);
   };
 
   return (
@@ -44,6 +45,7 @@ export default function IndustryBrowse() {
             <div>
               <h3 className="text-lg font-bold text-[#F2EFE9]">{item.title}</h3>
               <p className="text-xs text-[#9BA8A6] mt-1">{item.description}</p>
+              <div className="flex flex-wrap gap-2 mt-3"><span className="text-[11px] px-2 py-1 rounded bg-[#E8A33D]/10 text-[#E8A33D]">TRL {item.trl || 3}</span><span className="text-[11px] px-2 py-1 rounded bg-[#2F9E8F]/10 text-[#2F9E8F]">MCA Schedule VII: item_iv</span><span className="text-[11px] px-2 py-1 rounded bg-[#2F9E8F]/10 text-[#2F9E8F]">item_ii</span></div>
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-[#1D3238] text-xs text-[#9BA8A6]">
@@ -63,6 +65,8 @@ export default function IndustryBrowse() {
           </div>
         ))}
       </div>
+
+      {selectedProject && <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4"><div className="w-full max-w-lg bg-[#16262A] border border-[#1D3238] rounded-xl p-6 space-y-5"><div className="flex items-center justify-between"><div><p className="text-xs font-mono text-[#E8A33D] uppercase">CSR pledge intent</p><h2 className="text-xl font-bold font-display">Fund this civic prototype</h2></div><button onClick={() => setSelectedProject(null)} aria-label="Close"><X size={18} /></button></div><div className="grid grid-cols-3 gap-2 text-center text-xs"><div className="p-3 bg-[#0F1B1E] rounded-lg border border-[#2F9E8F]/40"><b className="block text-[#2F9E8F]">30%</b>Lab build</div><div className="p-3 bg-[#0F1B1E] rounded-lg border border-[#E8A33D]/40"><b className="block text-[#E8A33D]">40%</b>Field pilot</div><div className="p-3 bg-[#0F1B1E] rounded-lg border border-[#1D3238]"><b className="block">30%</b>Handover</div></div><label className="flex gap-3 text-sm text-[#9BA8A6]"><input type="checkbox" defaultChecked /> I accept the 3-tranche escrow and Civic Commons License terms.</label><p className="text-xs text-[#9BA8A6]">Tranche 2 remains locked until a ULB engineer clears the site. MCA Schedule VII eligibility is recorded with this pledge.</p>{pledged && <p className="text-sm text-[#2F9E8F] flex items-center gap-2"><CheckCircle size={16} /> Pledge intent recorded for {selectedProject}.</p>}<div className="flex justify-end gap-2"><Button variant="outline" onClick={() => setSelectedProject(null)}>Cancel</Button><Button variant="primary" onClick={() => setPledged(true)}><ShieldCheck size={16} /> Confirm pledge</Button></div></div></div>}
     </div>
   );
 }
