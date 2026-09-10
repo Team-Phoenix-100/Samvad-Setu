@@ -28,6 +28,7 @@ export const useProblemStore = create((set, get) => ({
         payload.append('category', data.category);
         payload.append('urgency', data.urgency);
         payload.append('location', JSON.stringify(data.location));
+        if (data.audio) payload.append('audio', data.audio, data.audio.name || 'voice-note.webm');
         
         data.images.forEach((image, index) => {
           const fileName = image.name || `proof_${index + 1}.jpg`;

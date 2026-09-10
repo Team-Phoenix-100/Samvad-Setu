@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Filter, MapPin, Sparkles, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Filter, MapPin, CheckCircle2, ShieldAlert, Download } from 'lucide-react';
 import { useProblemStore } from '../../store/problemStore';
 import SignalDot from '../../components/ui/SignalDot';
 import Badge from '../../components/ui/Badge';
@@ -10,6 +10,17 @@ export default function HeiProblemReview() {
   const navigate = useNavigate();
   const { problems, fetchProblems } = useProblemStore();
   const [selectedFilter, setSelectedFilter] = useState('all');
+
+  const getTier = (item) => item.complexityTier || (item.urgency === 'urgent' ? 3 : item.urgency === 'high' ? 2 : 1);
+  const downloadDossier = (item) => {
+    const dossier = `SAMVAD SETU ENGINEERING DOSSIER\n\nWHAT: ${item.title}\nWHERE: ${item.location?.district || 'Jharkhand'}\nWHY: ${item.description}\nWHO: Municipal ULB + HEI student team\nHOW: Validate the proposed prototype through a staged field pilot.\nCOMPLEXITY: Tier ${getTier(item)}`;
+    const url = URL.createObjectURL(new Blob([dossier], { type: 'text/plain' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${item.id || 'problem'}-engineering-dossier.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
 
   useEffect(() => {
     fetchProblems();
@@ -27,6 +38,8 @@ export default function HeiProblemReview() {
         <h1 className="text-3xl font-bold font-display">Problem Review & Claim Queue</h1>
         <p className="text-xs text-[#9BA8A6]">Select AI-categorized civic problems near your institution to adopt as student Capstone / R&D projects.</p>
       </div>
+
+      <div className="flex items-start gap-3 p-4 rounded-xl border border-[#C1443B]/40 bg-[#C1443B]/10 text-sm text-red-200"><ShieldAlert size={18} className="shrink-0 text-[#C1443B]" /><span><strong>1st-year safety guardrail:</strong> Tier 3 and Tier 4 R&D briefs require senior faculty supervision and are hidden from junior-only teams.</span></div>
 
       {/* Filter Toolbar */}
       <div className="flex items-center gap-3 bg-[#16262A] p-3 rounded-lg border border-[#1D3238] text-xs">
@@ -59,6 +72,7 @@ export default function HeiProblemReview() {
               <span className="text-xs font-mono text-[#E8A33D] bg-[#E8A33D]/10 px-2.5 py-1 rounded w-fit">
                 AI Urgency: {item.urgency || 'Urgent'}
               </span>
+                <span className="text-xs font-mono text-[#2F9E8F] bg-[#2F9E8F]/10 px-2.5 py-1 rounded w-fit">Tier {getTier(item)} {getTier(item) === 4 ? 'R&D' : getTier(item) === 3 ? 'Advanced' : getTier(item) === 2 ? 'Applied' : 'Foundation'}</span>
             </div>
 
             <div>
@@ -72,6 +86,7 @@ export default function HeiProblemReview() {
               </span>
 
               <div className="flex items-center gap-3">
+                <Button variant="outline" className="py-1.5 text-xs" onClick={() => downloadDossier(item)}><Download size={14} /> Dossier</Button>
                 <Link to={`/problem/${item.id}`} className="hover:text-[#F2EFE9]">
                   View Details
                 </Link>

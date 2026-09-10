@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Calendar, Building2, ShieldCheck, ArrowLeft, Award, Sparkles, CheckCircle2, Trash2, Camera, Users, ThumbsUp, Activity, Wrench, Banknote, FileCheck } from 'lucide-react';
+import { MapPin, Calendar, Building2, ShieldCheck, ArrowLeft, CheckCircle2, Trash2, Camera, ThumbsUp, Activity, Wrench, Banknote, FileCheck, Clock, X } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useProblemStore } from '../../store/problemStore';
 import { useToastStore } from '../../store/toastStore';
@@ -17,6 +17,8 @@ export default function ProblemDetail() {
   const { showToast } = useToastStore();
   const [problem, setProblem] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [actionModal, setActionModal] = useState(null);
+  const [actionNote, setActionNote] = useState('');
   
   // Mock engagement state
   const [upvotes, setUpvotes] = useState(142);
@@ -56,6 +58,25 @@ export default function ProblemDetail() {
       </div>
     );
   }
+
+  const slaHours = problem.urgency === 'urgent' ? 168 : 336;
+  const reportedAt = new Date(problem.createdAt || Date.now()).getTime();
+  const dueAt = reportedAt + slaHours * 60 * 60 * 1000;
+  const remainingHours = Math.max(0, Math.ceil((dueAt - Date.now()) / (60 * 60 * 1000)));
+  const role = user?.role || 'citizen';
+  const roleAction = ['government_admin', 'admin', 'govt_admin', 'platform_admin'].includes(role)
+    ? { label: 'Record municipal attempt', options: ['RESOLVED', 'FAILED'] }
+    : role.includes('hei')
+      ? { label: 'Open capstone workspace', options: ['CLAIM FOR HEI'] }
+      : role.includes('industry')
+        ? { label: 'Review CSR pledge', options: ['PLEDGE SUPPORT'] }
+        : null;
+
+  const completeAction = (option) => {
+    showToast(`${option} recorded for this prototype view.`, 'success');
+    setActionModal(null);
+    setActionNote('');
+  };
 
   // Enhanced Mock Timeline Stages
   const extendedTimeline = [
@@ -130,6 +151,10 @@ export default function ProblemDetail() {
               <p className="text-[#F2EFE9] text-lg leading-relaxed font-light">
                 {problem.description}
               </p>
+              <div className={`flex items-center gap-3 rounded-lg border p-3 text-sm ${remainingHours === 0 ? 'border-[#C1443B]/50 bg-[#C1443B]/10 text-red-300' : 'border-[#E8A33D]/30 bg-[#E8A33D]/10 text-[#E8A33D]'}`}>
+                <Clock size={18} />
+                <span><strong>Municipal SLA:</strong> {remainingHours ? `${remainingHours} hours remaining` : 'SLA breached'} <span className="text-xs opacity-75">({slaHours / 24}-day target)</span></span>
+              </div>
             </div>
             
             {/* Citizen Impact Bar */}
@@ -219,10 +244,22 @@ export default function ProblemDetail() {
                 </div>
               ))}
             </div>
+            {roleAction && <Button variant="secondary" className="w-full mt-8" onClick={() => setActionModal(true)}><ShieldCheck size={16} /> {roleAction.label}</Button>}
           </div>
 
         </div>
       </div>
+
+      <AnimatePresence>
+        {actionModal && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[90] bg-black/70 flex items-center justify-center p-4">
+          <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full max-w-md bg-[#16262A] border border-[#1D3238] rounded-xl p-6 space-y-4">
+            <div className="flex items-center justify-between"><h2 className="font-bold font-display">{roleAction.label}</h2><button onClick={() => setActionModal(null)} aria-label="Close"><X size={18} /></button></div>
+            <p className="text-sm text-[#9BA8A6]">Capture the next lifecycle decision for this issue.</p>
+            <textarea value={actionNote} onChange={(event) => setActionNote(event.target.value)} rows={3} placeholder="Notes, inspection findings, or pledge context" className="w-full bg-[#0F1B1E] border border-[#1D3238] rounded-lg p-3 text-sm" />
+            <div className="flex flex-wrap gap-2">{roleAction.options.map((option) => <Button key={option} variant={option === 'FAILED' ? 'danger' : 'primary'} onClick={() => completeAction(option)}>{option}</Button>)}</div>
+          </motion.div>
+        </motion.div>}
+      </AnimatePresence>
 
       {/* Full Screen Image Preview Modal */}
       <AnimatePresence>
