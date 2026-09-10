@@ -1,43 +1,52 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LayoutDashboard, Map as MapIcon, UserCircle } from 'lucide-react-native';
+import { LayoutDashboard, Settings as SettingsIcon, UserCircle } from 'lucide-react-native';
 
 export default function CitizenTabLayout() {
-  // 1. Get the safe margins of the specific Android device
   const insets = useSafeAreaInsets();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#E8A33D', // Accent color for the Citizen portal
-        tabBarInactiveTintColor: '#9BA8A6',
+        tabBarActiveTintColor: '#E8A33D', 
+        tabBarInactiveTintColor: '#5c6d6a', // Slightly darker inactive
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#16262A',
+          backgroundColor: '#0F1B1E', // Very dark background
           borderTopColor: '#1D3238',
-          // 2. Dynamically add the Android system bar height to our custom height
-          height: 60 + insets.bottom,
-          // 3. Push the clickable icons up above the system buttons
-          paddingBottom: Math.max(insets.bottom, 8),
-          paddingTop: 8,
+          borderTopWidth: 1,
+          height: 65 + insets.bottom,
+          paddingBottom: Math.max(insets.bottom, 10),
+          paddingTop: 10,
+          // Premium shadow
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 10,
+          elevation: 10,
         },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+          marginTop: 4,
+        }
       }}>
       
       {/* 🟢 VISIBLE TABS */}
       <Tabs.Screen
         name="home"
         options={{
-          title: 'Dashboard',
-          tabBarIcon: ({ color }) => <LayoutDashboard size={22} color={color} />,
+          title: 'Problems',
+          tabBarIcon: ({ color, focused }) => <LayoutDashboard size={24} color={color} strokeWidth={focused ? 2.5 : 2} />,
         }}
       />
       
       <Tabs.Screen
-        name="map"
+        name="settings"
         options={{
-          title: 'Heatmap',
-          tabBarIcon: ({ color }) => <MapIcon size={22} color={color} />,
+          title: 'Settings',
+          tabBarIcon: ({ color, focused }) => <SettingsIcon size={24} color={color} strokeWidth={focused ? 2.5 : 2} />,
         }}
       />
       
@@ -45,25 +54,14 @@ export default function CitizenTabLayout() {
         name="profile"
         options={{
           title: 'Profile',
-          tabBarIcon: ({ color }) => <UserCircle size={22} color={color} />,
+          tabBarIcon: ({ color, focused }) => <UserCircle size={24} color={color} strokeWidth={focused ? 2.5 : 2} />,
         }}
       />
 
-      {/* 🔴 HIDDEN TABS (These can be navigated to, but won't show on the bottom bar) */}
-      <Tabs.Screen 
-        name="submit-problem" 
-        options={{ href: null }} 
-      />
-      
-      <Tabs.Screen 
-        name="ticket/[id]" 
-        options={{ href: null }} 
-      />
-      
-      <Tabs.Screen 
-        name="notifications" 
-        options={{ href: null }} 
-      />
+      {/* 🔴 HIDDEN TABS */}
+      <Tabs.Screen name="map" options={{ href: null }} />
+      <Tabs.Screen name="submit-problem" options={{ href: null }} />
+      <Tabs.Screen name="notifications" options={{ href: null }} />
       
     </Tabs>
   );

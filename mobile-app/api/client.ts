@@ -1,8 +1,17 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
 
-// Use the local IP address for physical device testing
-export const API_URL = 'http://192.168.1.12:5001/api';
+// Dynamically grab the local network IP from Expo Go during development
+const debuggerHost = Constants?.expoConfig?.hostUri;
+const hostIp = debuggerHost ? debuggerHost.split(':')[0] : 'localhost';
+
+export const API_URL = `http://${hostIp}:5001/api`;
+
+console.log(`\n========================================`);
+console.log(`🔌 MOBILE APP API CONFIGURED FOR:`);
+console.log(`👉 ${API_URL}`);
+console.log(`========================================\n`);
 
 const api = axios.create({
   baseURL: API_URL,
