@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MapPin, AlertCircle } from 'lucide-react-native';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 import { useTheme } from '../../context/ThemeContext'; // Import theme hook
 
 const hotspots = [

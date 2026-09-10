@@ -15,7 +15,7 @@ import {
   Building2
 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 
 export default function HEIHomeScreen() {
   const router = useRouter();

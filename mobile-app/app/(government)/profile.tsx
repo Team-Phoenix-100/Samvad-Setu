@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { ShieldCheck, Mail, Phone, LogOut, CheckCircle2, Activity } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 import { useTheme } from '../../context/ThemeContext';
 
 export default function GovernmentProfileScreen() {

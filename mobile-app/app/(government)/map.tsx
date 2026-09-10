@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Dimensions, ActivityIndicator } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 import MapView, { Marker, Callout, PROVIDER_GOOGLE } from 'react-native-maps';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 import { MapPin, AlertTriangle } from 'lucide-react-native';
 import { useTheme } from '../../context/ThemeContext'; // Import theme hook
 

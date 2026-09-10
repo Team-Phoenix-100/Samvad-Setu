@@ -14,7 +14,7 @@ import {
   Layers
 } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 import { useTheme } from '../../context/ThemeContext'; // Import the Theme Hook
 
 export default function CitizenHomeScreen() {
