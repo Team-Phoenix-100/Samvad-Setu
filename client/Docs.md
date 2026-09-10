@@ -509,3 +509,8 @@ The following components and layouts were recently added via an Agentic Workflow
 ## Evidence Mandate & Problem UI
 - **SubmitProblem Validation**: Blocked problem submission progression to Phase 4 (AI Engine) unless `imageUploaded === true`.
 - **ProblemDetail Redesign**: Overhauled the ProblemDetail page to feature a 6-stage dynamic Resolution Tracker, a Citizen Impact Upvote widget, and a high-end glassmorphic UI.
+
+## DHTE Government Dashboard
+- **Socket.io Real-time Alerts**: The client now listens to `moderation:new_item` and `institution:new_signup` via `socket.io-client` inside `GovernmentLayout.jsx` for live notifications.
+- **Zustand Stores**: Added `govAnalyticsStore`, `govModerationStore`, and `govInstitutionStore` to handle state for the admin layer.
+- **New Admin Pages**: Fully integrated `AnalyticsOverview`, `ModerationQueue`, `ModerationReview`, `InstitutionManagement`, and `AuditLog` inside `App.jsx` under the `/government` path.

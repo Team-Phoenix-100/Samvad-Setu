@@ -27,6 +27,7 @@
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.18.3",
     "recharts": "^3.10.1",
+    "socket.io-client": "^4.8.3",
     "zod": "^4.5.2",
     "zustand": "^5.0.15"
   },

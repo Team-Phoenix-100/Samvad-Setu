@@ -69,12 +69,22 @@ router.post("/", protect, authorize("citizen"), upload.array("images", 3), async
     }
 
     // 4. Instantiate and Save Problem
+    const isFlagged = category === 'other' || category.includes('Hazards') || category.includes('Safety'); // Simplified heuristic if AI isn't reachable
+
     const newProblem = new Problem({
       ...req.body,
       category,
       location,
       images: uploadedImages,
       reportedBy: req.user._id,
+      aiMetadata: {
+        category: category,
+        confidence: 0.5,
+        severity: 'medium',
+        flagReason: 'new_intake',
+        flaggedForReview: isFlagged
+      },
+      moderation: { status: 'pending' },
       timeline: [
         { stage: "Reported", timestamp: "Just now", actor: "Citizen" },
         { stage: "Classified", timestamp: "Just now", actor: "AI Engine" },
@@ -82,6 +92,16 @@ router.post("/", protect, authorize("citizen"), upload.array("images", 3), async
     });
 
     const savedProblem = await newProblem.save();
+
+    if (savedProblem.aiMetadata.flaggedForReview) {
+      try {
+        const io = require('../../app').io;
+        if (io) io.to('admin_alerts').emit('moderation:new_item', savedProblem);
+      } catch (err) {
+        console.error("Socket error:", err);
+      }
+    }
+
     res.status(201).json(savedProblem);
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
