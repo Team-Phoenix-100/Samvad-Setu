@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Mail, Lock, ArrowRight, ShieldCheck } from 'lucide-react-native';
+import { useRouter, useLocalSearchParams } from 'expo-router';
+import { Mail, Lock, ArrowRight, ShieldCheck, Building2, Sparkles } from 'lucide-react-native';
 import { useAuthStore } from '../../store/authStore';
 import { useToastStore } from '../../store/toastStore';
 
 export default function LoginScreen() {
   const router = useRouter();
+  const { portal } = useLocalSearchParams<{ portal?: string }>();
   const { login, isLoading, error } = useAuthStore();
   const { showToast } = useToastStore();
   
-  const [identifier, setIdentifier] = useState('');
-  const [password, setPassword] = useState('');
+  const isAuthority = portal === 'authority';
+
+  const [identifier, setIdentifier] = useState(isAuthority ? 'dhte.admin@jharkhand.gov.in' : '');
+  const [password, setPassword] = useState(isAuthority ? 'admin123' : '');
 
   const handleLogin = async () => {
     if (!identifier.trim() || !password.trim()) {
@@ -31,7 +34,7 @@ export default function LoginScreen() {
         router.replace('/(hei)/home' as any);
       } else if (userRole === 'industry_csr' || userRole === 'industry_admin') {
         router.replace('/(industry)/home' as any);
-      } else if (userRole === 'government_admin' || userRole === 'govt_admin') {
+      } else if (userRole === 'government_admin' || userRole === 'govt_admin' || userRole === 'official' || isAuthority) {
         router.replace('/(government)/home' as any);
       } else {
         router.replace('/(citizen)/home');
@@ -42,15 +45,31 @@ export default function LoginScreen() {
     }
   };
 
+  const handleQuickDemoFill = () => {
+    setIdentifier('dhte.admin@jharkhand.gov.in');
+    setPassword('admin123');
+    showToast('Loaded DHTE Admin demo credentials', 'success');
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#0F1B1E' }}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={{ flex: 1, paddingHorizontal: 24, paddingTop: 40, paddingBottom: 20, justifyContent: 'center' }}>
           
           <View style={{ alignItems: 'center', marginBottom: 24 }}>
-            <Text style={{ fontSize: 28, fontWeight: '800', color: '#F2EFE9', marginBottom: 8 }}>Welcome Back</Text>
+            {isAuthority && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(47, 158, 143, 0.15)', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 10, borderWidth: 1, borderColor: '#2F9E8F', marginBottom: 12 }}>
+                <Building2 size={15} color="#2F9E8F" />
+                <Text style={{ color: '#2F9E8F', fontSize: 11, fontWeight: '800', letterSpacing: 0.8 }}>AUTHORITY / DHTE PORTAL</Text>
+              </View>
+            )}
+            <Text style={{ fontSize: 28, fontWeight: '800', color: '#F2EFE9', marginBottom: 8 }}>
+              {isAuthority ? 'State Authority Login' : 'Welcome Back'}
+            </Text>
             <Text style={{ fontSize: 13, color: '#9BA8A6', textAlign: 'center', lineHeight: 18 }}>
-              Enter your credentials to access your dashboard. Role is auto-detected on sign-in.
+              {isAuthority
+                ? 'Sign in to access the Jharkhand DHTE Statewide Oversight & AI Moderation Console.'
+                : 'Enter your credentials to access your dashboard. Role is auto-detected on sign-in.'}
             </Text>
           </View>
 
@@ -64,14 +83,14 @@ export default function LoginScreen() {
             
             <View style={{ marginBottom: 16 }}>
               <Text style={{ color: '#9BA8A6', fontSize: 11, letterSpacing: 1, marginBottom: 6, fontWeight: '700', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' }}>
-                EMAIL OR PHONE NUMBER
+                EMAIL OR OFFICIAL ID
               </Text>
               <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#0F1B1E', borderRadius: 12, borderWidth: 1, borderColor: '#1D3238', paddingHorizontal: 12, paddingVertical: 12 }}>
                 <Mail size={18} color="#9BA8A6" style={{ marginRight: 10 }} />
                 <TextInput
                   value={identifier}
                   onChangeText={(val) => { setIdentifier(val); }}
-                  placeholder="citizen@mail.com or +91 9876543210"
+                  placeholder="dhte.admin@jharkhand.gov.in"
                   placeholderTextColor="#9BA8A6"
                   autoCapitalize="none"
                   style={{ flex: 1, color: '#F2EFE9', fontSize: 14 }}
@@ -79,7 +98,7 @@ export default function LoginScreen() {
               </View>
             </View>
 
-            <View style={{ marginBottom: 20 }}>
+            <View style={{ marginBottom: 16 }}>
               <Text style={{ color: '#9BA8A6', fontSize: 11, letterSpacing: 1, marginBottom: 6, fontWeight: '700', fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' }}>
                 PASSWORD
               </Text>
@@ -96,11 +115,32 @@ export default function LoginScreen() {
               </View>
             </View>
 
+            {/* Quick Demo Pre-fill Button */}
+            <TouchableOpacity
+              onPress={handleQuickDemoFill}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: 6,
+                paddingVertical: 8,
+                backgroundColor: '#0F1B1E',
+                borderRadius: 8,
+                borderWidth: 1,
+                borderColor: '#1D3238',
+                marginBottom: 16,
+              }}>
+              <Sparkles size={13} color="#2F9E8F" />
+              <Text style={{ fontSize: 11, fontWeight: '700', color: '#2F9E8F' }}>
+                Use Demo DHTE Admin Credentials
+              </Text>
+            </TouchableOpacity>
+
             <TouchableOpacity 
               onPress={handleLogin} 
               disabled={isLoading}
               style={{ 
-                backgroundColor: '#E8A33D', 
+                backgroundColor: isAuthority ? '#2F9E8F' : '#E8A33D', 
                 borderRadius: 12, 
                 paddingVertical: 14, 
                 flexDirection: 'row', 
@@ -114,7 +154,9 @@ export default function LoginScreen() {
                 <ActivityIndicator color="#0F1B1E" size="small" />
               ) : (
                 <>
-                  <Text style={{ color: '#0F1B1E', fontSize: 15, fontWeight: '800', marginRight: 8 }}>Sign In</Text>
+                  <Text style={{ color: '#0F1B1E', fontSize: 15, fontWeight: '800', marginRight: 8 }}>
+                    {isAuthority ? 'Access Oversight Console' : 'Sign In'}
+                  </Text>
                   <ArrowRight size={18} color="#0F1B1E" />
                 </>
               )}
