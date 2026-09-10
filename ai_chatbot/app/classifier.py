@@ -79,6 +79,8 @@ class TfidfLogisticClassifier(BaseComplaintClassifier):
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             model_dir = os.path.join(base_dir, "models")
         self.model_dir = model_dir
+        self.vectorizer_path = os.path.join(self.model_dir, "tfidf_vectorizer.pkl")
+        self.classifier_path = os.path.join(self.model_dir, "complaint_classifier.pkl")
         self.model_path = os.path.join(self.model_dir, "baseline_classifier.joblib")
         self.pipeline: Optional[Pipeline] = None
         self._load_or_train()
@@ -117,7 +119,7 @@ class TfidfLogisticClassifier(BaseComplaintClassifier):
         return pipeline
 
     def train(self, dataset_path: Optional[str] = None) -> None:
-        """Train the baseline classifier on the complaints dataset."""
+        """Train the baseline classifier on the complaints dataset and save with joblib."""
         if dataset_path is None:
             base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
             dataset_path = os.path.join(base_dir, "dataset", "complaints.csv")
@@ -142,19 +144,44 @@ class TfidfLogisticClassifier(BaseComplaintClassifier):
         self.pipeline.fit(X, y)
 
         os.makedirs(self.model_dir, exist_ok=True)
+        # Save vectorizer and classifier separately using joblib as requested
+        joblib.dump(self.pipeline.named_steps["features"], self.vectorizer_path)
+        joblib.dump(self.pipeline.named_steps["clf"], self.classifier_path)
+        # Also save full pipeline for backward compatibility
         joblib.dump(self.pipeline, self.model_path)
-        print(f"Baseline classifier saved to {self.model_path}")
+        print(f"Saved models via joblib: {self.vectorizer_path}, {self.classifier_path}")
 
     def _load_or_train(self) -> None:
-        """Loads cached model from disk or trains a new one if missing."""
+        """Loads cached model from disk using joblib or trains a new one if missing."""
+        # 1. Try loading separate vectorizer and classifier
+        if os.path.exists(self.vectorizer_path) and os.path.exists(self.classifier_path):
+            try:
+                features = joblib.load(self.vectorizer_path)
+                clf = joblib.load(self.classifier_path)
+                self.pipeline = Pipeline([
+                    ("features", features),
+                    ("clf", clf)
+                ])
+                return
+            except Exception as e:
+                logger.warning(f"Could not load pkl models via joblib: {e}")
+
+        # 2. Try loading baseline_classifier.joblib
         if os.path.exists(self.model_path):
             try:
                 self.pipeline = joblib.load(self.model_path)
+                # Auto-export the separate pkl files if missing
+                if not (os.path.exists(self.vectorizer_path) and os.path.exists(self.classifier_path)):
+                    try:
+                        joblib.dump(self.pipeline.named_steps["features"], self.vectorizer_path)
+                        joblib.dump(self.pipeline.named_steps["clf"], self.classifier_path)
+                    except Exception:
+                        pass
                 return
             except Exception as e:
                 logger.warning(f"Could not load cached model from {self.model_path}: {e}")
 
-        # Train if model doesn't exist
+        # 3. Train if model doesn't exist
         try:
             self.train()
         except Exception as e:
@@ -298,6 +325,18 @@ class TransformerComplaintClassifier(BaseComplaintClassifier):
             "category": best_category,
             "confidence": round(best_confidence, 4)
         }
+
+    def save(self, save_directory: str) -> None:
+        """
+        Saves transformer model and tokenizer using Hugging Face save_pretrained().
+        Strict rule: Do NOT use joblib or pickle for transformer models.
+        """
+        if self.model is None or self.tokenizer is None:
+            raise RuntimeError("Cannot save uninitialized transformer model or tokenizer.")
+        os.makedirs(save_directory, exist_ok=True)
+        self.model.save_pretrained(save_directory)
+        self.tokenizer.save_pretrained(save_directory)
+        logger.info(f"Transformer model and tokenizer saved to {save_directory} via save_pretrained().")
 
 
 # ==============================================================================

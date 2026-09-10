@@ -19,7 +19,7 @@ class ClassificationResponse(BaseModel):
 
 class HumanFeedbackRequest(BaseModel):
     complaint: str
-    predicted_category: str
+    predicted_category: Optional[str] = ""
     correct_category: str
     timestamp: Optional[str] = None
 
@@ -80,7 +80,6 @@ class InternalDedupResponse(BaseModel):
     isDuplicate: bool
     similarity: float
     matchedComplaintId: Optional[str] = None
-    matchedComplaintText: Optional[str] = None
 
 class InternalChatbotRequest(BaseModel):
     message: Optional[str] = None
@@ -88,12 +87,9 @@ class InternalChatbotRequest(BaseModel):
     user_id: Optional[str] = None
 
 class InternalChatbotResponse(BaseModel):
-    response: str
-    matched: Optional[bool] = None
-    similarity: Optional[float] = None
+    matched: bool
+    answer: str
 
 class InternalHealthResponse(BaseModel):
-    status: str
-    service: str
-    version: str
+    status: str = "ok"
 
