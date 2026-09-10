@@ -64,7 +64,21 @@ const problemSchema = new mongoose.Schema(
         timestamp: { type: String },
         actor: { type: String },
       }
-    ]
+    ],
+    aiMetadata: {
+      category: { type: String },
+      confidence: { type: Number, min: 0, max: 1 },
+      severity: { type: String, enum: ['low', 'medium', 'high', 'critical'] },
+      flagReason: { type: String },
+      flaggedForReview: { type: Boolean, default: false }
+    },
+    moderation: {
+      status: { type: String, enum: ['pending', 'approved', 'rejected', 'reclassified'], default: 'pending' },
+      moderatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+      moderatedAt: { type: Date },
+      notes: { type: String },
+      originalCategory: { type: String }
+    }
   },
   { timestamps: true }
 );

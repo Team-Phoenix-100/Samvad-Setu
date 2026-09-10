@@ -177,3 +177,9 @@ Content-Type: application/json
 
 ## Evidence Mandate
 - **POST /api/problems**: The route now enforces a mandatory image array (`req.files`). If an image is missing, it returns a `400 Bad Request` with an explicit message to prevent ghost submissions.
+
+## DHTE Government Dashboard & API
+- **Socket.io**: Bound a WebSocket server to the Express HTTP server in `app.js`. `io` is exported and used in controllers to broadcast real-time events to the `admin_alerts` room.
+- **New Schemas**: Added `Institution.js` (for tracking HEI/Industry verification) and `AuditLog.js` (to record admin actions).
+- **Admin Controller & Routes**: Implemented a comprehensive admin API layer at `/api/admin` handling analytics, moderation queues, institution verification, and audit logs.
+- **Seed Script**: Added `scripts/seedGovAdmin.js` to automatically populate the database with a test admin, flagged problems, and pending institutions.

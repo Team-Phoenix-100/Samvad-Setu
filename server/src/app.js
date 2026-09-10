@@ -19,8 +19,21 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 5001;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
 });
 
-module.exports = app;
+const { Server } = require("socket.io");
+const io = new Server(server, {
+  cors: { origin: "*" }
+});
+
+io.on('connection', (socket) => {
+  console.log('New client connected:', socket.id);
+  socket.on('join_admin', () => {
+    socket.join('admin_alerts');
+    console.log('Socket joined admin_alerts room');
+  });
+});
+
+module.exports = { app, io };

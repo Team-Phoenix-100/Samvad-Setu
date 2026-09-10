@@ -24,6 +24,13 @@ import PublicLayout from "./components/layout/PublicLayout";
 import Profile from "./pages/citizen/Profile";
 import Settings from "./pages/citizen/Settings";
 
+import GovernmentLayout from "./components/government/GovernmentLayout";
+import AnalyticsOverview from "./pages/government/AnalyticsOverview";
+import ModerationQueue from "./pages/government/ModerationQueue";
+import ModerationReview from "./pages/government/ModerationReview";
+import InstitutionManagement from "./pages/government/InstitutionManagement";
+import AuditLog from "./pages/government/AuditLog";
+
 // Temporary placeholder wrapper for project pages during Phase 1 setup[cite: 1]
 const PageStub = ({ title, category }) => (
   <div className="min-h-screen bg-[#0F1B1E] text-[#F2EFE9] p-8">
@@ -138,29 +145,16 @@ export default function App() {
 
         {/* Government / DHTE Module Routes (Section 1)[cite: 1] */}
         <Route element={<ProtectedRoute allowedRoles={['government_admin', 'admin', 'govt_admin', 'platform_admin']} />}>
-          <Route element={<SidebarLayout />}>
-            <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route element={<GovernmentLayout />}>
+            <Route path="/government/dashboard" element={<AnalyticsOverview />} />
+            <Route path="/government/moderation" element={<ModerationQueue />} />
+            <Route path="/government/moderation/:problemId" element={<ModerationReview />} />
+            <Route path="/government/institutions" element={<InstitutionManagement />} />
+            <Route path="/government/audit-log" element={<AuditLog />} />
+            <Route path="/admin/analytics" element={<AnalyticsOverview />} />
             <Route path="/admin/problems" element={<AdminProblems />} />
             <Route path="/admin/profile" element={<Profile />} />
             <Route path="/admin/settings" element={<Settings />} />
-            <Route
-              path="/admin/moderation"
-              element={
-                <PageStub
-                  title="Problem Moderation Queue"
-                  category="DHTE Admin (P1)"
-                />
-              }
-            />
-            <Route
-              path="/admin/institutions"
-              element={
-                <PageStub
-                  title="Institution & Industry Management"
-                  category="DHTE Admin (P2)"
-                />
-              }
-            />
           </Route>
         </Route>
 
