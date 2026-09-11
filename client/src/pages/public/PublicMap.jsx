@@ -16,11 +16,12 @@ L.Icon.Default.mergeOptions({
 });
 
 export default function PublicMap() {
-  const { problems, fetchProblems } = useProblemStore();
+  const { problems, fetchPublicProblems } = useProblemStore();
+  const { showToast } = useToastStore();
   const [filter, setFilter] = useState('all');
 
   useEffect(() => {
-    fetchProblems();
+    fetchPublicProblems();
   }, []);
 
   // Jharkhand Center Coordinates

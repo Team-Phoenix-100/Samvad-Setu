@@ -19,6 +19,7 @@ export default function ProblemDetail() {
   const [previewImage, setPreviewImage] = useState(null);
   const [actionModal, setActionModal] = useState(null);
   const [actionNote, setActionNote] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   
   // Mock engagement state
   const [upvotes, setUpvotes] = useState(142);
@@ -32,13 +33,12 @@ export default function ProblemDetail() {
     }
   };
 
-  const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this problem?")) {
-      const success = await deleteProblem(id);
-      if (success) {
-        showToast("Problem deleted successfully.", "success");
-        navigate('/citizen/dashboard');
-      }
+  const confirmDelete = async () => {
+    const success = await deleteProblem(id);
+    if (success) {
+      showToast("Problem deleted successfully.", "success");
+      setShowDeleteModal(false);
+      navigate('/citizen/dashboard');
     }
   };
 
@@ -78,14 +78,30 @@ export default function ProblemDetail() {
     setActionNote('');
   };
 
-  // Enhanced Mock Timeline Stages
-  const extendedTimeline = [
-    { stage: "Reported & Classified", timestamp: "Oct 12, 10:30 AM", actor: "Citizen & AI Engine", icon: FileCheck, color: "bg-blue-500", border: "border-blue-500", text: "text-blue-400", active: true },
-    { stage: "Verified by Authority", timestamp: "Oct 13, 09:15 AM", actor: "Municipal Admin", icon: ShieldCheck, color: "bg-emerald-500", border: "border-emerald-500", text: "text-emerald-400", active: true },
-    { stage: "Assigned to Tech Partner", timestamp: "Oct 15, 02:00 PM", actor: "Ranchi University", icon: Building2, color: "bg-purple-500", border: "border-purple-500", text: "text-purple-400", active: true },
-    { stage: "CSR Funds Pledged", timestamp: "Oct 18, 11:45 AM", actor: "Tata Steel CSR", icon: Banknote, color: "bg-[#E8A33D]", border: "border-[#E8A33D]", text: "text-[#E8A33D]", active: true },
-    { stage: "Work in Progress", timestamp: "Pending", actor: "Local Contractor", icon: Wrench, color: "bg-[#1D3238]", border: "border-[#1D3238]", text: "text-[#9BA8A6]", active: false },
-    { stage: "Resolved", timestamp: "Pending", actor: "Admin", icon: CheckCircle2, color: "bg-[#1D3238]", border: "border-[#1D3238]", text: "text-[#9BA8A6]", active: false }
+  // Dynamic Timeline mapping
+  const extendedTimeline = problem.timeline?.length > 0 ? problem.timeline.map((item, idx) => {
+    let icon = FileCheck;
+    let color = "bg-blue-500";
+    let text = "text-blue-400";
+    
+    if (item.stage?.toLowerCase().includes('report') || item.actor === 'Citizen') {
+      icon = FileCheck; color = "bg-blue-500"; text = "text-blue-400";
+    } else if (item.stage?.toLowerCase().includes('ai') || item.actor?.includes('AI')) {
+      icon = Activity; color = "bg-[#E8A33D]"; text = "text-[#E8A33D]";
+    } else if (item.stage?.toLowerCase().includes('escalated') || item.stage?.toLowerCase().includes('review')) {
+      icon = Building2; color = "bg-purple-500"; text = "text-purple-400";
+    } else if (item.stage?.toLowerCase().includes('resolved')) {
+      icon = CheckCircle2; color = "bg-emerald-500"; text = "text-emerald-400";
+    }
+
+    return {
+      stage: item.stage,
+      timestamp: new Date(item.timestamp).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }),
+      actor: item.actor,
+      icon, color, text, active: true
+    };
+  }) : [
+    { stage: "Reported & Pending", timestamp: new Date().toLocaleString(), actor: "System", icon: Activity, color: "bg-[#1D3238]", text: "text-[#9BA8A6]", active: true }
   ];
 
   return (
@@ -125,11 +141,21 @@ export default function ProblemDetail() {
               </div>
 
               <div className="flex items-start justify-between gap-4">
-                <h1 className="text-3xl md:text-4xl font-bold font-display leading-tight">{problem.title}</h1>
+                <div className="space-y-3">
+                  <h1 className="text-3xl md:text-4xl font-bold font-display leading-tight">{problem.title}</h1>
+                  {problem.reportedBy && (
+                    <div className="text-[#9BA8A6] text-sm flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-[#1D3238] flex items-center justify-center text-[10px] text-white font-bold">
+                        {problem.reportedBy.name?.charAt(0) || "C"}
+                      </span>
+                      Reported by <strong className="text-[#F2EFE9]">{problem.reportedBy.name || "Citizen"}</strong> • {new Date(problem.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  )}
+                </div>
                 {user && (user.id === problem.reportedBy?._id || user.id === problem.reportedBy?.id || user.id === problem.reportedBy) && (
                   <button 
-                    onClick={handleDelete}
-                    className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors border border-transparent hover:border-red-400/30"
+                    onClick={() => setShowDeleteModal(true)}
+                    className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-colors border border-transparent hover:border-red-400/30 shrink-0"
                     title="Delete Problem"
                   >
                     <Trash2 size={20} />
@@ -138,6 +164,12 @@ export default function ProblemDetail() {
               </div>
 
               <div className="flex flex-wrap items-center gap-6 text-sm text-[#9BA8A6] font-medium">
+                <span className="flex items-center gap-2 text-[#F2EFE9] bg-[#1D3238] px-2 py-1 rounded">
+                  <Activity size={16} className="text-[#2F9E8F]" /> {problem.category || 'General'}
+                </span>
+                <span className="flex items-center gap-2">
+                  <Building2 size={16} className="text-[#E8A33D]" /> {problem.department || 'Public Works Department'}
+                </span>
                 <span className="flex items-center gap-2">
                   <MapPin size={16} className="text-[#E8A33D]" /> {problem.location?.district || "Jharkhand"}, {problem.location?.block || "Block"}
                 </span>
@@ -148,10 +180,47 @@ export default function ProblemDetail() {
 
               <div className="w-full h-px bg-gradient-to-r from-transparent via-[#1D3238] to-transparent my-4" />
 
-              <p className="text-[#F2EFE9] text-lg leading-relaxed font-light">
+              {/* AI Metadata Tabular Grid */}
+              {problem.aiMetadata && (
+                <div className="bg-[#0F1B1E] rounded-xl border border-[#1D3238] p-5 space-y-4">
+                  <h3 className="text-sm font-bold font-display text-[#2F9E8F] flex items-center gap-2 border-b border-[#1D3238] pb-2">
+                    <Activity size={16} /> AI Classification Analysis
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <div className="text-[#9BA8A6] text-xs uppercase tracking-wider mb-1">Category</div>
+                      <div className="font-medium text-[#F2EFE9]">{problem.aiMetadata.category || problem.category || "N/A"}</div>
+                    </div>
+                    <div>
+                      <div className="text-[#9BA8A6] text-xs uppercase tracking-wider mb-1">Confidence Score</div>
+                      <div className="font-medium text-[#E8A33D]">
+                        {problem.aiMetadata.confidence ? `${Math.round(problem.aiMetadata.confidence * 100)}%` : "N/A"}
+                      </div>
+                    </div>
+                    <div>
+                      <div className="text-[#9BA8A6] text-xs uppercase tracking-wider mb-1">Severity</div>
+                      <div className="font-medium text-[#F2EFE9] uppercase">{problem.aiMetadata.severity || "MEDIUM"}</div>
+                    </div>
+                    <div>
+                      <div className="text-[#9BA8A6] text-xs uppercase tracking-wider mb-1">Priority Index</div>
+                      <div className="font-medium text-[#E8A33D]">{problem.aiMetadata.priority || 50}/100</div>
+                    </div>
+                    <div>
+                      <div className="text-[#9BA8A6] text-xs uppercase tracking-wider mb-1">Human Review Req.</div>
+                      <div className="font-medium text-[#F2EFE9]">{problem.aiMetadata.needsHumanReview ? 'Yes' : 'No'}</div>
+                    </div>
+                    <div>
+                      <div className="text-[#9BA8A6] text-xs uppercase tracking-wider mb-1">Assigned Department</div>
+                      <div className="font-medium text-[#F2EFE9] truncate" title={problem.department}>{problem.department || 'PWD'}</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <p className="text-[#F2EFE9] text-lg leading-relaxed font-light mt-6">
                 {problem.description}
               </p>
-              <div className={`flex items-center gap-3 rounded-lg border p-3 text-sm ${remainingHours === 0 ? 'border-[#C1443B]/50 bg-[#C1443B]/10 text-red-300' : 'border-[#E8A33D]/30 bg-[#E8A33D]/10 text-[#E8A33D]'}`}>
+              <div className={`flex items-center gap-3 rounded-lg border p-3 text-sm mt-6 ${remainingHours === 0 ? 'border-[#C1443B]/50 bg-[#C1443B]/10 text-red-300' : 'border-[#E8A33D]/30 bg-[#E8A33D]/10 text-[#E8A33D]'}`}>
                 <Clock size={18} />
                 <span><strong>Municipal SLA:</strong> {remainingHours ? `${remainingHours} hours remaining` : 'SLA breached'} <span className="text-xs opacity-75">({slaHours / 24}-day target)</span></span>
               </div>
@@ -259,6 +328,40 @@ export default function ProblemDetail() {
             <div className="flex flex-wrap gap-2">{roleAction.options.map((option) => <Button key={option} variant={option === 'FAILED' ? 'danger' : 'primary'} onClick={() => completeAction(option)}>{option}</Button>)}</div>
           </motion.div>
         </motion.div>}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showDeleteModal && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} 
+            className="fixed inset-0 z-[90] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, y: 10, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }}
+              className="w-full max-w-sm bg-[#16262A] border border-[#1D3238] rounded-2xl p-6 space-y-6 shadow-2xl"
+            >
+              <div className="flex flex-col items-center text-center space-y-4">
+                <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center text-red-500 border border-red-500/20">
+                  <Trash2 size={32} />
+                </div>
+                <div className="space-y-2">
+                  <h2 className="text-xl font-bold font-display text-white">Delete Problem?</h2>
+                  <p className="text-[#9BA8A6] text-sm">
+                    Are you sure you want to delete this problem? If you delete it, all related data, evidence, and AI classifications will be lost forever.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 w-full">
+                <Button variant="outline" className="flex-1" onClick={() => setShowDeleteModal(false)}>
+                  Cancel
+                </Button>
+                <Button variant="danger" className="flex-1 bg-red-600 hover:bg-red-700 text-white border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.2)]" onClick={confirmDelete}>
+                  Delete Forever
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Full Screen Image Preview Modal */}

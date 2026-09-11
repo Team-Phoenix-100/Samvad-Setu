@@ -7,5 +7,6 @@ const { app } = require("./app");
 app.use("/api/auth", authRoutes);
 app.use("/api/problems", problemRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/chatbot", require("./routes/chatbotRoutes"));
 
 module.exports = app;

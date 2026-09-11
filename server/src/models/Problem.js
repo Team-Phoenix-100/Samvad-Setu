@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const problemSchema = new mongoose.Schema(
   {
+    ticketId: { type: String, sparse: true, unique: true },
     title: {
       type: String,
       required: true,
@@ -15,6 +16,7 @@ const problemSchema = new mongoose.Schema(
       type: String,
       default: 'other',
     },
+    department: { type: String },
     location: {
       lat: { type: Number },
       lng: { type: Number },
@@ -30,8 +32,10 @@ const problemSchema = new mongoose.Schema(
     ],
     status: {
       type: String,
+      enum: ['unresolved', 'resolved', 'Submitted', 'Under_Govt_Review', 'Escalated_To_HEI', 'Corporate_Pledged', 'Site_Clearance', 'Resolved', 'Rejected'],
       default: 'unresolved',
     },
+    severity: { type: String, default: 'medium' },
     urgency: {
       type: String,
       default: 'medium',
@@ -46,10 +50,9 @@ const problemSchema = new mongoose.Schema(
       ref: 'User',
       default: null,
     },
-    assignedInstitution: {
-      type: String,
-      default: null,
-    },
+    assignedHEI: { type: mongoose.Schema.Types.ObjectId, ref: 'Institution' },
+    corporatePartner: { type: mongoose.Schema.Types.ObjectId, ref: 'Institution' },
+    slaHours: { type: Number, default: 72 },
     statusHistory: [
       {
         status: { type: String },
@@ -61,16 +64,20 @@ const problemSchema = new mongoose.Schema(
     timeline: [
       {
         stage: { type: String },
-        timestamp: { type: String },
+        timestamp: { type: mongoose.Schema.Types.Mixed },
         actor: { type: String },
+        notes: { type: String }
       }
     ],
     aiMetadata: {
       category: { type: String },
       confidence: { type: Number, min: 0, max: 1 },
-      severity: { type: String, enum: ['low', 'medium', 'high', 'critical'] },
+      severity: { type: String },
+      priority: { type: Number },
+      needsHumanReview: { type: Boolean },
       flagReason: { type: String },
-      flaggedForReview: { type: Boolean, default: false }
+      flaggedForReview: { type: Boolean, default: false },
+      duplicatesDetected: [String]
     },
     moderation: {
       status: { type: String, enum: ['pending', 'approved', 'rejected', 'reclassified'], default: 'pending' },
