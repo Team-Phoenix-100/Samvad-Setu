@@ -10,3 +10,5 @@ joblib
 fastapi
 uvicorn
 pydantic
+google-genai
+python-dotenv
