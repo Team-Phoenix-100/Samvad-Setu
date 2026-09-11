@@ -8,10 +8,21 @@ export const useProblemStore = create((set, get) => ({
   fetchProblems: async () => {
     set({ isLoading: true });
     try {
-      const response = await api.get('/problems/public');
+      const response = await api.get('/problems');
       set({ problems: response.data, isLoading: false });
     } catch (error) {
       console.error("Failed to fetch problems", error);
+      set({ isLoading: false });
+    }
+  },
+
+  fetchPublicProblems: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get('/problems/public');
+      set({ problems: response.data, isLoading: false });
+    } catch (error) {
+      console.error("Failed to fetch public problems", error);
       set({ isLoading: false });
     }
   },
@@ -28,6 +39,7 @@ export const useProblemStore = create((set, get) => ({
         payload.append('category', data.category);
         payload.append('urgency', data.urgency);
         payload.append('location', JSON.stringify(data.location));
+        if (data.aiMetadata) payload.append('aiMetadata', JSON.stringify(data.aiMetadata));
         if (data.audio) payload.append('audio', data.audio, data.audio.name || 'voice-note.webm');
         
         data.images.forEach((image, index) => {
@@ -37,8 +49,9 @@ export const useProblemStore = create((set, get) => ({
       }
 
       const response = await api.post('/problems', payload);
-      set({ problems: [response.data, ...get().problems], isLoading: false });
-      return response.data;
+      const newProblem = response.data.problem || response.data;
+      set({ problems: [newProblem, ...get().problems], isLoading: false });
+      return newProblem;
     } catch (error) {
       console.error("Failed to submit problem", error);
       set({ isLoading: false });

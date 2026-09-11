@@ -31,6 +31,8 @@ import ModerationReview from "./pages/government/ModerationReview";
 import InstitutionManagement from "./pages/government/InstitutionManagement";
 import AuditLog from "./pages/government/AuditLog";
 
+import ChatbotWidget from "./components/chat/ChatbotWidget";
+
 // Temporary placeholder wrapper for project pages during Phase 1 setup[cite: 1]
 const PageStub = ({ title, category }) => (
   <div className="min-h-screen bg-[#0F1B1E] text-[#F2EFE9] p-8">
@@ -51,6 +53,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <Toast />
+      <ChatbotWidget />
       <Routes>
         {/* Design System Preview Route (Section 0.2)[cite: 1] */}
         <Route path="/dev/components" element={<ComponentLibrary />} />

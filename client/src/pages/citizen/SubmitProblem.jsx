@@ -46,6 +46,8 @@ export default function SubmitProblem() {
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [audioFile, setAudioFile] = useState(null);
   const [isResolvingLocation, setIsResolvingLocation] = useState(false);
+  const [isClassifying, setIsClassifying] = useState(false);
+  const [aiClassification, setAiClassification] = useState(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
 
@@ -73,20 +75,46 @@ export default function SubmitProblem() {
     lng: 85.3096,
   });
 
-  // Simulated AI Engine Auto-Classification (Section 3.6)
-  const handleNextToAI = () => {
+  // Dynamic AI Engine Auto-Classification
+  const handleNextToAI = async () => {
     if (!formData.imageUploaded || formData.images.length === 0) {
       showToast("Uploading valid proof is required before continuing.", "error");
       return;
     }
 
-    // Basic heuristic to demonstrate dynamic AI suggestions
-    if (formData.description.toLowerCase().includes('water') || formData.description.toLowerCase().includes('pump')) {
-      setFormData(prev => ({ ...prev, category: 'Renewable Energy & Water', urgency: 'urgent' }));
-    } else if (formData.description.toLowerCase().includes('road') || formData.description.toLowerCase().includes('bridge')) {
-      setFormData(prev => ({ ...prev, category: 'Civil Infrastructure', urgency: 'high' }));
+    setIsClassifying(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch("http://localhost:5001/api/problems/classify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: formData.title,
+          description: formData.description
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setAiClassification(data);
+        setFormData(prev => ({ 
+          ...prev, 
+          category: data.category, 
+          urgency: data.severity?.toLowerCase() || 'medium' 
+        }));
+      } else {
+        showToast("AI Classification failed. Using defaults.", "warning");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("AI Engine unreachable. Proceeding with manual input.", "warning");
+    } finally {
+      setIsClassifying(false);
+      setStep(4);
     }
-    setStep(4);
   };
 
   const toggleVoiceRecording = async () => {
@@ -296,6 +324,7 @@ export default function SubmitProblem() {
       location: { district: formData.district, block: formData.block, lat: formData.lat, lng: formData.lng },
       images: formData.images,
       audio: audioFile,
+      aiMetadata: aiClassification
     };
     
     const created = await addProblem(payload);
@@ -562,9 +591,11 @@ export default function SubmitProblem() {
               onClick={handleNextToAI}
             >
               {formData.imageUploaded && formData.images.length > 0 ? (
-                <>Submit <ArrowRight size={16} /></>
+                <>
+                  {isClassifying ? 'Analyzing...' : 'Run AI Engine Check'} <Sparkles size={16} className={isClassifying ? 'animate-pulse' : ''} />
+                </>
               ) : (
-                <>Run AI Engine Check <Sparkles size={16} /></>
+                <>Submit <ArrowRight size={16} /></>
               )}
             </Button>
           </div>
@@ -596,19 +627,23 @@ export default function SubmitProblem() {
           <div className="p-4 bg-[#0F1B1E] rounded-lg border border-[#1D3238] space-y-3 text-xs">
             <div className="flex justify-between">
               <span className="text-[#9BA8A6]">Detected Category:</span>
-              <span className="font-bold text-[#E8A33D]">{formData.category}</span>
+              <span className="font-bold text-[#E8A33D]">{aiClassification?.category || formData.category}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#9BA8A6]">Calculated Urgency:</span>
-              <span className="font-bold text-[#2F9E8F] uppercase">{formData.urgency}</span>
+              <span className="font-bold text-[#2F9E8F] uppercase">{aiClassification?.severity || formData.urgency}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[#9BA8A6]">Suggested Match HEIs:</span>
-              <span className="font-bold text-[#F2EFE9]">BIT Sindri, Ranchi University</span>
+              <span className="text-[#9BA8A6]">Recommended Department:</span>
+              <span className="font-bold text-[#F2EFE9]">{aiClassification?.department || 'Public Works Department'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-[#9BA8A6]">AI Confidence Score:</span>
+              <span className="font-bold text-[#E8A33D]">{aiClassification?.confidence ? `${Math.round(aiClassification.confidence * 100)}%` : 'N/A'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-[#9BA8A6]">Municipal SLA target:</span>
-              <span className="font-bold text-[#E8A33D]">{formData.urgency === 'urgent' ? '168' : '336'} hours</span>
+              <span className="font-bold text-[#E8A33D]">{formData.urgency === 'critical' ? '24' : formData.urgency === 'urgent' || formData.urgency === 'high' ? '72' : '168'} hours</span>
             </div>
             {audioFile && <div className="flex items-center gap-2 text-[#2F9E8F] border-t border-[#1D3238] pt-3"><Radio size={14} /> Voice note queued for Whisper transcription</div>}
           </div>

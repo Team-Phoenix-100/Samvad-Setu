@@ -514,3 +514,14 @@ The following components and layouts were recently added via an Agentic Workflow
 - **Socket.io Real-time Alerts**: The client now listens to `moderation:new_item` and `institution:new_signup` via `socket.io-client` inside `GovernmentLayout.jsx` for live notifications.
 - **Zustand Stores**: Added `govAnalyticsStore`, `govModerationStore`, and `govInstitutionStore` to handle state for the admin layer.
 - **New Admin Pages**: Fully integrated `AnalyticsOverview`, `ModerationQueue`, `ModerationReview`, `InstitutionManagement`, and `AuditLog` inside `App.jsx` under the `/government` path.
+
+## AI Grid & Problem UI Enhancements
+### State Management (`problemStore.js`)
+- Re-routed `fetchProblems` to hit the new protected `GET /api/problems` endpoint for secure RBAC.
+- Created `fetchPublicProblems` to fetch open data for the public map without authentication.
+- Automatically appends the live `aiMetadata` prediction from the preview state into the `FormData` on submission.
+
+### UI Enhancements (`ProblemDetail.jsx`)
+- **Reporter Details**: A new top-level UI component maps `problem.reportedBy.name` and the formatted timestamp, providing exact traceability for who created the issue and when.
+- **AI Classification Grid**: Replaced raw string output with a modern, glassmorphic 3x2 Grid UI that dynamically visualizes the NLP predictions (Confidence Score, Priority Index, Severity, Human Review requirement, and Category).
+- **Custom Delete Modal**: Replaced the native `window.confirm` popup with an animated Framer Motion Tailwind modal providing explicit destructive warnings before soft/hard deleting the problem.

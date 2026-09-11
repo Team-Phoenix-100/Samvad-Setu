@@ -183,3 +183,19 @@ Content-Type: application/json
 - **New Schemas**: Added `Institution.js` (for tracking HEI/Industry verification) and `AuditLog.js` (to record admin actions).
 - **Admin Controller & Routes**: Implemented a comprehensive admin API layer at `/api/admin` handling analytics, moderation queues, institution verification, and audit logs.
 - **Seed Script**: Added `scripts/seedGovAdmin.js` to automatically populate the database with a test admin, flagged problems, and pending institutions.
+
+## AI Engine Integration & RBAC
+### Problem Model (`server/src/models/Problem.js`)
+The `Problem` schema has been extended to securely store the comprehensive output from the NLP AI Chatbot. 
+The `aiMetadata` field now includes:
+- `priority` (Number): An index between 0-100 indicating the urgency of the problem.
+- `needsHumanReview` (Boolean): Flag indicating if the AI was unsure and requires an admin to manually review.
+- `category` (String): The classified municipal department or domain.
+- `confidence` (Number): AI's confidence level for the prediction.
+- `severity` (String): High/Medium/Low representation.
+
+### Access Control Routing (`server/src/routes/problemRoutes.js`)
+- **`GET /api/problems/`**: New protected route implementing Role-Based Access Control (RBAC). 
+  - If the authenticated user is a `citizen`, the backend strictly returns only grievances reported by their `_id`. 
+  - If the user is an `admin` or other privileged role, all problems are returned.
+- **`GET /api/problems/public`**: Remains open for unauthenticated fetching required by the `PublicMap`.
