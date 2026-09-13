@@ -2,27 +2,28 @@ import { Tabs } from 'expo-router';
 import React from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LayoutDashboard, Settings as SettingsIcon, UserCircle } from 'lucide-react-native';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function CitizenTabLayout() {
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#E8A33D', 
-        tabBarInactiveTintColor: '#5c6d6a', // Slightly darker inactive
+        tabBarActiveTintColor: theme.citizenPrimary, 
+        tabBarInactiveTintColor: theme.subtext,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#0F1B1E', // Very dark background
-          borderTopColor: '#1D3238',
+          backgroundColor: theme.tabBarBg,
+          borderTopColor: theme.tabBarBorder,
           borderTopWidth: 1,
           height: 65 + insets.bottom,
           paddingBottom: Math.max(insets.bottom, 10),
           paddingTop: 10,
-          // Premium shadow
           shadowColor: '#000',
           shadowOffset: { width: 0, height: -4 },
-          shadowOpacity: 0.3,
+          shadowOpacity: 0.15,
           shadowRadius: 10,
           elevation: 10,
         },

@@ -243,7 +243,12 @@ export const MOCK_AUDIT_LOGS = [
 export const getAnalyticsSummary = async () => {
   try {
     const res = await api.get('/admin/analytics/summary');
-    return res.data;
+    return {
+      ...MOCK_SUMMARY,
+      ...res.data,
+      resolutionTrend: res.data?.resolutionTrend || MOCK_SUMMARY.resolutionTrend,
+      leaderboard: res.data?.leaderboard || MOCK_SUMMARY.leaderboard,
+    };
   } catch (error) {
     return MOCK_SUMMARY;
   }

@@ -19,10 +19,13 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
 import { useGovStore } from '../../store/govStore';
+import { useTheme, ThemeSelector } from '../../context/ThemeContext';
+import { Palette } from 'lucide-react-native';
 
 export default function GovernmentProfileScreen() {
   const router = useRouter();
   const { summary } = useGovStore();
+  const { theme, isDarkMode } = useTheme();
   const [officialEmail, setOfficialEmail] = useState('dhte.admin@jharkhand.gov.in');
   const [officialPhone, setOfficialPhone] = useState('+91 651 2490520');
   const [officialName, setOfficialName] = useState('Dr. Rajeshwar Soren, IAS');
@@ -62,109 +65,130 @@ export default function GovernmentProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: '#0F1B1E' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.taglineBadge}>
-            <View style={styles.statusDot} />
-            <Text style={styles.taglineText}>OFFICIAL DHTE DIRECTORY</Text>
+            <View style={[styles.statusDot, { backgroundColor: theme.authorityPrimary }]} />
+            <Text style={[styles.taglineText, { color: theme.authorityPrimary }]}>OFFICIAL DHTE DIRECTORY</Text>
           </View>
-          <Text style={styles.title}>DHTE State Office</Text>
-          <Text style={styles.subtitle}>
+          <Text style={[styles.title, { color: theme.text }]}>DHTE State Office</Text>
+          <Text style={[styles.subtitle, { color: theme.subtext }]}>
             Dept. of Higher & Technical Education • Govt. of Jharkhand
           </Text>
         </View>
 
         {/* Official Identity Card */}
-        <View style={styles.identityCard}>
-          <View style={styles.avatarBox}>
-            <ShieldCheck size={38} color="#2F9E8F" />
+        <View style={[styles.identityCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <View style={[styles.avatarBox, { backgroundColor: isDarkMode ? 'rgba(47, 158, 143, 0.15)' : 'rgba(5, 150, 105, 0.12)', borderColor: theme.authorityPrimary }]}>
+            <ShieldCheck size={38} color={theme.authorityPrimary} />
           </View>
-          <Text style={styles.officialName}>{officialName}</Text>
-          <View style={styles.roleBadge}>
-            <Text style={styles.roleBadgeText}>DIRECTOR GENERAL • STATE CONSOLE</Text>
+          <Text style={[styles.officialName, { color: theme.text }]}>{officialName}</Text>
+          <View style={[styles.roleBadge, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Text style={[styles.roleBadgeText, { color: theme.authorityPrimary }]}>DIRECTOR GENERAL • STATE CONSOLE</Text>
           </View>
 
-          <View style={styles.contactDetails}>
+          <View style={[styles.contactDetails, { borderTopColor: theme.borderSubtle }]}>
             <View style={styles.contactRow}>
-              <Mail size={15} color="#9BA8A6" />
-              <Text style={styles.contactText}>{officialEmail}</Text>
+              <Mail size={15} color={theme.subtext} />
+              <Text style={[styles.contactText, { color: theme.textSecondary }]}>{officialEmail}</Text>
             </View>
             <View style={styles.contactRow}>
-              <Phone size={15} color="#9BA8A6" />
-              <Text style={styles.contactText}>{officialPhone}</Text>
+              <Phone size={15} color={theme.subtext} />
+              <Text style={[styles.contactText, { color: theme.textSecondary }]}>{officialPhone}</Text>
             </View>
             <View style={styles.contactRow}>
-              <Building2 size={15} color="#9BA8A6" />
-              <Text style={styles.contactText}>DHTE Headquarters, Project Building, Dhurwa, Ranchi</Text>
+              <Building2 size={15} color={theme.subtext} />
+              <Text style={[styles.contactText, { color: theme.textSecondary }]}>DHTE Headquarters, Project Building, Dhurwa, Ranchi</Text>
             </View>
           </View>
         </View>
 
+        {/* Theme Mode Selector */}
+        <View style={{
+          backgroundColor: theme.card,
+          borderRadius: 18,
+          borderWidth: 1,
+          borderColor: theme.border,
+          padding: 18,
+          marginBottom: 24,
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <Palette size={18} color={theme.authorityPrimary} />
+            <Text style={{ fontSize: 14, fontWeight: '800', color: theme.text }}>
+              Display Theme Mode
+            </Text>
+          </View>
+          <Text style={{ fontSize: 12, color: theme.subtext, marginBottom: 14 }}>
+            Toggle between Light Mode, Dark Mode, or match your device system appearance.
+          </Text>
+          <ThemeSelector />
+        </View>
+
         {/* Quick Links */}
-        <Text style={styles.sectionHeader}>ADMINISTRATIVE CONTROLS</Text>
+        <Text style={[styles.sectionHeader, { color: theme.subtext }]}>ADMINISTRATIVE CONTROLS</Text>
 
         <TouchableOpacity
-          style={styles.menuItem}
+          style={[styles.menuItem, { backgroundColor: theme.card, borderColor: theme.border }]}
           onPress={() => router.push('/(government)/audit-log' as any)}>
-          <View style={styles.menuIconBox}>
-            <FileText size={18} color="#2F9E8F" />
+          <View style={[styles.menuIconBox, { backgroundColor: theme.surface }]}>
+            <FileText size={18} color={theme.authorityPrimary} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.menuTitle}>Immutable Audit Trail</Text>
-            <Text style={styles.menuSub}>View cryptographic ledger of all moderation actions</Text>
+            <Text style={[styles.menuTitle, { color: theme.text }]}>Immutable Audit Trail</Text>
+            <Text style={[styles.menuSub, { color: theme.subtext }]}>View cryptographic ledger of all moderation actions</Text>
           </View>
-          <ChevronRight size={18} color="#9BA8A6" />
+          <ChevronRight size={18} color={theme.subtext} />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.menuItem}
+          style={[styles.menuItem, { backgroundColor: theme.card, borderColor: theme.border }]}
           onPress={() => router.push('/(government)/institutions' as any)}>
-          <View style={styles.menuIconBox}>
-            <Building2 size={18} color="#E8A33D" />
+          <View style={[styles.menuIconBox, { backgroundColor: theme.surface }]}>
+            <Building2 size={18} color={theme.citizenPrimary} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.menuTitle}>Accreditation Registry</Text>
-            <Text style={styles.menuSub}>Verify AISHE university & corporate CSR registrations</Text>
+            <Text style={[styles.menuTitle, { color: theme.text }]}>Accreditation Registry</Text>
+            <Text style={[styles.menuSub, { color: theme.subtext }]}>Verify AISHE university & corporate CSR registrations</Text>
           </View>
-          <ChevronRight size={18} color="#9BA8A6" />
+          <ChevronRight size={18} color={theme.subtext} />
         </TouchableOpacity>
 
         {/* System Health */}
-        <Text style={styles.sectionHeader}>SYSTEM & NODE STATUS</Text>
-        <View style={styles.systemHealthCard}>
-          <View style={styles.healthRow}>
+        <Text style={[styles.sectionHeader, { color: theme.subtext }]}>SYSTEM & NODE STATUS</Text>
+        <View style={[styles.systemHealthCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <View style={[styles.healthRow, { borderBottomColor: theme.borderSubtle }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Server size={16} color="#2F9E8F" />
-              <Text style={styles.healthLabel}>DHTE AI Engine Service</Text>
+              <Server size={16} color={theme.authorityPrimary} />
+              <Text style={[styles.healthLabel, { color: theme.textSecondary }]}>DHTE AI Engine Service</Text>
             </View>
-            <View style={styles.healthStatusPill}>
-              <Text style={styles.healthStatusText}>OPERATIONAL</Text>
+            <View style={[styles.healthStatusPill, { backgroundColor: isDarkMode ? 'rgba(47, 158, 143, 0.15)' : 'rgba(5, 150, 105, 0.12)' }]}>
+              <Text style={[styles.healthStatusText, { color: theme.authorityPrimary }]}>OPERATIONAL</Text>
             </View>
           </View>
 
-          <View style={styles.healthRow}>
+          <View style={[styles.healthRow, { borderBottomColor: theme.borderSubtle }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Sparkles size={16} color="#2F9E8F" />
-              <Text style={styles.healthLabel}>Human-in-the-Loop Threshold</Text>
+              <Sparkles size={16} color={theme.authorityPrimary} />
+              <Text style={[styles.healthLabel, { color: theme.textSecondary }]}>Human-in-the-Loop Threshold</Text>
             </View>
-            <Text style={styles.healthValue}>75% Confidence Cutoff</Text>
+            <Text style={[styles.healthValue, { color: theme.citizenPrimary }]}>75% Confidence Cutoff</Text>
           </View>
 
           <View style={[styles.healthRow, { borderBottomWidth: 0 }]}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Building2 size={16} color="#4E7AFF" />
-              <Text style={styles.healthLabel}>AISHE / CIN Validator</Text>
+              <Building2 size={16} color={theme.accent} />
+              <Text style={[styles.healthLabel, { color: theme.textSecondary }]}>AISHE / CIN Validator</Text>
             </View>
-            <Text style={styles.healthValue}>Connected (NIC Gateway)</Text>
+            <Text style={[styles.healthValue, { color: theme.text }]}>Connected (NIC Gateway)</Text>
           </View>
         </View>
 
         {/* Secure Logout Button */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <LogOut size={18} color="#F87171" style={{ marginRight: 8 }} />
-          <Text style={styles.logoutBtnText}>Secure Sign Out</Text>
+        <TouchableOpacity style={[styles.logoutBtn, { backgroundColor: theme.errorBg, borderColor: isDarkMode ? 'rgba(248, 113, 113, 0.3)' : 'rgba(220, 38, 38, 0.25)' }]} onPress={handleLogout}>
+          <LogOut size={18} color={theme.error} style={{ marginRight: 8 }} />
+          <Text style={[styles.logoutBtnText, { color: theme.error }]}>Secure Sign Out</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

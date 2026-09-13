@@ -167,12 +167,44 @@ router.post("/", protect, authorize("citizen"), upload.array("images", 3), async
   }
 });
 
+// Role-Restricted Route: Only 'citizen' can update their own problem
+router.put("/:id", protect, authorize("citizen"), async (req, res) => {
+  try {
+    const problem = await Problem.findOne({ _id: req.params.id, reportedBy: req.user._id });
+    if (!problem) {
+      return res.status(404).json({ message: "Problem not found or unauthorized to edit. You can only edit your own reports." });
+    }
+
+    // Citizens can only edit their own inputs: title, description, location, images
+    const { title, description, location, images } = req.body;
+    if (title !== undefined) problem.title = title;
+    if (description !== undefined) problem.description = description;
+    if (images !== undefined) problem.images = images;
+    if (location !== undefined) {
+      problem.location = typeof location === "string" ? JSON.parse(location) : location;
+    }
+
+    if (problem.timeline) {
+      problem.timeline.push({
+        stage: "Edited by Citizen",
+        timestamp: "Just now",
+        actor: "Citizen"
+      });
+    }
+
+    const updatedProblem = await problem.save();
+    res.json(updatedProblem);
+  } catch (error) {
+    res.status(500).json({ message: "Server Error", error: error.message });
+  }
+});
+
 // Role-Restricted Route: Only 'citizen' can delete their own problem
 router.delete("/:id", protect, authorize("citizen"), async (req, res) => {
   try {
     const problem = await Problem.findOne({ _id: req.params.id, reportedBy: req.user._id });
     if (!problem) {
-      return res.status(404).json({ message: "Problem not found or unauthorized to delete" });
+      return res.status(404).json({ message: "Problem not found or unauthorized to delete. You can only delete your own reports." });
     }
 
     if (problem.images && problem.images.length > 0) {

@@ -1,253 +1,437 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Alert, RefreshControl, TextInput, Modal } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { 
-  GraduationCap, 
-  Sparkles, 
-  MapPin, 
-  Users, 
-  CheckCircle2, 
-  Clock, 
-  ArrowRight, 
-  LogOut,
-  Layers,
-  Building2
+  GraduationCap, Sparkles, MapPin, Users, CheckCircle2, 
+  Clock, ArrowRight, ArrowUpRight, Plus, Trash2, Send, X, Layers, Compass 
 } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from 'expo-router';
+import { useProblemStore } from '../../store/problemStore';
+import { useAuthStore } from '../../store/authStore';
+import { useTheme } from '../../context/ThemeContext';
+import { useToastStore } from '../../store/toastStore';
 
 export default function HEIHomeScreen() {
   const router = useRouter();
-  const [challenges, setChallenges] = useState<any[]>([]);
+  const { problems, fetchProblems, isLoading } = useProblemStore() as any;
+  const { user } = useAuthStore() as any;
+  const { theme, isDarkMode } = useTheme();
+  const { showToast } = useToastStore();
+
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedTab, setSelectedTab] = useState<'open' | 'claimed'>('open');
+  const [showSubmission, setShowSubmission] = useState(false);
+  const [materials, setMaterials] = useState<string[]>(['Solar pump controller', 'Weatherproof enclosure']);
+  const [form, setForm] = useState({ trl: '3', funding: '45000', abstract: '' });
 
-  useFocusEffect(
-    React.useCallback(() => {
-      loadChallenges();
-    }, [])
-  );
-
-  const loadChallenges = async () => {
-    try {
-      const stored = await AsyncStorage.getItem('@citizen_tickets');
-      if (stored) {
-        setChallenges(JSON.parse(stored));
-      }
-    } catch (error) {
-      console.error('Failed to load challenges in HEI portal', error);
-    }
-  };
+  useEffect(() => {
+    fetchProblems();
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadChallenges();
+    await fetchProblems();
     setRefreshing(false);
   };
 
-  const handleClaimChallenge = (challengeId: string) => {
-    Alert.alert(
-      'Claim Societal Challenge',
-      'Allocate this problem statement to your university innovation cell and assign a multidisciplinary student/faculty project team?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Form Team & Claim',
-          onPress: async () => {
-            const updated = challenges.map((item) => {
-              if (item.id === challengeId) {
-                return {
-                  ...item,
-                  stage: 'Claimed by University',
-                  status: 'Team Formed',
-                  claimedBy: 'Birsa Agricultural University - Innovation Cell',
-                  assignedLead: 'Faculty Mentor: Dr. A. K. Verma'
-                };
-              }
-              return item;
-            });
-            setChallenges(updated);
-            await AsyncStorage.setItem('@citizen_tickets', JSON.stringify(updated));
-            Alert.alert('Challenge Claimed', 'Problem assigned to your institution repository.');
-          }
-        }
-      ]
-    );
+  const handleAddMaterial = () => {
+    setMaterials([...materials, '']);
   };
 
-  const openChallenges = challenges.filter(c => c.stage !== 'Claimed by University' && c.stage !== 'Deployed Solution');
-  const claimedChallenges = challenges.filter(c => c.stage === 'Claimed by University' || c.stage === 'Deployed Solution');
+  const handleUpdateMaterial = (text: string, index: number) => {
+    const updated = [...materials];
+    updated[index] = text;
+    setMaterials(updated);
+  };
 
-  const displayedList = selectedTab === 'open' ? openChallenges : claimedChallenges;
+  const handleRemoveMaterial = (index: number) => {
+    setMaterials(materials.filter((_, idx) => idx !== index));
+  };
+
+  const handleSubmitPrototype = () => {
+    if (!form.abstract.trim() || !form.funding) {
+      Alert.alert('Required Fields', 'Please complete the technical abstract and funding estimate.');
+      return;
+    }
+    showToast('Working prototype brief submitted to showcase queue!', 'success');
+    setShowSubmission(false);
+    setForm({ trl: '3', funding: '', abstract: '' });
+  };
+
+  const activeClaims = [
+    {
+      id: 'SICP-2026-8901',
+      title: 'Solar Water Pump Malfunction in Secondary School',
+      district: 'Khunti',
+      team: 'Team Alpha (CSE)',
+      status: 'in-progress',
+      progress: '60%',
+    },
+    {
+      id: 'SICP-2026-4412',
+      title: 'Rural Micro-Grid Telemetry & Load Balancer',
+      district: 'Ranchi',
+      team: 'Team Vidyut (EE)',
+      status: 'in-progress',
+      progress: '85%',
+    },
+  ];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#0F1B1E', padding: 16 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <ScrollView 
-        contentContainerStyle={{ paddingBottom: 40 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#2F9E8F" />}
+        contentContainerStyle={{ padding: 18, paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh} 
+            tintColor={theme.authorityPrimary} 
+            colors={[theme.authorityPrimary]} 
+          />
+        }
       >
-        {/* Top Header */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <View>
-            <Text style={{ fontSize: 10, color: '#9BA8A6', letterSpacing: 1.2, fontWeight: '700' }}>
-              NEP-2020 EXPERIENTIAL RESEARCH PORTAL
-            </Text>
-            <Text style={{ fontSize: 24, fontWeight: '800', color: '#F2EFE9', marginTop: 2 }}>
-              University Hub
+        {/* Header */}
+        <View style={{ marginBottom: 20 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <Sparkles size={14} color={theme.authorityPrimary} />
+            <Text style={{ fontSize: 11, color: theme.authorityPrimary, fontWeight: '800', letterSpacing: 1 }}>
+              {user?.institutionName || 'BIT Sindri • Innovation & R&D Cell'}
             </Text>
           </View>
-          <TouchableOpacity 
-            onPress={() => router.replace('/(auth)/login' as any)}
-            style={{ backgroundColor: '#16262A', padding: 10, borderRadius: 12, borderWidth: 1, borderColor: '#1D3238' }}
-          >
-            <LogOut size={18} color="#EF4444" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Institution Info Card */}
-        <View style={{ backgroundColor: '#16262A', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#1D3238', marginBottom: 18 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-            <Building2 size={16} color="#2F9E8F" style={{ marginRight: 8 }} />
-            <Text style={{ color: '#F2EFE9', fontSize: 15, fontWeight: '700' }}>Birsa Agricultural University</Text>
-          </View>
-          <Text style={{ color: '#9BA8A6', fontSize: 12 }}>
-            Dept: AgriTech, Bioengineering & Rural Innovation Hub
+          <Text style={{ fontSize: 26, fontWeight: '900', color: theme.text, letterSpacing: -0.5 }}>
+            HEI Portal & Workspace
+          </Text>
+          <Text style={{ fontSize: 13, color: theme.subtext, marginTop: 4 }}>
+            Direct students to civic Capstone projects and deploy validated prototypes.
           </Text>
         </View>
 
-        {/* Segmented Filter Tabs */}
-        <View style={{ flexDirection: 'row', backgroundColor: '#16262A', borderRadius: 12, padding: 4, marginBottom: 18, borderWidth: 1, borderColor: '#1D3238' }}>
+        {/* Quick Action Buttons */}
+        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 22 }}>
           <TouchableOpacity
-            onPress={() => setSelectedTab('open')}
+            onPress={() => router.push('/(hei)/browse')}
             style={{
               flex: 1,
-              paddingVertical: 10,
+              flexDirection: 'row',
               alignItems: 'center',
-              borderRadius: 10,
-              backgroundColor: selectedTab === 'open' ? '#2F9E8F' : 'transparent',
+              justifyContent: 'center',
+              gap: 8,
+              paddingVertical: 12,
+              borderRadius: 14,
+              backgroundColor: theme.authorityPrimary,
+              shadowColor: theme.authorityPrimary,
+              shadowOffset: { width: 0, height: 3 },
+              shadowOpacity: 0.25,
+              shadowRadius: 6,
+              elevation: 4,
             }}
           >
-            <Text style={{ color: selectedTab === 'open' ? '#0F1B1E' : '#9BA8A6', fontWeight: '700', fontSize: 13 }}>
-              Open Challenges ({openChallenges.length})
-            </Text>
+            <Compass size={16} color="#FFFFFF" />
+            <Text style={{ color: '#FFFFFF', fontWeight: '800', fontSize: 13 }}>Browse Queue</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            onPress={() => setSelectedTab('claimed')}
+            onPress={() => setShowSubmission(true)}
             style={{
               flex: 1,
-              paddingVertical: 10,
+              flexDirection: 'row',
               alignItems: 'center',
-              borderRadius: 10,
-              backgroundColor: selectedTab === 'claimed' ? '#2F9E8F' : 'transparent',
+              justifyContent: 'center',
+              gap: 8,
+              paddingVertical: 12,
+              borderRadius: 14,
+              backgroundColor: theme.surface,
+              borderWidth: 1,
+              borderColor: theme.border,
             }}
           >
-            <Text style={{ color: selectedTab === 'claimed' ? '#0F1B1E' : '#9BA8A6', fontWeight: '700', fontSize: 13 }}>
-              Claimed Projects ({claimedChallenges.length})
-            </Text>
+            <Plus size={16} color={theme.text} />
+            <Text style={{ color: theme.text, fontWeight: '800', fontSize: 13 }}>Submit Prototype</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Challenge Cards Feed */}
-        {displayedList.length === 0 ? (
-          <View style={{ backgroundColor: '#16262A', padding: 32, borderRadius: 16, alignItems: 'center', borderWidth: 1, borderColor: '#1D3238' }}>
-            <GraduationCap size={32} color="#2F9E8F" style={{ marginBottom: 12 }} />
-            <Text style={{ color: '#F2EFE9', fontSize: 15, fontWeight: '700', marginBottom: 4 }}>
-              {selectedTab === 'open' ? 'No pending allocations' : 'No active university projects'}
-            </Text>
-            <Text style={{ color: '#9BA8A6', fontSize: 13, textAlign: 'center' }}>
-              {selectedTab === 'open' 
-                ? 'All domain-relevant societal problems have been claimed by innovation cells.' 
-                : 'Claim an open challenge to form a student research group.'}
-            </Text>
+        {/* Metrics Row */}
+        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
+          <View style={{ flex: 1, backgroundColor: theme.card, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: theme.border }}>
+            <Text style={{ color: theme.subtext, fontSize: 10, fontWeight: '800', letterSpacing: 0.5 }}>CLAIMED</Text>
+            <Text style={{ color: theme.citizenPrimary, fontSize: 24, fontWeight: '900', marginTop: 4 }}>04</Text>
+            <Text style={{ color: theme.subtext, fontSize: 10, marginTop: 2 }}>Problems</Text>
           </View>
-        ) : (
-          displayedList.map((item, index) => {
-            const isClaimed = item.stage === 'Claimed by University' || item.stage === 'Deployed Solution';
+          <View style={{ flex: 1, backgroundColor: theme.card, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: theme.border }}>
+            <Text style={{ color: theme.subtext, fontSize: 10, fontWeight: '800', letterSpacing: 0.5 }}>TEAMS</Text>
+            <Text style={{ color: theme.authorityPrimary, fontSize: 24, fontWeight: '900', marginTop: 4 }}>06</Text>
+            <Text style={{ color: theme.subtext, fontSize: 10, marginTop: 2 }}>Assigned</Text>
+          </View>
+          <View style={{ flex: 1, backgroundColor: theme.card, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: theme.border }}>
+            <Text style={{ color: theme.subtext, fontSize: 10, fontWeight: '800', letterSpacing: 0.5 }}>DEPLOYED</Text>
+            <Text style={{ color: theme.text, fontSize: 24, fontWeight: '900', marginTop: 4 }}>02</Text>
+            <Text style={{ color: theme.subtext, fontSize: 10, marginTop: 2 }}>Solutions</Text>
+          </View>
+        </View>
 
-            return (
+        {/* Active Projects Table */}
+        <View style={{
+          backgroundColor: theme.card,
+          borderRadius: 20,
+          borderWidth: 1,
+          borderColor: theme.border,
+          padding: 18,
+          marginBottom: 20,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: isDarkMode ? 0.2 : 0.05,
+          shadowRadius: 6,
+          elevation: 2,
+        }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <Text style={{ fontSize: 16, fontWeight: '800', color: theme.text }}>
+              Active Institutional Projects
+            </Text>
+            <TouchableOpacity onPress={() => router.push('/(hei)/tracking')}>
+              <Text style={{ fontSize: 12, color: theme.authorityPrimary, fontWeight: '700' }}>View All →</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={{ gap: 14 }}>
+            {activeClaims.map((item) => (
               <View 
-                key={index}
-                style={{ backgroundColor: '#16262A', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#1D3238', marginBottom: 14 }}
+                key={item.id}
+                style={{
+                  backgroundColor: theme.surface,
+                  borderRadius: 14,
+                  padding: 14,
+                  borderWidth: 1,
+                  borderColor: theme.borderSubtle,
+                }}
               >
-                {/* Domain & Department Header */}
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                  <View style={{ flex: 1, marginRight: 8 }}>
-                    <Text style={{ color: '#E8A33D', fontSize: 11, fontWeight: '700', textTransform: 'uppercase' }}>
-                      {item.domain || 'Multidisciplinary'}
-                    </Text>
-                    <Text style={{ color: '#F2EFE9', fontWeight: '700', fontSize: 16, marginTop: 2 }}>
-                      {item.title || item.description}
-                    </Text>
-                  </View>
-
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <Text style={{ color: theme.subtext, fontSize: 10, fontFamily: 'monospace' }}>
+                    {item.id}
+                  </Text>
                   <View style={{
-                    backgroundColor: isClaimed ? 'rgba(47, 158, 143, 0.15)' : 'rgba(232, 163, 61, 0.15)',
+                    backgroundColor: isDarkMode ? 'rgba(47, 158, 143, 0.15)' : 'rgba(5, 150, 105, 0.12)',
                     paddingHorizontal: 8,
-                    paddingVertical: 4,
-                    borderRadius: 8,
-                    borderWidth: 1,
-                    borderColor: isClaimed ? '#2F9E8F' : '#E8A33D'
+                    paddingVertical: 2,
+                    borderRadius: 6,
                   }}>
-                    <Text style={{ color: isClaimed ? '#2F9E8F' : '#E8A33D', fontSize: 10, fontWeight: '800' }}>
-                      {isClaimed ? 'Active Team' : 'Unassigned'}
+                    <Text style={{ color: theme.authorityPrimary, fontSize: 10, fontWeight: '800' }}>
+                      IN PROGRESS
                     </Text>
                   </View>
                 </View>
 
-                {/* Problem Description */}
-                <Text style={{ color: '#9BA8A6', fontSize: 13, marginBottom: 12, lineHeight: 18 }}>
-                  {item.description}
+                <Text style={{ color: theme.text, fontSize: 15, fontWeight: '800', marginBottom: 6 }}>
+                  {item.title}
                 </Text>
 
-                {/* Allocation Match Banner */}
-                <View style={{ backgroundColor: '#0F1B1E', borderRadius: 10, padding: 10, marginBottom: 12, borderWidth: 1, borderColor: '#1D3238' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                    <Sparkles size={12} color="#2F9E8F" style={{ marginRight: 6 }} />
-                    <Text style={{ color: '#F2EFE9', fontSize: 11, fontWeight: '600' }}>
-                      Mapped Dept: <Text style={{ color: '#9BA8A6' }}>{item.assignedDept || 'General Engineering'}</Text>
-                    </Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                  <Text style={{ color: theme.subtext, fontSize: 11 }}>
+                    District: {item.district} | <Text style={{ color: theme.authorityPrimary, fontWeight: '700' }}>{item.team}</Text>
+                  </Text>
+                </View>
+
+                {/* Progress bar */}
+                <View style={{ marginBottom: 12 }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <Text style={{ color: theme.subtext, fontSize: 10 }}>Milestone Progress</Text>
+                    <Text style={{ color: theme.citizenPrimary, fontSize: 11, fontWeight: '800' }}>{item.progress}</Text>
                   </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <MapPin size={12} color="#9BA8A6" style={{ marginRight: 6 }} />
-                    <Text style={{ color: '#9BA8A6', fontSize: 11 }}>{item.location || 'Jharkhand Region'}</Text>
+                  <View style={{ height: 6, width: '100%', backgroundColor: theme.card, borderRadius: 3, overflow: 'hidden' }}>
+                    <View style={{ height: '100%', width: item.progress as any, backgroundColor: theme.citizenPrimary }} />
                   </View>
                 </View>
 
-                {/* Action Footer */}
-                {isClaimed ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingTop: 8, borderTopWidth: 1, borderTopColor: '#1D3238' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <Users size={14} color="#2F9E8F" style={{ marginRight: 6 }} />
-                      <Text style={{ color: '#2F9E8F', fontSize: 12, fontWeight: '700' }}>R&D Team Assigned</Text>
-                    </View>
-                    <Text style={{ color: '#9BA8A6', fontSize: 11 }}>{item.id}</Text>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    onPress={() => handleClaimChallenge(item.id)}
-                    style={{
-                      backgroundColor: '#2F9E8F',
-                      borderRadius: 12,
-                      paddingVertical: 12,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: 4
-                    }}
-                  >
-                    <Users size={16} color="#0F1B1E" style={{ marginRight: 6 }} />
-                    <Text style={{ color: '#0F1B1E', fontWeight: '800', fontSize: 13 }}>
-                      Form Project Team & Claim
-                    </Text>
-                  </TouchableOpacity>
-                )}
+                <TouchableOpacity
+                  onPress={() => router.push('/(hei)/tracking')}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    gap: 4,
+                  }}
+                >
+                  <Text style={{ color: theme.authorityPrimary, fontSize: 12, fontWeight: '800' }}>Open Workspace</Text>
+                  <ArrowUpRight size={14} color={theme.authorityPrimary} />
+                </TouchableOpacity>
               </View>
-            );
-          })
-        )}
+            ))}
+          </View>
+        </View>
+
       </ScrollView>
+
+      {/* Capstone Intake Modal */}
+      <Modal visible={showSubmission} transparent animationType="slide">
+        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' }}>
+          <View style={{ 
+            backgroundColor: theme.card, 
+            borderTopLeftRadius: 24, 
+            borderTopRightRadius: 24, 
+            padding: 24, 
+            maxHeight: '90%',
+            borderWidth: 1,
+            borderColor: theme.border,
+          }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <View>
+                <Text style={{ color: theme.authorityPrimary, fontSize: 11, fontWeight: '800', letterSpacing: 1 }}>
+                  CAPSTONE INTAKE
+                </Text>
+                <Text style={{ color: theme.text, fontSize: 20, fontWeight: '800', marginTop: 2 }}>
+                  Submit Working Prototype
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setShowSubmission(false)} style={{ padding: 6 }}>
+                <X size={22} color={theme.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={{ marginBottom: 16 }}>
+              {/* TRL & Funding */}
+              <View style={{ flexDirection: 'row', gap: 12, marginBottom: 14 }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: theme.subtext, fontSize: 11, fontWeight: '700', marginBottom: 6 }}>
+                    TRL Level (1 - 7)
+                  </Text>
+                  <TextInput
+                    keyboardType="number-pad"
+                    value={form.trl}
+                    onChangeText={(val) => setForm({ ...form, trl: val })}
+                    style={{
+                      backgroundColor: theme.inputBg,
+                      borderWidth: 1,
+                      borderColor: theme.border,
+                      borderRadius: 12,
+                      padding: 12,
+                      color: theme.text,
+                      fontSize: 14,
+                    }}
+                  />
+                </View>
+
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: theme.subtext, fontSize: 11, fontWeight: '700', marginBottom: 6 }}>
+                    Funding Goal (₹ INR)
+                  </Text>
+                  <TextInput
+                    keyboardType="number-pad"
+                    value={form.funding}
+                    onChangeText={(val) => setForm({ ...form, funding: val })}
+                    style={{
+                      backgroundColor: theme.inputBg,
+                      borderWidth: 1,
+                      borderColor: theme.border,
+                      borderRadius: 12,
+                      padding: 12,
+                      color: theme.text,
+                      fontSize: 14,
+                    }}
+                  />
+                </View>
+              </View>
+
+              {/* Technical Abstract */}
+              <View style={{ marginBottom: 16 }}>
+                <Text style={{ color: theme.subtext, fontSize: 11, fontWeight: '700', marginBottom: 6 }}>
+                  Technical Abstract & Outcome
+                </Text>
+                <TextInput
+                  multiline
+                  numberOfLines={4}
+                  placeholder="State the prototype design, test methodology, and expected civic impact..."
+                  placeholderTextColor={theme.subtext}
+                  value={form.abstract}
+                  onChangeText={(val) => setForm({ ...form, abstract: val })}
+                  style={{
+                    backgroundColor: theme.inputBg,
+                    borderWidth: 1,
+                    borderColor: theme.border,
+                    borderRadius: 12,
+                    padding: 12,
+                    color: theme.text,
+                    fontSize: 14,
+                    minHeight: 90,
+                    textAlignVertical: 'top',
+                  }}
+                />
+              </View>
+
+              {/* Bill of Materials */}
+              <View style={{ marginBottom: 16 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <Text style={{ color: theme.subtext, fontSize: 11, fontWeight: '700' }}>
+                    Bill of Materials (BoM)
+                  </Text>
+                  <TouchableOpacity onPress={handleAddMaterial} style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <Plus size={13} color={theme.citizenPrimary} />
+                    <Text style={{ color: theme.citizenPrimary, fontSize: 12, fontWeight: '700' }}>Add Item</Text>
+                  </TouchableOpacity>
+                </View>
+
+                {materials.map((mat, idx) => (
+                  <View key={idx} style={{ flexDirection: 'row', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+                    <TextInput
+                      value={mat}
+                      onChangeText={(val) => handleUpdateMaterial(val, idx)}
+                      placeholder="Component or service..."
+                      placeholderTextColor={theme.subtext}
+                      style={{
+                        flex: 1,
+                        backgroundColor: theme.inputBg,
+                        borderWidth: 1,
+                        borderColor: theme.border,
+                        borderRadius: 10,
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        color: theme.text,
+                        fontSize: 13,
+                      }}
+                    />
+                    <TouchableOpacity onPress={() => handleRemoveMaterial(idx)} style={{ padding: 8 }}>
+                      <Trash2 size={16} color={theme.error} />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
+
+            <View style={{ flexDirection: 'row', gap: 10 }}>
+              <TouchableOpacity
+                onPress={() => setShowSubmission(false)}
+                style={{
+                  flex: 1,
+                  paddingVertical: 13,
+                  borderRadius: 12,
+                  backgroundColor: theme.surface,
+                  borderWidth: 1,
+                  borderColor: theme.border,
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ color: theme.textSecondary, fontWeight: '700', fontSize: 13 }}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleSubmitPrototype}
+                style={{
+                  flex: 1.5,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: 8,
+                  paddingVertical: 13,
+                  borderRadius: 12,
+                  backgroundColor: theme.authorityPrimary,
+                }}
+              >
+                <Send size={15} color="#FFFFFF" />
+                <Text style={{ color: '#FFFFFF', fontWeight: '800', fontSize: 13 }}>Submit Brief</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
     </SafeAreaView>
   );
 }
