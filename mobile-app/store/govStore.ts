@@ -43,6 +43,7 @@ export interface FlaggedProblem {
   title: string;
   description: string;
   category: string;
+  status?: string;
   urgency: 'low' | 'medium' | 'high' | 'critical';
   location: {
     district: string;
@@ -143,8 +144,14 @@ export const useGovStore = create<GovState>((set, get) => ({
         getDomainDistribution(),
         getDistrictBreakdown(),
       ]);
+      const mergedSummary = {
+        ...MOCK_SUMMARY,
+        ...(sum || {}),
+        resolutionTrend: (sum?.resolutionTrend && sum.resolutionTrend.length > 0) ? sum.resolutionTrend : MOCK_SUMMARY.resolutionTrend,
+        leaderboard: (sum?.leaderboard && sum.leaderboard.length > 0) ? sum.leaderboard : MOCK_SUMMARY.leaderboard,
+      };
       set({
-        summary: sum || MOCK_SUMMARY,
+        summary: mergedSummary,
         domains: dom || MOCK_DOMAINS,
         districts: dist || MOCK_DISTRICTS,
       });

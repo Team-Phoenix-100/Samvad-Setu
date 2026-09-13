@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MapPin, AlertCircle } from 'lucide-react-native';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import LeafletMap from '../../components/LeafletMap';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
 import { useTheme } from '../../context/ThemeContext'; // Import theme hook
@@ -61,39 +61,44 @@ export default function CitizenMapScreen() {
           </View>
         </View>
 
-        {/* Live Interactive Map Box */}
+        {/* Live Interactive Leaflet OpenStreetMap Box */}
         <View style={{ backgroundColor: theme.card, borderRadius: 20, borderWidth: 1, borderColor: theme.border, padding: 16, marginBottom: 20 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-            <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>Howrah service zone</Text>
-            <Text style={{ color: theme.authorityPrimary, fontSize: 11, fontWeight: '700' }}>Live GPS Data</Text>
+            <Text style={{ color: theme.text, fontSize: 16, fontWeight: '700' }}>Jharkhand Service Zone</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(47, 158, 143, 0.12)', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 }}>
+              <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: theme.authorityPrimary }} />
+              <Text style={{ color: theme.authorityPrimary, fontSize: 11, fontWeight: '700' }}>Leaflet (OSM)</Text>
+            </View>
           </View>
 
-          <View style={{ height: 250, backgroundColor: theme.background, borderRadius: 18, overflow: 'hidden', borderWidth: 1, borderColor: theme.border }}>
-            <MapView
-              style={StyleSheet.absoluteFillObject}
-              initialRegion={howrahRegion}
-              userInterfaceStyle={isDarkMode ? "dark" : "light"}
-            >
-              {tickets.map((ticket, index) => {
-                if (!ticket.latitude || !ticket.longitude) return null;
-                const pinColor = ticket.status === 'Resolved' ? theme.authorityPrimary : (ticket.status === 'In Progress' ? theme.citizenPrimary : theme.error);
-                
-                return (
-                  <Marker
-                    key={ticket.id || index}
-                    coordinate={{ latitude: parseFloat(ticket.latitude), longitude: parseFloat(ticket.longitude) }}
-                    pinColor={pinColor}
-                  >
-                    <Callout tooltip>
-                      <View style={{ backgroundColor: theme.card, padding: 12, borderRadius: 12, borderWidth: 1, borderColor: theme.border, minWidth: 200 }}>
-                        <Text style={{ color: theme.text, fontWeight: 'bold', fontSize: 14, marginBottom: 4 }}>{ticket.category}</Text>
-                        <Text style={{ color: pinColor, fontSize: 12, fontWeight: 'bold' }}>{ticket.status}</Text>
-                      </View>
-                    </Callout>
-                  </Marker>
-                );
-              })}
-            </MapView>
+          <View style={{ height: 260, backgroundColor: theme.background, borderRadius: 18, overflow: 'hidden', borderWidth: 1, borderColor: theme.border }}>
+            <LeafletMap
+              mode="view"
+              initialLatitude={23.3441}
+              initialLongitude={85.3096}
+              initialZoom={12}
+              markers={
+                tickets.length > 0
+                  ? tickets
+                      .filter(t => t.latitude && t.longitude)
+                      .map((t, idx) => ({
+                        id: t.id || String(idx),
+                        latitude: parseFloat(t.latitude),
+                        longitude: parseFloat(t.longitude),
+                        title: t.title || t.category || 'Civic Report',
+                        category: t.category,
+                        status: t.status || 'Active',
+                        urgency: t.urgency,
+                      }))
+                  : [
+                      { id: '1', latitude: 23.3441, longitude: 85.3096, title: 'Ranchi Main Road Repair', category: 'Civil Works', status: 'In Progress' },
+                      { id: '2', latitude: 23.3550, longitude: 85.3250, title: 'Solar Water Pump Outage', category: 'Water Supply', status: 'Pending' },
+                      { id: '3', latitude: 23.3320, longitude: 85.2980, title: 'Street Light Grid Breakdown', category: 'Electrical', status: 'Critical' },
+                    ]
+              }
+              height={260}
+              isDarkMode={isDarkMode}
+            />
           </View>
         </View>
 

@@ -51,7 +51,7 @@ export default function Toast() {
     });
   };
 
-  if (!isVisible && opacity.interpolate({ inputRange: [0, 1], outputRange: [0, 1] }) === 0) return null;
+  if (!isVisible) return null;
 
   let bgBorderColor = '#1D3238';
   let textColor = '#F2EFE9';

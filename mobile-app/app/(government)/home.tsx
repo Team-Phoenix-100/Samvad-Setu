@@ -29,7 +29,7 @@ import { useTheme } from '../../context/ThemeContext';
 
 export default function GovernmentHomeScreen() {
   const router = useRouter();
-  const { theme } = useTheme();
+  const { theme, isDarkMode } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
 
   const {
@@ -62,45 +62,49 @@ export default function GovernmentHomeScreen() {
     i => i.verificationStatus === 'pending_verification'
   ).length;
 
+  const resolutionTrend = summary?.resolutionTrend || [];
+  const leaderboard = summary?.leaderboard || [];
+
   const resolutionRate =
-    summary.totalProblems > 0
-      ? Math.round((summary.resolvedProblems / summary.totalProblems) * 100)
+    (summary?.totalProblems || 0) > 0
+      ? Math.round(((summary?.resolvedProblems || 0) / summary.totalProblems) * 100)
       : 0;
 
   // Max value for resolution trend bar graph
   const maxWeeklyResolved = Math.max(
-    ...summary.resolutionTrend.map(t => t.resolved),
+    ...resolutionTrend.map(t => t.resolved),
     1
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: '#0F1B1E' }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#2F9E8F"
+            tintColor={theme.authorityPrimary}
+            colors={[theme.authorityPrimary]}
           />
         }>
         {/* Top Header */}
         <View style={styles.header}>
           <View>
             <View style={styles.taglineBadge}>
-              <View style={styles.statusDot} />
-              <Text style={styles.taglineText}>GOVT. OF JHARKHAND • DHTE</Text>
+              <View style={[styles.statusDot, { backgroundColor: theme.authorityPrimary }]} />
+              <Text style={[styles.taglineText, { color: theme.authorityPrimary }]}>GOVT. OF JHARKHAND • DHTE</Text>
             </View>
-            <Text style={styles.title}>Statewide Oversight</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[styles.title, { color: theme.text }]}>Statewide Oversight</Text>
+            <Text style={[styles.subtitle, { color: theme.subtext }]}>
               Institutional Innovation & AI Moderation Console
             </Text>
           </View>
           <TouchableOpacity
-            style={styles.auditIconBtn}
+            style={[styles.auditIconBtn, { backgroundColor: theme.surface, borderColor: theme.border }]}
             onPress={() => router.push('/(government)/audit-log' as any)}>
-            <FileText size={18} color="#2F9E8F" />
-            <Text style={styles.auditBtnText}>Audit</Text>
+            <FileText size={18} color={theme.authorityPrimary} />
+            <Text style={[styles.auditBtnText, { color: theme.authorityPrimary }]}>Audit</Text>
           </TouchableOpacity>
         </View>
 
@@ -156,94 +160,95 @@ export default function GovernmentHomeScreen() {
         )}
 
         {/* 4 Primary KPI Grid */}
-        <Text style={styles.sectionHeader}>STATEWIDE IMPACT METRICS</Text>
+        <Text style={[styles.sectionHeader, { color: theme.subtext }]}>STATEWIDE IMPACT METRICS</Text>
         <View style={styles.kpiGrid}>
           {/* Total Problems */}
-          <View style={styles.kpiCard}>
+          <View style={[styles.kpiCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <View style={styles.kpiTopRow}>
-              <Text style={styles.kpiLabel}>TOTAL PROBLEMS</Text>
-              <AlertTriangle size={16} color="#E8A33D" />
+              <Text style={[styles.kpiLabel, { color: theme.subtext }]}>TOTAL PROBLEMS</Text>
+              <AlertTriangle size={16} color={theme.citizenPrimary} />
             </View>
-            <Text style={styles.kpiValue}>{summary.totalProblems}</Text>
-            <Text style={styles.kpiSub}>Crowdsourced statewide</Text>
+            <Text style={[styles.kpiValue, { color: theme.text }]}>{summary.totalProblems}</Text>
+            <Text style={[styles.kpiSub, { color: theme.subtext }]}>Crowdsourced statewide</Text>
           </View>
 
           {/* Resolved */}
-          <View style={styles.kpiCard}>
+          <View style={[styles.kpiCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <View style={styles.kpiTopRow}>
-              <Text style={styles.kpiLabel}>RESOLVED</Text>
-              <CheckCircle2 size={16} color="#2F9E8F" />
+              <Text style={[styles.kpiLabel, { color: theme.subtext }]}>RESOLVED</Text>
+              <CheckCircle2 size={16} color={theme.authorityPrimary} />
             </View>
-            <Text style={[styles.kpiValue, { color: '#2F9E8F' }]}>
+            <Text style={[styles.kpiValue, { color: theme.authorityPrimary }]}>
               {summary.resolvedProblems}
             </Text>
-            <Text style={styles.kpiSub}>{resolutionRate}% completion rate</Text>
+            <Text style={[styles.kpiSub, { color: theme.subtext }]}>{resolutionRate}% completion rate</Text>
           </View>
 
           {/* HEIs */}
-          <View style={styles.kpiCard}>
+          <View style={[styles.kpiCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <View style={styles.kpiTopRow}>
-              <Text style={styles.kpiLabel}>ACTIVE HEIs</Text>
+              <Text style={[styles.kpiLabel, { color: theme.subtext }]}>ACTIVE HEIs</Text>
               <GraduationCap size={16} color="#4E7AFF" />
             </View>
             <Text style={[styles.kpiValue, { color: '#4E7AFF' }]}>
               {summary.activeHEIs}
             </Text>
-            <Text style={styles.kpiSub}>State universities & IITs</Text>
+            <Text style={[styles.kpiSub, { color: theme.subtext }]}>State universities & IITs</Text>
           </View>
 
           {/* Industry CSR */}
-          <View style={styles.kpiCard}>
+          <View style={[styles.kpiCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
             <View style={styles.kpiTopRow}>
-              <Text style={styles.kpiLabel}>INDUSTRY / CSR</Text>
+              <Text style={[styles.kpiLabel, { color: theme.subtext }]}>INDUSTRY / CSR</Text>
               <Briefcase size={16} color="#A855F7" />
             </View>
             <Text style={[styles.kpiValue, { color: '#A855F7' }]}>
               {summary.activeIndustry}
             </Text>
-            <Text style={styles.kpiSub}>Active funding partners</Text>
+            <Text style={[styles.kpiSub, { color: theme.subtext }]}>Active funding partners</Text>
           </View>
         </View>
 
         {/* 6-Week Resolution Throughput Trend */}
-        <View style={styles.trendCard}>
+        {/* 6-Week Resolution Throughput Trend */}
+        <View style={[styles.trendCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <View style={styles.trendHeader}>
             <View>
-              <Text style={styles.cardTitle}>Resolution Throughput</Text>
-              <Text style={styles.cardSubtitle}>
+              <Text style={[styles.cardTitle, { color: theme.text }]}>Resolution Throughput</Text>
+              <Text style={[styles.cardSubtitle, { color: theme.subtext }]}>
                 6-Week trajectory of deployed solutions
               </Text>
             </View>
-            <View style={styles.trendBadge}>
-              <TrendingUp size={14} color="#2F9E8F" />
-              <Text style={styles.trendBadgeText}>+18.4% WoW</Text>
+            <View style={[styles.trendBadge, { backgroundColor: isDarkMode ? 'rgba(47, 158, 143, 0.15)' : 'rgba(5, 150, 105, 0.12)' }]}>
+              <TrendingUp size={14} color={theme.authorityPrimary} />
+              <Text style={[styles.trendBadgeText, { color: theme.authorityPrimary }]}>+18.4% WoW</Text>
             </View>
           </View>
 
           <View style={styles.barsContainer}>
-            {summary.resolutionTrend.map((item, index) => {
+            {resolutionTrend.map((item, index) => {
               const heightPercent = Math.max(
                 (item.resolved / maxWeeklyResolved) * 100,
                 12
               );
               return (
                 <View key={item.week || index} style={styles.barColumn}>
-                  <Text style={styles.barValueText}>{item.resolved}</Text>
-                  <View style={styles.barTrack}>
+                  <Text style={[styles.barValueText, { color: theme.subtext }]}>{item.resolved}</Text>
+                  <View style={[styles.barTrack, { backgroundColor: theme.surface }]}>
                     <View
                       style={[
                         styles.barFill,
                         {
                           height: `${heightPercent}%`,
                           backgroundColor:
-                            index === summary.resolutionTrend.length - 1
-                              ? '#2F9E8F'
-                              : '#234449',
+                            index === resolutionTrend.length - 1
+                              ? theme.authorityPrimary
+                              : (isDarkMode ? '#234449' : '#B8D5D0'),
                         },
                       ]}
                     />
                   </View>
-                  <Text style={styles.barLabel}>{item.week}</Text>
+                  <Text style={[styles.barLabel, { color: theme.subtext }]}>{item.week}</Text>
                 </View>
               );
             })}
@@ -251,53 +256,55 @@ export default function GovernmentHomeScreen() {
         </View>
 
         {/* Top HEI Leaderboard */}
-        <View style={styles.leaderboardCard}>
+        <View style={[styles.leaderboardCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <View style={styles.leaderboardHeader}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Award size={20} color="#E8A33D" />
-              <Text style={styles.cardTitle}>Top HEI Innovators</Text>
+              <Award size={20} color={theme.citizenPrimary} />
+              <Text style={[styles.cardTitle, { color: theme.text }]}>Top HEI Innovators</Text>
             </View>
             <TouchableOpacity onPress={() => router.push('/(government)/analytics' as any)}>
-              <Text style={styles.viewAllText}>Full Analytics →</Text>
+              <Text style={[styles.viewAllText, { color: theme.authorityPrimary }]}>Full Analytics →</Text>
             </TouchableOpacity>
           </View>
 
-          {summary.leaderboard.map((hei, index) => (
+          {leaderboard.map((hei, index) => (
             <View
-              key={hei.name}
+              key={hei.name || index}
               style={[
                 styles.heiRow,
-                index === summary.leaderboard.length - 1 && { borderBottomWidth: 0 },
+                { borderBottomColor: theme.borderSubtle },
+                index === leaderboard.length - 1 && { borderBottomWidth: 0 },
               ]}>
               <View
                 style={[
                   styles.heiRankBadge,
                   index === 0
-                    ? { backgroundColor: 'rgba(232, 163, 61, 0.2)', borderColor: '#E8A33D' }
-                    : { backgroundColor: '#1A2F33', borderColor: '#1D3238' },
+                    ? { backgroundColor: isDarkMode ? 'rgba(232, 163, 61, 0.2)' : 'rgba(203, 125, 24, 0.15)', borderColor: theme.citizenPrimary }
+                    : { backgroundColor: theme.surface, borderColor: theme.border },
                 ]}>
                 <Text
                   style={[
                     styles.heiRankText,
-                    index === 0 && { color: '#E8A33D', fontWeight: '800' },
+                    { color: theme.textSecondary },
+                    index === 0 && { color: theme.citizenPrimary, fontWeight: '800' },
                   ]}>
                   #{index + 1}
                 </Text>
               </View>
 
               <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.heiName}>{hei.name}</Text>
-                <Text style={styles.heiDistrict}>District: {hei.district}</Text>
+                <Text style={[styles.heiName, { color: theme.text }]}>{hei.name}</Text>
+                <Text style={[styles.heiDistrict, { color: theme.subtext }]}>District: {hei.district}</Text>
               </View>
 
               <View style={{ alignItems: 'flex-end' }}>
-                <View style={styles.projectsPill}>
-                  <CheckCircle2 size={12} color="#2F9E8F" />
-                  <Text style={styles.projectsPillText}>
+                <View style={[styles.projectsPill, { backgroundColor: isDarkMode ? 'rgba(47, 158, 143, 0.15)' : 'rgba(5, 150, 105, 0.12)' }]}>
+                  <CheckCircle2 size={12} color={theme.authorityPrimary} />
+                  <Text style={[styles.projectsPillText, { color: theme.authorityPrimary }]}>
                     {hei.projectsDeployed} Deployed
                   </Text>
                 </View>
-                <Text style={styles.heiRating}>★ {hei.rating.toFixed(1)} / 5.0</Text>
+                <Text style={[styles.heiRating, { color: theme.citizenPrimary }]}>★ {hei.rating.toFixed(1)} / 5.0</Text>
               </View>
             </View>
           ))}
@@ -305,18 +312,18 @@ export default function GovernmentHomeScreen() {
 
         {/* Audit Log Quick Link */}
         <TouchableOpacity
-          style={styles.auditLogFooterBtn}
+          style={[styles.auditLogFooterBtn, { backgroundColor: theme.card, borderColor: theme.border }]}
           onPress={() => router.push('/(government)/audit-log' as any)}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <ShieldCheck size={20} color="#2F9E8F" />
+            <ShieldCheck size={20} color={theme.authorityPrimary} />
             <View>
-              <Text style={styles.auditFooterTitle}>Administrative Audit Trail</Text>
-              <Text style={styles.auditFooterSubtitle}>
+              <Text style={[styles.auditFooterTitle, { color: theme.text }]}>Administrative Audit Trail</Text>
+              <Text style={[styles.auditFooterSubtitle, { color: theme.subtext }]}>
                 View immutable blockchain/DHTE logs of moderation & approvals
               </Text>
             </View>
           </View>
-          <ChevronRight size={18} color="#9BA8A6" />
+          <ChevronRight size={18} color={theme.subtext} />
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

@@ -1,285 +1,244 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Alert, RefreshControl, Modal, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, ScrollView, TouchableOpacity, Alert, RefreshControl } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { 
-  Briefcase, 
-  GraduationCap, 
-  Sparkles, 
-  MapPin, 
-  IndianRupee, 
-  CheckCircle2, 
-  LogOut, 
-  Layers,
-  Award,
-  X
+  Building2, Award, Search, FileText, CheckCircle2, 
+  TrendingUp, Compass, ArrowUpRight, DollarSign, Layers 
 } from 'lucide-react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useFocusEffect } from 'expo-router';
-
-const PLEDGE_AMOUNTS = ['₹25,000', '₹50,000', '₹1,00,000', 'Mentorship Only'];
+import { useProblemStore } from '../../store/problemStore';
+import { useAuthStore } from '../../store/authStore';
+import { useTheme } from '../../context/ThemeContext';
+import { useToastStore } from '../../store/toastStore';
 
 export default function IndustryHomeScreen() {
   const router = useRouter();
-  const [challenges, setChallenges] = useState<any[]>([]);
+  const { problems, fetchProblems, isLoading } = useProblemStore() as any;
+  const { user } = useAuthStore() as any;
+  const { theme, isDarkMode } = useTheme();
+  const { showToast } = useToastStore();
+
   const [refreshing, setRefreshing] = useState(false);
-  
-  // Modal State
-  const [selectedChallenge, setSelectedChallenge] = useState<any>(null);
-  const [pledgeType, setPledgeType] = useState(PLEDGE_AMOUNTS[0]);
-  const [corporateNotes, setCorporateNotes] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useFocusEffect(
-    React.useCallback(() => {
-      loadChallenges();
-    }, [])
-  );
-
-  const loadChallenges = async () => {
-    try {
-      const stored = await AsyncStorage.getItem('@citizen_tickets');
-      if (stored) {
-        setChallenges(JSON.parse(stored));
-      }
-    } catch (error) {
-      console.error('Failed to load challenges in Industry portal', error);
-    }
-  };
+  useEffect(() => {
+    fetchProblems();
+  }, []);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await loadChallenges();
+    await fetchProblems();
     setRefreshing(false);
   };
 
-  const openPledgeModal = (item: any) => {
-    setSelectedChallenge(item);
-    setIsModalOpen(true);
-  };
-
-  const handleConfirmPledge = async () => {
-    if (!selectedChallenge) return;
-
-    try {
-      const updated = challenges.map((item) => {
-        if (item.id === selectedChallenge.id) {
-          return {
-            ...item,
-            stage: 'Industry Pledged',
-            industryPledge: `Tata Steel CSR (${pledgeType}${corporateNotes ? ` - ${corporateNotes}` : ''})`,
-          };
-        }
-        return item;
-      });
-
-      setChallenges(updated);
-      await AsyncStorage.setItem('@citizen_tickets', JSON.stringify(updated));
-      setIsModalOpen(false);
-      setCorporateNotes('');
-      Alert.alert('Pledge Confirmed', 'Your CSR funding & technical mentorship commitment has been linked to the HEI research team.');
-    } catch (e) {
-      Alert.alert('Error', 'Unable to commit pledge at this time.');
-    }
-  };
+  const pledges = [
+    {
+      id: 'SICP-2026-8901',
+      title: 'Solar Water Pump Malfunction in Secondary School',
+      hei: 'Birsa Institute of Technology, Sindri',
+      pledgedAmount: '₹15,000',
+      status: 'in-progress',
+      district: 'Khunti',
+    },
+    {
+      id: 'SICP-2026-4412',
+      title: 'Rural Micro-Grid Telemetry & Load Balancer',
+      hei: 'National Institute of Technology, Jamshedpur',
+      pledgedAmount: '₹30,000',
+      status: 'in-progress',
+      district: 'Ranchi',
+    },
+  ];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#0F1B1E', padding: 16 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <ScrollView 
-        contentContainerStyle={{ paddingBottom: 40 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#A855F7" />}
+        contentContainerStyle={{ padding: 18, paddingBottom: 100 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh} 
+            tintColor={theme.citizenPrimary} 
+            colors={[theme.citizenPrimary]} 
+          />
+        }
       >
         {/* Header */}
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-          <View>
-            <Text style={{ fontSize: 10, color: '#9BA8A6', letterSpacing: 1.2, fontWeight: '700' }}>
-              CSR & INDUSTRY CO-INNOVATION
-            </Text>
-            <Text style={{ fontSize: 24, fontWeight: '800', color: '#F2EFE9', marginTop: 2 }}>
-              Industry Partner Hub
+        <View style={{ marginBottom: 20 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+            <Building2 size={14} color={theme.citizenPrimary} />
+            <Text style={{ fontSize: 11, color: theme.citizenPrimary, fontWeight: '800', letterSpacing: 1 }}>
+              {user?.companyName || 'Tata Steel Foundation (CSR Partner)'}
             </Text>
           </View>
-          <TouchableOpacity 
-            onPress={() => router.replace('/(auth)/login' as any)}
-            style={{ backgroundColor: '#16262A', padding: 10, borderRadius: 12, borderWidth: 1, borderColor: '#1D3238' }}
+          <Text style={{ fontSize: 26, fontWeight: '900', color: theme.text, letterSpacing: -0.5 }}>
+            Industry & CSR Portal
+          </Text>
+          <Text style={{ fontSize: 13, color: theme.subtext, marginTop: 4 }}>
+            Direct corporate capital into verified university prototypes under MCA Section 135.
+          </Text>
+        </View>
+
+        {/* Quick Actions */}
+        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 22 }}>
+          <TouchableOpacity
+            onPress={() => router.push('/(industry)/browse')}
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              paddingVertical: 12,
+              borderRadius: 14,
+              backgroundColor: theme.citizenPrimary,
+              shadowColor: theme.citizenPrimary,
+              shadowOffset: { width: 0, height: 3 },
+              shadowOpacity: 0.25,
+              shadowRadius: 6,
+              elevation: 4,
+            }}
           >
-            <LogOut size={18} color="#EF4444" />
+            <Search size={16} color="#FFFFFF" />
+            <Text style={{ color: '#FFFFFF', fontWeight: '800', fontSize: 13 }}>Browse to Fund</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => router.push('/(industry)/handover')}
+            style={{
+              flex: 1,
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 8,
+              paddingVertical: 12,
+              borderRadius: 14,
+              backgroundColor: theme.surface,
+              borderWidth: 1,
+              borderColor: theme.border,
+            }}
+          >
+            <Award size={16} color={theme.text} />
+            <Text style={{ color: theme.text, fontWeight: '800', fontSize: 13 }}>Certifications</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Corporate Profile Card */}
-        <View style={{ backgroundColor: '#16262A', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#1D3238', marginBottom: 18 }}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
-            <Award size={18} color="#A855F7" style={{ marginRight: 8 }} />
-            <Text style={{ color: '#F2EFE9', fontSize: 15, fontWeight: '700' }}>Tata Steel CSR & Sustainability Cell</Text>
+        {/* Metrics Row */}
+        <View style={{ flexDirection: 'row', gap: 10, marginBottom: 24 }}>
+          <View style={{ flex: 1, backgroundColor: theme.card, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: theme.border }}>
+            <Text style={{ color: theme.subtext, fontSize: 10, fontWeight: '800', letterSpacing: 0.5 }}>COMMITTED</Text>
+            <Text style={{ color: theme.citizenPrimary, fontSize: 22, fontWeight: '900', marginTop: 4 }}>₹4.5L</Text>
+            <Text style={{ color: theme.subtext, fontSize: 10, marginTop: 2 }}>CSR Escrow</Text>
           </View>
-          <Text style={{ color: '#9BA8A6', fontSize: 12 }}>
-            Focus: Rural Livelihoods, Clean Water & STEM Education in Eastern India
-          </Text>
+          <View style={{ flex: 1, backgroundColor: theme.card, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: theme.border }}>
+            <Text style={{ color: theme.subtext, fontSize: 10, fontWeight: '800', letterSpacing: 0.5 }}>SPONSORED</Text>
+            <Text style={{ color: theme.authorityPrimary, fontSize: 22, fontWeight: '900', marginTop: 4 }}>08</Text>
+            <Text style={{ color: theme.subtext, fontSize: 10, marginTop: 2 }}>Projects</Text>
+          </View>
+          <View style={{ flex: 1, backgroundColor: theme.card, padding: 14, borderRadius: 16, borderWidth: 1, borderColor: theme.border }}>
+            <Text style={{ color: theme.subtext, fontSize: 10, fontWeight: '800', letterSpacing: 0.5 }}>IMPACT</Text>
+            <Text style={{ color: theme.text, fontSize: 22, fontWeight: '900', marginTop: 4 }}>12.4k+</Text>
+            <Text style={{ color: theme.subtext, fontSize: 10, marginTop: 2 }}>Beneficiaries</Text>
+          </View>
         </View>
 
-        {/* Section Title */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 14 }}>
-          <Layers size={16} color="#A855F7" style={{ marginRight: 6 }} />
-          <Text style={{ color: '#F2EFE9', fontSize: 16, fontWeight: '700' }}>
-            Validated Academic Projects ({challenges.length})
-          </Text>
-        </View>
-
-        {/* Projects Feed */}
-        {challenges.length === 0 ? (
-          <View style={{ backgroundColor: '#16262A', padding: 32, borderRadius: 16, alignItems: 'center', borderWidth: 1, borderColor: '#1D3238' }}>
-            <Briefcase size={32} color="#A855F7" style={{ marginBottom: 12 }} />
-            <Text style={{ color: '#F2EFE9', fontSize: 15, fontWeight: '700', marginBottom: 4 }}>No projects seeking funding</Text>
-            <Text style={{ color: '#9BA8A6', fontSize: 13, textAlign: 'center' }}>
-              Active university R&D projects will appear here once claimed by academic institutions.
+        {/* Active Funded Projects */}
+        <View style={{
+          backgroundColor: theme.card,
+          borderRadius: 20,
+          borderWidth: 1,
+          borderColor: theme.border,
+          padding: 18,
+          marginBottom: 20,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: isDarkMode ? 0.2 : 0.05,
+          shadowRadius: 6,
+          elevation: 2,
+        }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+            <Text style={{ fontSize: 16, fontWeight: '800', color: theme.text }}>
+              Active Funded Projects
             </Text>
-          </View>
-        ) : (
-          challenges.map((item, index) => {
-            const hasPledge = Boolean(item.industryPledge);
-
-            return (
-              <View 
-                key={index}
-                style={{ backgroundColor: '#16262A', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: '#1D3238', marginBottom: 14 }}
-              >
-                {/* Domain & Stage Header */}
-                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                  <View style={{ flex: 1, marginRight: 8 }}>
-                    <Text style={{ color: '#E8A33D', fontSize: 11, fontWeight: '700', textTransform: 'uppercase' }}>
-                      {item.domain || 'Societal Challenge'}
-                    </Text>
-                    <Text style={{ color: '#F2EFE9', fontWeight: '700', fontSize: 16, marginTop: 2 }}>
-                      {item.title || item.description}
-                    </Text>
-                  </View>
-
-                  <View style={{
-                    backgroundColor: hasPledge ? 'rgba(168, 85, 247, 0.15)' : 'rgba(47, 158, 143, 0.15)',
-                    paddingHorizontal: 8,
-                    paddingVertical: 4,
-                    borderRadius: 8,
-                    borderWidth: 1,
-                    borderColor: hasPledge ? '#A855F7' : '#2F9E8F'
-                  }}>
-                    <Text style={{ color: hasPledge ? '#A855F7' : '#2F9E8F', fontSize: 10, fontWeight: '800' }}>
-                      {hasPledge ? 'Pledge Active' : 'Seeking Partner'}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Problem Summary */}
-                <Text style={{ color: '#9BA8A6', fontSize: 13, marginBottom: 12, lineHeight: 18 }}>
-                  {item.description}
-                </Text>
-
-                {/* Institutional Allocation Box */}
-                <View style={{ backgroundColor: '#0F1B1E', borderRadius: 10, padding: 10, marginBottom: 12, borderWidth: 1, borderColor: '#1D3238' }}>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                    <GraduationCap size={13} color="#2F9E8F" style={{ marginRight: 6 }} />
-                    <Text style={{ color: '#F2EFE9', fontSize: 11, fontWeight: '600' }}>
-                      Leading HEI: <Text style={{ color: '#9BA8A6' }}>{item.suggestedHEI || 'Academic Team'}</Text>
-                    </Text>
-                  </View>
-                  <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <MapPin size={12} color="#9BA8A6" style={{ marginRight: 6 }} />
-                    <Text style={{ color: '#9BA8A6', fontSize: 11 }}>{item.location || 'Jharkhand Region'}</Text>
-                  </View>
-                </View>
-
-                {/* Pledge Action or Status */}
-                {hasPledge ? (
-                  <View style={{ backgroundColor: 'rgba(168, 85, 247, 0.08)', padding: 10, borderRadius: 10, borderWidth: 1, borderColor: '#A855F7' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                      <CheckCircle2 size={14} color="#A855F7" style={{ marginRight: 6 }} />
-                      <Text style={{ color: '#A855F7', fontSize: 12, fontWeight: '700' }}>
-                        Partner: {item.industryPledge}
-                      </Text>
-                    </View>
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    onPress={() => openPledgeModal(item)}
-                    style={{
-                      backgroundColor: '#A855F7',
-                      borderRadius: 12,
-                      paddingVertical: 12,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      marginTop: 4
-                    }}
-                  >
-                    <IndianRupee size={15} color="#FFFFFF" style={{ marginRight: 4 }} />
-                    <Text style={{ color: '#FFFFFF', fontWeight: '800', fontSize: 13 }}>
-                      Pledge CSR Grant / Mentorship
-                    </Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            );
-          })
-        )}
-      </ScrollView>
-
-      {/* Structured Pledge Bottom Sheet Modal */}
-      <Modal visible={isModalOpen} animationType="slide" transparent>
-        <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.7)', justifyContent: 'flex-end' }}>
-          <View style={{ backgroundColor: '#16262A', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20, borderWidth: 1, borderColor: '#1D3238' }}>
-            <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <Text style={{ color: '#F2EFE9', fontSize: 18, fontWeight: '800' }}>Pledge CSR Support</Text>
-              <TouchableOpacity onPress={() => setIsModalOpen(false)}>
-                <X size={22} color="#9BA8A6" />
-              </TouchableOpacity>
-            </View>
-
-            <Text style={{ color: '#9BA8A6', fontSize: 13, marginBottom: 14 }}>
-              Support: <Text style={{ color: '#E8A33D', fontWeight: '700' }}>{selectedChallenge?.title || selectedChallenge?.description}</Text>
-            </Text>
-
-            {/* Select Tier */}
-            <Text style={{ color: '#F2EFE9', fontSize: 13, fontWeight: '700', marginBottom: 8 }}>Select Contribution Tier</Text>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
-              {PLEDGE_AMOUNTS.map((amt) => (
-                <TouchableOpacity
-                  key={amt}
-                  onPress={() => setPledgeType(amt)}
-                  style={{
-                    backgroundColor: pledgeType === amt ? '#A855F7' : '#0F1B1E',
-                    paddingHorizontal: 14,
-                    paddingVertical: 10,
-                    borderRadius: 10,
-                    borderWidth: 1,
-                    borderColor: pledgeType === amt ? '#A855F7' : '#1D3238',
-                  }}
-                >
-                  <Text style={{ color: pledgeType === amt ? '#FFFFFF' : '#9BA8A6', fontSize: 12, fontWeight: '700' }}>
-                    {amt}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            {/* Mentorship / Notes */}
-            <Text style={{ color: '#F2EFE9', fontSize: 13, fontWeight: '700', marginBottom: 8 }}>Mentorship & Technical Offering</Text>
-            <TextInput
-              placeholder="e.g. 10 hours of technical mentorship, IoT sensor hardware kits..."
-              placeholderTextColor="#9BA8A6"
-              value={corporateNotes}
-              onChangeText={setCorporateNotes}
-              style={{ backgroundColor: '#0F1B1E', color: '#F2EFE9', padding: 12, borderRadius: 10, borderWidth: 1, borderColor: '#1D3238', marginBottom: 20, fontSize: 13 }}
-            />
-
-            <TouchableOpacity
-              onPress={handleConfirmPledge}
-              style={{ backgroundColor: '#A855F7', paddingVertical: 14, borderRadius: 12, alignItems: 'center' }}
-            >
-              <Text style={{ color: '#FFFFFF', fontWeight: '800', fontSize: 15 }}>Confirm & Allocate Support</Text>
+            <TouchableOpacity onPress={() => router.push('/(industry)/browse')}>
+              <Text style={{ fontSize: 12, color: theme.citizenPrimary, fontWeight: '700' }}>Explore More →</Text>
             </TouchableOpacity>
           </View>
+
+          <View style={{ gap: 14 }}>
+            {pledges.map((item) => (
+              <View 
+                key={item.id}
+                style={{
+                  backgroundColor: theme.surface,
+                  borderRadius: 14,
+                  padding: 14,
+                  borderWidth: 1,
+                  borderColor: theme.borderSubtle,
+                }}
+              >
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                  <Text style={{ color: theme.subtext, fontSize: 10, fontFamily: 'monospace' }}>
+                    {item.id}
+                  </Text>
+                  <View style={{
+                    backgroundColor: isDarkMode ? 'rgba(47, 158, 143, 0.15)' : 'rgba(5, 150, 105, 0.12)',
+                    paddingHorizontal: 8,
+                    paddingVertical: 2,
+                    borderRadius: 6,
+                  }}>
+                    <Text style={{ color: theme.authorityPrimary, fontSize: 10, fontWeight: '800' }}>
+                      IN PROGRESS
+                    </Text>
+                  </View>
+                </View>
+
+                <Text style={{ color: theme.text, fontSize: 15, fontWeight: '800', marginBottom: 6 }}>
+                  {item.title}
+                </Text>
+
+                <Text style={{ color: theme.subtext, fontSize: 11, marginBottom: 12 }}>
+                  Technical Partner: <Text style={{ color: theme.authorityPrimary, fontWeight: '700' }}>{item.hei}</Text>
+                </Text>
+
+                {/* Grant Pledged and Audit Action */}
+                <View style={{ 
+                  flexDirection: 'row', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  borderTopWidth: 1,
+                  borderTopColor: theme.borderSubtle,
+                  paddingTop: 10,
+                }}>
+                  <View>
+                    <Text style={{ color: theme.subtext, fontSize: 10 }}>PLEDGED GRANT</Text>
+                    <Text style={{ color: theme.citizenPrimary, fontSize: 14, fontWeight: '800', marginTop: 1 }}>{item.pledgedAmount}</Text>
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={() => router.push('/(industry)/handover')}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 4,
+                      backgroundColor: theme.card,
+                      paddingVertical: 6,
+                      paddingHorizontal: 12,
+                      borderRadius: 10,
+                      borderWidth: 1,
+                      borderColor: theme.border,
+                    }}
+                  >
+                    <Text style={{ color: theme.text, fontSize: 11, fontWeight: '800' }}>Audit Project</Text>
+                    <ArrowUpRight size={13} color={theme.text} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </View>
         </View>
-      </Modal>
+
+      </ScrollView>
     </SafeAreaView>
   );
 }

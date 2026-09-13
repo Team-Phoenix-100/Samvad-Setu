@@ -12,10 +12,12 @@ import {
 } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useGovStore } from '../../store/govStore';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function GovernmentTabLayout() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { theme, isDarkMode } = useTheme();
   
   // Strict login guard
   const [isAuthorized, setIsAuthorized] = useState(false);
@@ -31,14 +33,14 @@ export default function GovernmentTabLayout() {
         const role = await AsyncStorage.getItem('@app_user_role');
         const token = await AsyncStorage.getItem('@app_user_token');
 
-        // Strict Check: Must have official role or demo bypass
-        if (role !== 'official' && role !== 'government_admin') {
-          // If in development or demo testing, allow or redirect
-          // Set role to official if not set for seamless demo presentation
-          await AsyncStorage.setItem('@app_user_role', 'official');
-          await AsyncStorage.setItem('@app_user_token', 'demo_dhte_token');
+        // Only allow official or government_admin roles in government portal
+        if (role === 'official' || role === 'government_admin') {
+          setIsAuthorized(true);
+        } else {
+          // If accessing directly without official role, redirect to login
+          setIsAuthorized(false);
+          router.replace({ pathname: '/(auth)/login', params: { portal: 'authority' } } as any);
         }
-        setIsAuthorized(true);
       } catch (error) {
         console.error("Auth check error:", error);
         setIsAuthorized(true);
@@ -50,8 +52,8 @@ export default function GovernmentTabLayout() {
 
   if (!isAuthorized) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#0F1B1E', justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#2F9E8F" />
+      <View style={{ flex: 1, backgroundColor: theme.background, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color={theme.authorityPrimary} />
       </View>
     );
   }
@@ -59,15 +61,20 @@ export default function GovernmentTabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: '#2F9E8F',
-        tabBarInactiveTintColor: '#9BA8A6',
+        tabBarActiveTintColor: theme.authorityPrimary,
+        tabBarInactiveTintColor: theme.subtext,
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#16262A',
-          borderTopColor: '#1D3238',
+          backgroundColor: theme.tabBarBg,
+          borderTopColor: theme.tabBarBorder,
           height: 62 + insets.bottom,
           paddingBottom: 8 + insets.bottom,
           paddingTop: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.15,
+          shadowRadius: 10,
+          elevation: 10,
         },
         tabBarLabelStyle: {
           fontSize: 11,

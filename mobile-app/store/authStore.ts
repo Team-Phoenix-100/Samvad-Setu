@@ -3,11 +3,19 @@ import api from '../api/client';
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface User {
+export interface User {
   _id: string;
+  id?: string;
   name: string;
   email: string;
   role: string;
+  phone?: string;
+  district?: string;
+  city?: string;
+  state?: string;
+  institutionName?: string;
+  regId?: string;
+  [key: string]: any;
 }
 
 interface AuthState {
@@ -48,8 +56,93 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ user: userData, token, isLoading: false });
       return true;
     } catch (error: any) {
-      // Offline / Demo Fallback to guarantee seamless presentation
+      // Offline / Demo Fallback to guarantee seamless presentation across all 4 portals
+      const portalType = payload.portal;
+
       if (
+        portalType === 'citizen' ||
+        emailLower.includes('citizen') ||
+        emailLower.includes('user') ||
+        emailLower.includes('sharma') ||
+        emailLower === 'password123'
+      ) {
+        const demoCitizen = {
+          _id: 'CITIZEN-01',
+          name: 'Test Citizen',
+          email: payload.email || 'citizen100@test.com',
+          role: 'citizen',
+          phone: '9876543210',
+          district: 'Ranchi',
+          city: 'Ranchi',
+          state: 'Jharkhand',
+        };
+        const demoToken = 'citizen_demo_token';
+
+        await SecureStore.setItemAsync('userToken', demoToken);
+        await SecureStore.setItemAsync('userData', JSON.stringify(demoCitizen));
+        await AsyncStorage.setItem('@app_user_role', 'citizen');
+        await AsyncStorage.setItem('@app_user_token', demoToken);
+        await AsyncStorage.setItem('@app_current_session', JSON.stringify(demoCitizen));
+
+        set({ user: demoCitizen, token: demoToken, isLoading: false });
+        return true;
+      }
+
+      if (
+        portalType === 'hei' ||
+        emailLower.includes('hei') ||
+        emailLower.includes('bit') ||
+        emailLower.includes('univ') ||
+        emailLower.includes('college')
+      ) {
+        const demoHei = {
+          _id: 'HEI-BIT-01',
+          name: 'Dr. D. K. Singh',
+          email: payload.email || 'hei.bitsindri@test.com',
+          role: 'hei',
+          institutionName: 'Birsa Institute of Technology, Sindri',
+          regId: 'C-42194 / AICTE-1-490219',
+        };
+        const demoToken = 'hei_demo_token';
+
+        await SecureStore.setItemAsync('userToken', demoToken);
+        await SecureStore.setItemAsync('userData', JSON.stringify(demoHei));
+        await AsyncStorage.setItem('@app_user_role', 'hei');
+        await AsyncStorage.setItem('@app_user_token', demoToken);
+        await AsyncStorage.setItem('@app_current_session', JSON.stringify(demoHei));
+
+        set({ user: demoHei, token: demoToken, isLoading: false });
+        return true;
+      }
+
+      if (
+        portalType === 'industry' ||
+        emailLower.includes('csr') ||
+        emailLower.includes('industry') ||
+        emailLower.includes('tata')
+      ) {
+        const demoIndustry = {
+          _id: 'IND-TATA-01',
+          name: 'Sourav Mukherjee',
+          email: payload.email || 'csr.tatasteel@test.com',
+          role: 'industry_csr',
+          companyName: 'Tata Steel Foundation',
+          regId: 'CSR00018492',
+        };
+        const demoToken = 'industry_demo_token';
+
+        await SecureStore.setItemAsync('userToken', demoToken);
+        await SecureStore.setItemAsync('userData', JSON.stringify(demoIndustry));
+        await AsyncStorage.setItem('@app_user_role', 'industry_csr');
+        await AsyncStorage.setItem('@app_user_token', demoToken);
+        await AsyncStorage.setItem('@app_current_session', JSON.stringify(demoIndustry));
+
+        set({ user: demoIndustry, token: demoToken, isLoading: false });
+        return true;
+      }
+
+      if (
+        portalType === 'authority' ||
         emailLower.includes('dhte') ||
         emailLower.includes('admin') ||
         emailLower.includes('gov') ||
@@ -76,7 +169,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
       set({
         isLoading: false,
-        error: error.response?.data?.message || 'Login failed. Use demo: dhte.admin@jharkhand.gov.in / admin123',
+        error: error.response?.data?.message || 'Login failed. Please check your credentials or tap Use Demo Credentials.',
       });
       return false;
     }

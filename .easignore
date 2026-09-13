@@ -1,0 +1,12 @@
+client
+server
+ai-engine
+ei-engine
+*.mp4
+*.pt
+*.csv
+*.joblib
+*.pkl
+*.index
+*.zip
+*.tar.gz

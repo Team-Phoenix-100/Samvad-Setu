@@ -29,7 +29,7 @@ export const useProblemStore = create((set, get) => ({
         payload.append('urgency', data.urgency);
         payload.append('location', JSON.stringify(data.location));
         if (data.audio) payload.append('audio', data.audio, data.audio.name || 'voice-note.webm');
-        
+
         data.images.forEach((image, index) => {
           const fileName = image.name || `proof_${index + 1}.jpg`;
           payload.append('images', image, fileName);
@@ -46,14 +46,31 @@ export const useProblemStore = create((set, get) => ({
       return { error: errorMessage };
     }
   },
-  
+
+  updateProblem: async (id, updatedData) => {
+    set({ isLoading: true });
+    try {
+      const response = await api.put(`/problems/${id}`, updatedData);
+      set({
+        problems: get().problems.map(p => (p.id === id || p._id === id) ? response.data : p),
+        isLoading: false
+      });
+      return { success: true, problem: response.data };
+    } catch (error) {
+      console.error("Failed to update problem", error);
+      set({ isLoading: false });
+      const errorMessage = error.response?.data?.message || error.message || "Failed to update problem.";
+      return { success: false, error: errorMessage };
+    }
+  },
+
   deleteProblem: async (id) => {
     set({ isLoading: true });
     try {
       await api.delete(`/problems/${id}`);
-      set({ 
-        problems: get().problems.filter(p => p.id !== id), 
-        isLoading: false 
+      set({
+        problems: get().problems.filter(p => p.id !== id && p._id !== id),
+        isLoading: false
       });
       return true;
     } catch (error) {

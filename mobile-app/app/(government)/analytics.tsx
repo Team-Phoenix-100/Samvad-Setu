@@ -42,7 +42,9 @@ export default function GovernmentAnalyticsScreen() {
 
   const maxDomainCount = Math.max(...domains.map(d => d.count), 1);
   const maxDistrictCount = Math.max(...districts.map(d => d.count), 1);
-  const maxWeeklyResolved = Math.max(...summary.resolutionTrend.map(t => t.resolved), 1);
+  const resolutionTrend = summary?.resolutionTrend || [];
+  const leaderboard = summary?.leaderboard || [];
+  const maxWeeklyResolved = Math.max(...resolutionTrend.map(t => t.resolved), 1);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: '#0F1B1E' }]}>
@@ -190,7 +192,7 @@ export default function GovernmentAnalyticsScreen() {
           </View>
 
           <View style={styles.chartContainer}>
-            {summary.resolutionTrend.map((item, index) => {
+            {resolutionTrend.map((item, index) => {
               const heightPct = Math.max((item.resolved / maxWeeklyResolved) * 100, 15);
               return (
                 <View key={item.week || index} style={styles.chartCol}>
@@ -202,7 +204,7 @@ export default function GovernmentAnalyticsScreen() {
                         {
                           height: `${heightPct}%`,
                           backgroundColor:
-                            index === summary.resolutionTrend.length - 1
+                            index === resolutionTrend.length - 1
                               ? '#2F9E8F'
                               : '#234449',
                         },
@@ -226,12 +228,12 @@ export default function GovernmentAnalyticsScreen() {
             <Text style={styles.sectionMeta}>Jharkhand DHTE</Text>
           </View>
 
-          {summary.leaderboard.map((hei, index) => (
+          {leaderboard.map((hei, index) => (
             <View
-              key={hei.name}
+              key={hei.name || index}
               style={[
                 styles.heiRow,
-                index === summary.leaderboard.length - 1 && { borderBottomWidth: 0 },
+                index === leaderboard.length - 1 && { borderBottomWidth: 0 },
               ]}>
               <View
                 style={[

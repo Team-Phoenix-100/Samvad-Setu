@@ -30,6 +30,7 @@ import {
   Flame,
   Info,
 } from 'lucide-react-native';
+import LeafletMap from '../../../components/LeafletMap';
 import { useGovStore, FlaggedProblem } from '../../../store/govStore';
 import { getProblemForReview } from '../../../api/govApi';
 
@@ -279,7 +280,7 @@ export default function TicketDetailScreen() {
 
           {/* Location Details */}
           <View style={styles.locationSection}>
-            <Text style={styles.sectionSub}>GEOGRAPHIC TRACE</Text>
+            <Text style={styles.sectionSub}>GEOGRAPHIC TRACE (OPENSTREETMAP)</Text>
             <View style={styles.locationRow}>
               <MapPin size={16} color="#2F9E8F" />
               <View style={{ flex: 1, marginLeft: 8 }}>
@@ -290,6 +291,28 @@ export default function TicketDetailScreen() {
                 </Text>
               </View>
             </View>
+
+            {problem.location?.lat && problem.location?.lng && (
+              <View style={{ height: 180, borderRadius: 12, overflow: 'hidden', marginTop: 12, borderWidth: 1, borderColor: '#1D3238' }}>
+                <LeafletMap
+                  mode="view"
+                  initialLatitude={problem.location.lat}
+                  initialLongitude={problem.location.lng}
+                  initialZoom={14}
+                  markers={[{
+                    id: String(problem._id || problem.id),
+                    latitude: problem.location.lat,
+                    longitude: problem.location.lng,
+                    title: problem.title,
+                    category: problem.category,
+                    status: problem.status || problem.moderation?.status || 'Pending Review',
+                    urgency: problem.urgency
+                  }]}
+                  height={180}
+                  isDarkMode={false}
+                />
+              </View>
+            )}
           </View>
 
           {/* Citizen Reporter Info */}

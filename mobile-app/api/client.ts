@@ -2,11 +2,16 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 
-// Dynamically grab the local network IP from Expo Go during development
-const debuggerHost = Constants?.expoConfig?.hostUri;
-const hostIp = debuggerHost ? debuggerHost.split(':')[0] : 'localhost';
+// Dynamically grab the local network IP from Expo Go during development, or fallback to LAN IP
+const debuggerHost = 
+  Constants?.expoGoConfig?.debuggerHost ||
+  (Constants?.manifest2 as any)?.extra?.expoGo?.debuggerHost ||
+  (Constants as any)?.manifest?.debuggerHost ||
+  Constants?.expoConfig?.hostUri;
 
-export const API_URL = `http://${hostIp}:5001/api`;
+const hostIp = debuggerHost ? debuggerHost.split(':')[0] : (process.env.EXPO_PUBLIC_HOST_IP || '192.168.43.12');
+
+export const API_URL = process.env.EXPO_PUBLIC_API_URL || `http://${hostIp}:5001/api`;
 
 console.log(`\n========================================`);
 console.log(`🔌 MOBILE APP API CONFIGURED FOR:`);
