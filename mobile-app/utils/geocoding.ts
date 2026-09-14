@@ -85,12 +85,14 @@ function findNearestIndianLocation(lat: number, lng: number): GeocodedLocation {
 export async function reverseGeocodeCoords(latitude: number, longitude: number): Promise<GeocodedLocation> {
   // Method 1: expo-location native reverseGeocodeAsync
   try {
-    const results = await Location.reverseGeocodeAsync({ latitude, longitude });
-    if (results && results.length > 0) {
-      const item = results[0];
-      const state = cleanStateName(item.region);
-      const rawDistrict = cleanDistrictName(item.district || item.subregion || item.city);
-      const rawBlock = item.name || item.street || item.subregion || item.city || 'Central';
+    const perm = await Location.getForegroundPermissionsAsync().catch(() => ({ status: 'undetermined' }));
+    if (perm.status === 'granted') {
+      const results = await Location.reverseGeocodeAsync({ latitude, longitude });
+      if (results && results.length > 0) {
+        const item = results[0];
+        const state = cleanStateName(item.region);
+        const rawDistrict = cleanDistrictName(item.district || item.subregion || item.city);
+        const rawBlock = item.name || item.street || item.subregion || item.city || 'Central';
 
       const parts = [
         item.name,
@@ -109,7 +111,8 @@ export async function reverseGeocodeCoords(latitude: number, longitude: number):
         };
       }
     }
-  } catch (err) {
+  }
+} catch (err) {
     console.log('Native reverse geocode skipped, trying Nominatim fallback', err);
   }
 

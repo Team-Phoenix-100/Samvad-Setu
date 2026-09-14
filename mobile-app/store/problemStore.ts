@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { Platform } from 'react-native';
 import api, { API_URL } from '../api/client';
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -47,8 +48,11 @@ export const useProblemStore = create((set, get) => ({
         payload.append('location', JSON.stringify(data.location || {}));
 
         data.images.forEach((image: any, index: number) => {
-          const uri = image.uri || image;
-          const fileName = image.fileName || uri.split('/').pop() || `proof_${index + 1}.jpg`;
+          let uri = image.uri || image;
+          if (Platform.OS === 'android' && typeof uri === 'string' && !uri.startsWith('file://') && !uri.startsWith('content://')) {
+            uri = `file://${uri}`;
+          }
+          const fileName = image.fileName || (typeof uri === 'string' ? uri.split('/').pop() : '') || `proof_${index + 1}.jpg`;
           const extension = fileName.split('.').pop()?.toLowerCase();
           const type = image.mimeType || (extension === 'png' ? 'image/png' : 'image/jpeg');
 
@@ -61,12 +65,20 @@ export const useProblemStore = create((set, get) => ({
 
         if (data.audio) {
           const audioUri = data.audio.uri || data.audio;
-          const audioName = data.audio.name || `voice_${Date.now()}.m4a`;
-          payload.append('audio', {
-            uri: audioUri,
-            name: audioName,
-            type: data.audio.type || 'audio/m4a',
-          } as any);
+          const isRealLocalFile = typeof audioUri === 'string' && 
+            !audioUri.includes('simulated-audio') && 
+            (audioUri.startsWith('file://') || audioUri.startsWith('content://'));
+
+          if (isRealLocalFile) {
+            const audioName = data.audio.name || `voice_${Date.now()}.m4a`;
+            payload.append('audio', {
+              uri: audioUri,
+              name: audioName,
+              type: data.audio.type || 'audio/m4a',
+            } as any);
+          } else {
+            payload.append('audioNote', typeof data.audio === 'string' ? data.audio : JSON.stringify(data.audio));
+          }
         }
       }
 
