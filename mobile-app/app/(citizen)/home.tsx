@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Plus, AlertCircle, CheckCircle2, Clock, MapPin, Search, Map, Bell, Filter } from 'lucide-react-native';
 import { useProblemStore } from '../../store/problemStore';
+import { useAuthStore } from '../../store/authStore';
 import { useTheme } from '../../context/ThemeContext';
 
 // Helper component for Status Badge
@@ -45,6 +46,7 @@ const SignalDot = ({ status, isDarkMode }: { status: string; isDarkMode: boolean
 export default function CitizenHomeScreen() {
   const router = useRouter();
   const { problems, isLoading, fetchProblems } = useProblemStore() as any;
+  const { user } = useAuthStore() as any;
   const { theme, isDarkMode } = useTheme();
   const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -62,6 +64,13 @@ export default function CitizenHomeScreen() {
 
   const filteredProblems = useMemo(() => {
     return problems.filter((p: any) => {
+      const authorId = p.reportedBy?._id || p.reportedBy?.id || p.reportedBy || p.userId;
+      const currentUserId = user?._id || user?.id;
+      const isOfflineTicket = String(p._id || p.id).startsWith('offline_');
+      
+      const isMyProblem = (authorId && currentUserId && String(authorId) === String(currentUserId)) || isOfflineTicket;
+      if (!isMyProblem) return false;
+
       const matchesSearch = searchQuery === '' || 
         p.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
         p.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
