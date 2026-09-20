@@ -320,6 +320,41 @@ export default function ProblemDetailScreen() {
 
             <View style={{ height: 1, backgroundColor: theme.borderSubtle, marginBottom: 20 }} />
 
+            {problem.aiMetadata && (
+              <View style={{ backgroundColor: theme.background, borderRadius: 16, borderWidth: 1, borderColor: theme.border, padding: 16, marginBottom: 20 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', borderBottomWidth: 1, borderBottomColor: theme.border, paddingBottom: 10, marginBottom: 12 }}>
+                  <Activity size={16} color={theme.accent} style={{ marginRight: 6 }} />
+                  <Text style={{ fontSize: 13, fontWeight: '800', color: theme.accent }}>AI Classification Analysis</Text>
+                </View>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 16 }}>
+                  <View style={{ width: '45%' }}>
+                    <Text style={{ fontSize: 10, color: theme.subtext, marginBottom: 4, fontWeight: '700', letterSpacing: 0.5 }}>CATEGORY</Text>
+                    <Text style={{ fontSize: 13, color: theme.text, fontWeight: '600' }}>{problem.aiMetadata.category || problem.category || "N/A"}</Text>
+                  </View>
+                  <View style={{ width: '45%' }}>
+                    <Text style={{ fontSize: 10, color: theme.subtext, marginBottom: 4, fontWeight: '700', letterSpacing: 0.5 }}>CONFIDENCE</Text>
+                    <Text style={{ fontSize: 13, color: theme.citizenPrimary, fontWeight: '600' }}>{problem.aiMetadata.confidence ? `${Math.round(problem.aiMetadata.confidence * 100)}%` : "N/A"}</Text>
+                  </View>
+                  <View style={{ width: '45%' }}>
+                    <Text style={{ fontSize: 10, color: theme.subtext, marginBottom: 4, fontWeight: '700', letterSpacing: 0.5 }}>SEVERITY</Text>
+                    <Text style={{ fontSize: 13, color: theme.text, fontWeight: '600' }}>{problem.aiMetadata.severity?.toUpperCase() || "MEDIUM"}</Text>
+                  </View>
+                  <View style={{ width: '45%' }}>
+                    <Text style={{ fontSize: 10, color: theme.subtext, marginBottom: 4, fontWeight: '700', letterSpacing: 0.5 }}>PRIORITY INDEX</Text>
+                    <Text style={{ fontSize: 13, color: theme.citizenPrimary, fontWeight: '600' }}>{problem.aiMetadata.priority || 50}/100</Text>
+                  </View>
+                  <View style={{ width: '45%' }}>
+                    <Text style={{ fontSize: 10, color: theme.subtext, marginBottom: 4, fontWeight: '700', letterSpacing: 0.5 }}>HUMAN REVIEW</Text>
+                    <Text style={{ fontSize: 13, color: theme.text, fontWeight: '600' }}>{problem.aiMetadata.needsHumanReview ? 'Yes' : 'No'}</Text>
+                  </View>
+                  <View style={{ width: '45%' }}>
+                    <Text style={{ fontSize: 10, color: theme.subtext, marginBottom: 4, fontWeight: '700', letterSpacing: 0.5 }}>DEPARTMENT</Text>
+                    <Text style={{ fontSize: 13, color: theme.text, fontWeight: '600' }} numberOfLines={1}>{problem.department || 'PWD'}</Text>
+                  </View>
+                </View>
+              </View>
+            )}
+
             <Text style={{ color: theme.text, fontSize: 15, lineHeight: 24, marginBottom: 20 }}>
               {problem.description}
             </Text>
