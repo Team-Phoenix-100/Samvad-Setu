@@ -14,13 +14,13 @@ export default function Toast() {
       <div
         className={`flex items-center justify-between p-4 rounded-xl border backdrop-blur-md shadow-2xl ${
           isSuccess
-            ? "bg-[#16262A]/95 border-[#2F9E8F]/40 text-[#F2EFE9]"
-            : "bg-[#16262A]/95 border-red-500/40 text-[#F2EFE9]"
+            ? "bg-surface/95 border-[#2F9E8F]/40 text-primary-custom"
+            : "bg-surface/95 border-red-500/40 text-primary-custom"
         }`}
       >
         <div className="flex items-center gap-3">
           {isSuccess ? (
-            <CheckCircle2 size={20} className="text-[#2F9E8F] shrink-0" />
+            <CheckCircle2 size={20} className="text-accent-secondary shrink-0" />
           ) : (
             <AlertCircle size={20} className="text-red-400 shrink-0" />
           )}
@@ -31,7 +31,7 @@ export default function Toast() {
 
         <button
           onClick={hideToast}
-          className="p-1 text-[#9BA8A6] hover:text-[#F2EFE9] transition-colors rounded-lg"
+          className="p-1 text-muted-custom hover:text-primary-custom transition-colors rounded-lg"
         >
           <X size={16} />
         </button>

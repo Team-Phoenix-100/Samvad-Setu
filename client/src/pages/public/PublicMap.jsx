@@ -5,6 +5,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Filter, ArrowRight } from 'lucide-react';
 import { useProblemStore } from '../../store/problemStore';
+import { useToastStore } from '../../store/toastStore';
 import SignalDot from '../../components/ui/SignalDot';
 
 // Fix for default marker icons in Leaflet under Vite bundle
@@ -32,26 +33,26 @@ export default function PublicMap() {
     : problems.filter(p => p.status === filter);
 
   return (
-    <div className="flex-1 h-[calc(100vh-80px)] min-h-[520px] bg-[#0F1B1E] text-[#F2EFE9] flex flex-col">
+    <div className="flex-1 h-[calc(100vh-80px)] min-h-[520px] bg-base text-primary-custom flex flex-col">
       {/* Map Header Overlay */}
-      <header className="border-b border-[#1D3238] bg-[#16262A]/90 backdrop-blur-md px-6 py-4 flex flex-wrap items-center justify-between gap-4 z-10">
+      <header className="border-b border-surface-raised bg-surface/90 backdrop-blur-md px-6 py-4 flex flex-wrap items-center justify-between gap-4 z-10">
         <div className="flex items-center gap-3">
           <Link to="/" className="flex items-center gap-2">
             <SignalDot status="unresolved" size="sm" />
-            <span className="font-display font-bold text-lg text-[#F2EFE9]">SICP Map Explorer</span>
+            <span className="font-display font-bold text-lg text-primary-custom">SICP Map Explorer</span>
           </Link>
-          <span className="hidden sm:inline text-xs font-mono text-[#9BA8A6] border-l border-[#1D3238] pl-3">
+          <span className="hidden sm:inline text-xs font-mono text-muted-custom border-l border-surface-raised pl-3">
             Jharkhand Geo-Signals
           </span>
         </div>
 
         {/* Filter Controls */}
         <div className="flex items-center gap-2 text-xs">
-          <Filter size={14} className="text-[#E8A33D]" />
+          <Filter size={14} className="text-accent-primary" />
           <button
             onClick={() => setFilter('all')}
             className={`px-3 py-1.5 rounded-lg border transition-all ${
-              filter === 'all' ? 'bg-[#1D3238] border-[#E8A33D] text-[#E8A33D]' : 'border-[#1D3238] text-[#9BA8A6]'
+              filter === 'all' ? 'bg-surface-raised border-[#E8A33D] text-accent-primary' : 'border-surface-raised text-muted-custom'
             }`}
           >
             All ({problems.length})
@@ -59,7 +60,7 @@ export default function PublicMap() {
           <button
             onClick={() => setFilter('in-progress')}
             className={`px-3 py-1.5 rounded-lg border transition-all ${
-              filter === 'in-progress' ? 'bg-[#1D3238] border-[#2F9E8F] text-[#2F9E8F]' : 'border-[#1D3238] text-[#9BA8A6]'
+              filter === 'in-progress' ? 'bg-surface-raised border-[#2F9E8F] text-accent-secondary' : 'border-surface-raised text-muted-custom'
             }`}
           >
             In Progress
@@ -67,7 +68,7 @@ export default function PublicMap() {
           <button
             onClick={() => setFilter('resolved')}
             className={`px-3 py-1.5 rounded-lg border transition-all ${
-              filter === 'resolved' ? 'bg-[#1D3238] border-[#F2EFE9] text-[#F2EFE9]' : 'border-[#1D3238] text-[#9BA8A6]'
+              filter === 'resolved' ? 'bg-surface-raised border-[#F2EFE9] text-primary-custom' : 'border-surface-raised text-muted-custom'
             }`}
           >
             Resolved
@@ -97,7 +98,7 @@ export default function PublicMap() {
                 <div className="p-1 space-y-2 max-w-xs font-sans text-slate-900">
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-[10px] font-mono font-bold text-slate-500">{item.id}</span>
-                    <span className="text-[10px] uppercase font-bold text-[#2F9E8F]">{item.status}</span>
+                    <span className="text-[10px] uppercase font-bold text-accent-secondary">{item.status}</span>
                   </div>
                   <h4 className="font-bold text-sm leading-tight text-slate-900">{item.title}</h4>
                   <p className="text-xs text-slate-600 line-clamp-2">{item.description}</p>

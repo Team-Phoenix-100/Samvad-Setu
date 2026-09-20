@@ -78,22 +78,22 @@ export default function ChatbotWidget() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-24 right-6 w-80 sm:w-96 h-[32rem] bg-[#16262A] border border-[#1D3238] rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 fade-in duration-200">
+        <div className="fixed bottom-24 right-6 w-80 sm:w-96 h-[32rem] bg-surface border border-surface-raised rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden animate-in slide-in-from-bottom-5 fade-in duration-200">
           {/* Header */}
-          <div className="bg-[#0F1B1E] border-b border-[#1D3238] p-4 flex items-center justify-between">
+          <div className="bg-base border-b border-surface-raised p-4 flex items-center justify-between">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 rounded-full bg-[#E8A33D] flex items-center justify-center">
                 <span className="text-[#0F1B1E] font-bold">AI</span>
               </div>
               <div>
-                <h3 className="text-[#F2EFE9] font-semibold text-sm">Civic Assistant</h3>
-                <p className="text-[#2F9E8F] text-xs flex items-center">
+                <h3 className="text-primary-custom font-semibold text-sm">Civic Assistant</h3>
+                <p className="text-accent-secondary text-xs flex items-center">
                   <span className="w-2 h-2 rounded-full bg-[#2F9E8F] mr-1 animate-pulse"></span>
                   Online
                 </p>
               </div>
             </div>
-            <button onClick={() => setIsOpen(false)} className="text-[#9BA8A6] hover:text-[#F2EFE9]">
+            <button onClick={() => setIsOpen(false)} className="text-muted-custom hover:text-primary-custom">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
@@ -101,14 +101,14 @@ export default function ChatbotWidget() {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-[#16262A]/50">
+          <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-surface/50">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.isBot ? "justify-start" : "justify-end"}`}>
                 <div 
                   className={`max-w-[80%] rounded-2xl p-3 text-sm ${
                     msg.isBot 
-                      ? "bg-[#1D3238] text-[#F2EFE9] rounded-tl-none" 
-                      : "bg-[#2F9E8F] text-white rounded-tr-none"
+                      ? "bg-surface-raised text-primary-custom rounded-tl-none" 
+                      : "bg-[#2F9E8F] text-primary-custom rounded-tr-none"
                   }`}
                 >
                   {msg.text}
@@ -117,7 +117,7 @@ export default function ChatbotWidget() {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-[#1D3238] rounded-2xl rounded-tl-none p-3 max-w-[80%] flex space-x-2">
+                <div className="bg-surface-raised rounded-2xl rounded-tl-none p-3 max-w-[80%] flex space-x-2">
                   <div className="w-2 h-2 bg-[#9BA8A6] rounded-full animate-bounce"></div>
                   <div className="w-2 h-2 bg-[#9BA8A6] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                   <div className="w-2 h-2 bg-[#9BA8A6] rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
@@ -128,14 +128,14 @@ export default function ChatbotWidget() {
           </div>
 
           {/* Input Area */}
-          <div className="p-4 bg-[#0F1B1E] border-t border-[#1D3238]">
+          <div className="p-4 bg-base border-t border-surface-raised">
             <form onSubmit={handleSend} className="flex space-x-2">
               <input
                 type="text"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Ask a question..."
-                className="flex-1 bg-[#16262A] border border-[#1D3238] text-[#F2EFE9] rounded-full px-4 py-2 focus:outline-none focus:border-[#E8A33D] text-sm"
+                className="flex-1 bg-surface border border-surface-raised text-primary-custom rounded-full px-4 py-2 focus:outline-none focus:border-[#E8A33D] text-sm"
               />
               <button 
                 type="submit"

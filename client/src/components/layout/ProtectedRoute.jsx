@@ -20,8 +20,8 @@ export default function ProtectedRoute({ allowedRoles }) {
 
   if (isVerifying) {
     return (
-      <div className="min-h-screen bg-[#0F1B1E] flex items-center justify-center">
-        <Loader2 className="animate-spin text-[#E8A33D]" size={48} />
+      <div className="min-h-screen bg-base flex items-center justify-center">
+        <Loader2 className="animate-spin text-accent-primary" size={48} />
       </div>
     );
   }

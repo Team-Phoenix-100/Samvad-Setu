@@ -19,17 +19,17 @@ export default function HandoverCertification() {
   const complete = corporateSigned && ulbSigned;
 
   return (
-    <div className="min-h-screen bg-[#0F1B1E] text-[#F2EFE9] p-6 max-w-5xl mx-auto space-y-7">
-      <header className="border-b border-[#1D3238] pb-6">
-        <div className="inline-flex items-center gap-2 text-xs font-mono text-[#2F9E8F] mb-2"><FileCheck size={14} /> FINAL HANDOVER & AUDIT</div>
+    <div className="min-h-screen bg-base text-primary-custom p-6 max-w-5xl mx-auto space-y-7">
+      <header className="border-b border-surface-raised pb-6">
+        <div className="inline-flex items-center gap-2 text-xs font-mono text-accent-secondary mb-2"><FileCheck size={14} /> FINAL HANDOVER & AUDIT</div>
         <h1 className="text-3xl font-bold font-display">Civic handover certification</h1>
-        <p className="text-sm text-[#9BA8A6] mt-2">Complete both sign-offs to release Tranche 3 and issue the CSR impact record.</p>
+        <p className="text-sm text-muted-custom mt-2">Complete both sign-offs to release Tranche 3 and issue the CSR impact record.</p>
       </header>
       <div className="grid md:grid-cols-2 gap-5">
-        <div className="bg-[#16262A] border border-[#1D3238] rounded-xl p-6 space-y-4"><h2 className="font-bold">Corporate auditor</h2><p className="text-sm text-[#9BA8A6]">Confirm the prototype met its funded pilot milestones and public-use license terms.</p><Button variant={corporateSigned ? 'outline' : 'primary'} className="w-full" onClick={() => setCorporateSigned(true)} disabled={corporateSigned}><CheckCircle2 size={16} /> {corporateSigned ? 'Corporate sign-off complete' : 'Sign corporate audit'}</Button></div>
-        <div className="bg-[#16262A] border border-[#1D3238] rounded-xl p-6 space-y-4"><h2 className="font-bold">ULB engineer</h2><p className="text-sm text-[#9BA8A6]">Confirm site clearance, field performance, and permanent civic handover.</p><Button variant={ulbSigned ? 'outline' : 'primary'} className="w-full" onClick={() => setUlbSigned(true)} disabled={ulbSigned}><CheckCircle2 size={16} /> {ulbSigned ? 'ULB sign-off complete' : 'Sign ULB handover'}</Button></div>
+        <div className="bg-surface border border-surface-raised rounded-xl p-6 space-y-4"><h2 className="font-bold">Corporate auditor</h2><p className="text-sm text-muted-custom">Confirm the prototype met its funded pilot milestones and public-use license terms.</p><Button variant={corporateSigned ? 'outline' : 'primary'} className="w-full" onClick={() => setCorporateSigned(true)} disabled={corporateSigned}><CheckCircle2 size={16} /> {corporateSigned ? 'Corporate sign-off complete' : 'Sign corporate audit'}</Button></div>
+        <div className="bg-surface border border-surface-raised rounded-xl p-6 space-y-4"><h2 className="font-bold">ULB engineer</h2><p className="text-sm text-muted-custom">Confirm site clearance, field performance, and permanent civic handover.</p><Button variant={ulbSigned ? 'outline' : 'primary'} className="w-full" onClick={() => setUlbSigned(true)} disabled={ulbSigned}><CheckCircle2 size={16} /> {ulbSigned ? 'ULB sign-off complete' : 'Sign ULB handover'}</Button></div>
       </div>
-      <div className="bg-[#16262A] border border-[#1D3238] rounded-xl p-6 space-y-4"><div className="flex items-center gap-2"><LockKeyhole size={18} className="text-[#E8A33D]" /><h2 className="font-bold">Escrow release</h2></div><div className="flex items-center justify-between text-sm"><span className="text-[#9BA8A6]">Tranche 3 · Final handover</span><span className={complete ? 'text-[#2F9E8F]' : 'text-[#E8A33D]'}>{complete ? 'READY TO RELEASE · 30%' : 'LOCKED · 30%'}</span></div>{complete && <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#1D3238] pt-4"><p className="text-sm text-[#2F9E8F] flex items-center gap-2"><CheckCircle2 size={16} /> Permanent civic handover certified.</p><Button variant="primary" onClick={downloadCertificate}><Download size={16} /> Download CSR-1 certificate</Button></div>}</div>
+      <div className="bg-surface border border-surface-raised rounded-xl p-6 space-y-4"><div className="flex items-center gap-2"><LockKeyhole size={18} className="text-accent-primary" /><h2 className="font-bold">Escrow release</h2></div><div className="flex items-center justify-between text-sm"><span className="text-muted-custom">Tranche 3 · Final handover</span><span className={complete ? 'text-accent-secondary' : 'text-accent-primary'}>{complete ? 'READY TO RELEASE · 30%' : 'LOCKED · 30%'}</span></div>{complete && <div className="flex flex-wrap items-center justify-between gap-3 border-t border-surface-raised pt-4"><p className="text-sm text-accent-secondary flex items-center gap-2"><CheckCircle2 size={16} /> Permanent civic handover certified.</p><Button variant="primary" onClick={downloadCertificate}><Download size={16} /> Download CSR-1 certificate</Button></div>}</div>
     </div>
   );
 }

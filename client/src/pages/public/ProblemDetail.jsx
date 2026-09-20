@@ -53,8 +53,8 @@ export default function ProblemDetail() {
 
   if (!problem) {
     return (
-      <div className="min-h-screen bg-[#0F1B1E] text-[#F2EFE9] flex items-center justify-center">
-        <p className="text-[#9BA8A6]">Loading problem details...</p>
+      <div className="min-h-screen bg-base text-primary-custom flex items-center justify-center">
+        <p className="text-muted-custom">Loading problem details...</p>
       </div>
     );
   }
@@ -87,7 +87,7 @@ export default function ProblemDetail() {
     if (item.stage?.toLowerCase().includes('report') || item.actor === 'Citizen') {
       icon = FileCheck; color = "bg-blue-500"; text = "text-blue-400";
     } else if (item.stage?.toLowerCase().includes('ai') || item.actor?.includes('AI')) {
-      icon = Activity; color = "bg-[#E8A33D]"; text = "text-[#E8A33D]";
+      icon = Activity; color = "bg-[#E8A33D]"; text = "text-accent-primary";
     } else if (item.stage?.toLowerCase().includes('escalated') || item.stage?.toLowerCase().includes('review')) {
       icon = Building2; color = "bg-purple-500"; text = "text-purple-400";
     } else if (item.stage?.toLowerCase().includes('resolved')) {
@@ -101,13 +101,13 @@ export default function ProblemDetail() {
       icon, color, text, active: true
     };
   }) : [
-    { stage: "Reported & Pending", timestamp: new Date().toLocaleString(), actor: "System", icon: Activity, color: "bg-[#1D3238]", text: "text-[#9BA8A6]", active: true }
+    { stage: "Reported & Pending", timestamp: new Date().toLocaleString(), actor: "System", icon: Activity, color: "bg-surface-raised", text: "text-muted-custom", active: true }
   ];
 
   return (
-    <div className="min-h-screen bg-[#0F1B1E] text-[#F2EFE9] p-6 max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-base text-primary-custom p-6 max-w-6xl mx-auto space-y-8">
       {/* Top Header & Navigation */}
-      <div className="flex items-center justify-between border-b border-[#1D3238] pb-4">
+      <div className="flex items-center justify-between border-b border-surface-raised pb-4">
         <Link 
           to={(() => {
             const role = user?.role;
@@ -116,11 +116,11 @@ export default function ProblemDetail() {
             if (role === "government_admin" || role === "admin" || role === "govt_admin" || role === "platform_admin") return "/admin/analytics";
             return "/citizen/dashboard";
           })()}
-          className="inline-flex items-center gap-2 text-sm font-mono text-[#9BA8A6] hover:text-[#F2EFE9] transition-colors"
+          className="inline-flex items-center gap-2 text-sm font-mono text-muted-custom hover:text-primary-custom transition-colors"
         >
           <ArrowLeft size={16} /> Back to Dashboard
         </Link>
-        <span className="text-xs font-mono font-bold text-[#E8A33D] bg-[#E8A33D]/10 border border-[#E8A33D]/20 px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(232,163,61,0.1)]">
+        <span className="text-xs font-mono font-bold text-accent-primary bg-[#E8A33D]/10 border border-[#E8A33D]/20 px-3 py-1.5 rounded-full shadow-[0_0_10px_rgba(232,163,61,0.1)]">
           REF: #{problem.id?.substring(0,8).toUpperCase()}
         </span>
       </div>
@@ -130,13 +130,13 @@ export default function ProblemDetail() {
         <div className="lg:col-span-2 space-y-6">
           
           {/* Main Hero Card */}
-          <div className="bg-[#16262A] rounded-2xl border border-[#1D3238] overflow-hidden shadow-xl">
+          <div className="bg-surface rounded-2xl border border-surface-raised overflow-hidden shadow-xl">
             <div className="p-8 space-y-6">
               <div className="flex flex-wrap items-center gap-3">
                 <SignalDot status={problem.status} size="lg" />
                 <Badge status={problem.status} />
-                <span className="text-xs font-mono font-bold px-2 py-1 bg-[#1D3238] rounded text-[#9BA8A6]">
-                  URGENCY: <span className="text-[#E8A33D]">{problem.urgency?.toUpperCase() || 'MEDIUM'}</span>
+                <span className="text-xs font-mono font-bold px-2 py-1 bg-surface-raised rounded text-muted-custom">
+                  URGENCY: <span className="text-accent-primary">{problem.urgency?.toUpperCase() || 'MEDIUM'}</span>
                 </span>
               </div>
 
@@ -144,11 +144,11 @@ export default function ProblemDetail() {
                 <div className="space-y-3">
                   <h1 className="text-3xl md:text-4xl font-bold font-display leading-tight">{problem.title}</h1>
                   {problem.reportedBy && (
-                    <div className="text-[#9BA8A6] text-sm flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-[#1D3238] flex items-center justify-center text-[10px] text-white font-bold">
+                    <div className="text-muted-custom text-sm flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-surface-raised flex items-center justify-center text-[10px] text-primary-custom font-bold">
                         {problem.reportedBy.name?.charAt(0) || "C"}
                       </span>
-                      Reported by <strong className="text-[#F2EFE9]">{problem.reportedBy.name || "Citizen"}</strong> • {new Date(problem.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      Reported by <strong className="text-primary-custom">{problem.reportedBy.name || "Citizen"}</strong> • {new Date(problem.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </div>
                   )}
                 </div>
@@ -163,18 +163,18 @@ export default function ProblemDetail() {
                 )}
               </div>
 
-              <div className="flex flex-wrap items-center gap-6 text-sm text-[#9BA8A6] font-medium">
-                <span className="flex items-center gap-2 text-[#F2EFE9] bg-[#1D3238] px-2 py-1 rounded">
-                  <Activity size={16} className="text-[#2F9E8F]" /> {problem.category || 'General'}
+              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-custom font-medium">
+                <span className="flex items-center gap-2 text-primary-custom bg-surface-raised px-2 py-1 rounded">
+                  <Activity size={16} className="text-accent-secondary" /> {problem.category || 'General'}
                 </span>
                 <span className="flex items-center gap-2">
-                  <Building2 size={16} className="text-[#E8A33D]" /> {problem.department || 'Public Works Department'}
+                  <Building2 size={16} className="text-accent-primary" /> {problem.department || 'Public Works Department'}
                 </span>
                 <span className="flex items-center gap-2">
-                  <MapPin size={16} className="text-[#E8A33D]" /> {problem.location?.district || "Jharkhand"}, {problem.location?.block || "Block"}
+                  <MapPin size={16} className="text-accent-primary" /> {problem.location?.district || "Jharkhand"}, {problem.location?.block || "Block"}
                 </span>
                 <span className="flex items-center gap-2">
-                  <Calendar size={16} className="text-[#2F9E8F]" /> Reported {new Date(problem.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  <Calendar size={16} className="text-accent-secondary" /> Reported {new Date(problem.createdAt || Date.now()).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </span>
               </div>
 
@@ -182,60 +182,60 @@ export default function ProblemDetail() {
 
               {/* AI Metadata Tabular Grid */}
               {problem.aiMetadata && (
-                <div className="bg-[#0F1B1E] rounded-xl border border-[#1D3238] p-5 space-y-4">
-                  <h3 className="text-sm font-bold font-display text-[#2F9E8F] flex items-center gap-2 border-b border-[#1D3238] pb-2">
+                <div className="bg-base rounded-xl border border-surface-raised p-5 space-y-4">
+                  <h3 className="text-sm font-bold font-display text-accent-secondary flex items-center gap-2 border-b border-surface-raised pb-2">
                     <Activity size={16} /> AI Classification Analysis
                   </h3>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                     <div>
-                      <div className="text-[#9BA8A6] text-xs uppercase tracking-wider mb-1">Category</div>
-                      <div className="font-medium text-[#F2EFE9]">{problem.aiMetadata.category || problem.category || "N/A"}</div>
+                      <div className="text-muted-custom text-xs uppercase tracking-wider mb-1">Category</div>
+                      <div className="font-medium text-primary-custom">{problem.aiMetadata.category || problem.category || "N/A"}</div>
                     </div>
                     <div>
-                      <div className="text-[#9BA8A6] text-xs uppercase tracking-wider mb-1">Confidence Score</div>
-                      <div className="font-medium text-[#E8A33D]">
+                      <div className="text-muted-custom text-xs uppercase tracking-wider mb-1">Confidence Score</div>
+                      <div className="font-medium text-accent-primary">
                         {problem.aiMetadata.confidence ? `${Math.round(problem.aiMetadata.confidence * 100)}%` : "N/A"}
                       </div>
                     </div>
                     <div>
-                      <div className="text-[#9BA8A6] text-xs uppercase tracking-wider mb-1">Severity</div>
-                      <div className="font-medium text-[#F2EFE9] uppercase">{problem.aiMetadata.severity || "MEDIUM"}</div>
+                      <div className="text-muted-custom text-xs uppercase tracking-wider mb-1">Severity</div>
+                      <div className="font-medium text-primary-custom uppercase">{problem.aiMetadata.severity || "MEDIUM"}</div>
                     </div>
                     <div>
-                      <div className="text-[#9BA8A6] text-xs uppercase tracking-wider mb-1">Priority Index</div>
-                      <div className="font-medium text-[#E8A33D]">{problem.aiMetadata.priority || 50}/100</div>
+                      <div className="text-muted-custom text-xs uppercase tracking-wider mb-1">Priority Index</div>
+                      <div className="font-medium text-accent-primary">{problem.aiMetadata.priority || 50}/100</div>
                     </div>
                     <div>
-                      <div className="text-[#9BA8A6] text-xs uppercase tracking-wider mb-1">Human Review Req.</div>
-                      <div className="font-medium text-[#F2EFE9]">{problem.aiMetadata.needsHumanReview ? 'Yes' : 'No'}</div>
+                      <div className="text-muted-custom text-xs uppercase tracking-wider mb-1">Human Review Req.</div>
+                      <div className="font-medium text-primary-custom">{problem.aiMetadata.needsHumanReview ? 'Yes' : 'No'}</div>
                     </div>
                     <div>
-                      <div className="text-[#9BA8A6] text-xs uppercase tracking-wider mb-1">Assigned Department</div>
-                      <div className="font-medium text-[#F2EFE9] truncate" title={problem.department}>{problem.department || 'PWD'}</div>
+                      <div className="text-muted-custom text-xs uppercase tracking-wider mb-1">Assigned Department</div>
+                      <div className="font-medium text-primary-custom truncate" title={problem.department}>{problem.department || 'PWD'}</div>
                     </div>
                   </div>
                 </div>
               )}
 
-              <p className="text-[#F2EFE9] text-lg leading-relaxed font-light mt-6">
+              <p className="text-primary-custom text-lg leading-relaxed font-light mt-6">
                 {problem.description}
               </p>
-              <div className={`flex items-center gap-3 rounded-lg border p-3 text-sm mt-6 ${remainingHours === 0 ? 'border-[#C1443B]/50 bg-[#C1443B]/10 text-red-300' : 'border-[#E8A33D]/30 bg-[#E8A33D]/10 text-[#E8A33D]'}`}>
+              <div className={`flex items-center gap-3 rounded-lg border p-3 text-sm mt-6 ${remainingHours === 0 ? 'border-[#C1443B]/50 bg-[#C1443B]/10 text-red-300' : 'border-[#E8A33D]/30 bg-[#E8A33D]/10 text-accent-primary'}`}>
                 <Clock size={18} />
                 <span><strong>Municipal SLA:</strong> {remainingHours ? `${remainingHours} hours remaining` : 'SLA breached'} <span className="text-xs opacity-75">({slaHours / 24}-day target)</span></span>
               </div>
             </div>
             
             {/* Citizen Impact Bar */}
-            <div className="bg-[#0F1B1E] border-t border-[#1D3238] p-4 px-8 flex items-center justify-between">
+            <div className="bg-base border-t border-surface-raised p-4 px-8 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex -space-x-3">
-                  <div className="w-8 h-8 rounded-full border-2 border-[#0F1B1E] bg-[#1D3238] flex items-center justify-center text-[10px] text-white">A</div>
-                  <div className="w-8 h-8 rounded-full border-2 border-[#0F1B1E] bg-[#2F9E8F] flex items-center justify-center text-[10px] text-white">R</div>
-                  <div className="w-8 h-8 rounded-full border-2 border-[#0F1B1E] bg-[#E8A33D] flex items-center justify-center text-[10px] text-white">K</div>
+                  <div className="w-8 h-8 rounded-full border-2 border-[#0F1B1E] bg-surface-raised flex items-center justify-center text-[10px] text-primary-custom">A</div>
+                  <div className="w-8 h-8 rounded-full border-2 border-[#0F1B1E] bg-[#2F9E8F] flex items-center justify-center text-[10px] text-primary-custom">R</div>
+                  <div className="w-8 h-8 rounded-full border-2 border-[#0F1B1E] bg-[#E8A33D] flex items-center justify-center text-[10px] text-primary-custom">K</div>
                 </div>
-                <span className="text-sm font-medium text-[#9BA8A6]">
-                  <strong className="text-[#F2EFE9]">+{upvotes} citizens</strong> impacted
+                <span className="text-sm font-medium text-muted-custom">
+                  <strong className="text-primary-custom">+{upvotes} citizens</strong> impacted
                 </span>
               </div>
               <Button 
@@ -243,16 +243,16 @@ export default function ProblemDetail() {
                 className="rounded-full px-6 py-2 flex items-center gap-2 text-sm shadow-[0_0_15px_rgba(232,163,61,0.1)]"
                 onClick={handleUpvote}
               >
-                <ThumbsUp size={16} className={hasUpvoted ? "" : "text-[#E8A33D]"} />
+                <ThumbsUp size={16} className={hasUpvoted ? "" : "text-accent-primary"} />
                 {hasUpvoted ? 'Supported' : 'Support Issue'}
               </Button>
             </div>
           </div>
 
           {/* Uploaded Media Display */}
-          <div className="bg-[#16262A] p-8 rounded-2xl border border-[#1D3238] space-y-6 shadow-lg">
-            <h3 className="text-lg font-bold font-display flex items-center gap-2 border-b border-[#1D3238] pb-4">
-              <Camera size={20} className="text-[#E8A33D]" /> Verified Photographic Evidence
+          <div className="bg-surface p-8 rounded-2xl border border-surface-raised space-y-6 shadow-lg">
+            <h3 className="text-lg font-bold font-display flex items-center gap-2 border-b border-surface-raised pb-4">
+              <Camera size={20} className="text-accent-primary" /> Verified Photographic Evidence
             </h3>
             {problem.images && problem.images.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -261,7 +261,7 @@ export default function ProblemDetail() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     key={idx}
-                    className="cursor-pointer rounded-xl overflow-hidden border border-[#1D3238] hover:border-[#E8A33D] transition-colors shadow-sm aspect-square relative group bg-[#0F1B1E]"
+                    className="cursor-pointer rounded-xl overflow-hidden border border-surface-raised hover:border-[#E8A33D] transition-colors shadow-sm aspect-square relative group bg-base"
                     onClick={() => setPreviewImage(img.url)}
                   >
                     <img 
@@ -269,8 +269,8 @@ export default function ProblemDetail() {
                       alt={`Evidence ${idx + 1}`} 
                       className="w-full h-full object-cover" 
                     />
-                    <div className="absolute inset-0 bg-[#0F1B1E]/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
-                      <span className="text-white text-xs font-mono font-bold bg-[#E8A33D] px-3 py-1.5 rounded-full shadow-lg">Expand</span>
+                    <div className="absolute inset-0 bg-base/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-[2px]">
+                      <span className="text-primary-custom text-xs font-mono font-bold bg-[#E8A33D] px-3 py-1.5 rounded-full shadow-lg">Expand</span>
                     </div>
                   </motion.div>
                 ))}
@@ -289,12 +289,12 @@ export default function ProblemDetail() {
         <div className="space-y-6">
           
           {/* Extended Life Cycle Audit Timeline */}
-          <div className="bg-[#16262A] p-6 rounded-2xl border border-[#1D3238] shadow-lg sticky top-24">
+          <div className="bg-surface p-6 rounded-2xl border border-surface-raised shadow-lg sticky top-24">
             <h2 className="text-lg font-bold font-display flex items-center gap-2 mb-8">
-              <Activity size={20} className="text-[#2F9E8F]" /> Resolution Tracker
+              <Activity size={20} className="text-accent-secondary" /> Resolution Tracker
             </h2>
 
-            <div className="relative border-l-2 border-[#1D3238] ml-5 space-y-8">
+            <div className="relative border-l-2 border-surface-raised ml-5 space-y-8">
               {extendedTimeline.map((item, index) => (
                 <div key={index} className={`relative pl-8 transition-opacity ${item.active ? 'opacity-100' : 'opacity-40'}`}>
                   {/* Timeline Node */}
@@ -304,9 +304,9 @@ export default function ProblemDetail() {
                   
                   {/* Content */}
                   <div className="space-y-1.5 -mt-1">
-                    <h4 className={`text-sm font-bold ${item.active ? 'text-[#F2EFE9]' : 'text-[#9BA8A6]'}`}>{item.stage}</h4>
+                    <h4 className={`text-sm font-bold ${item.active ? 'text-primary-custom' : 'text-muted-custom'}`}>{item.stage}</h4>
                     <p className={`text-xs font-medium ${item.text}`}>{item.actor}</p>
-                    <span className="inline-block text-[10px] font-mono font-bold bg-[#0F1B1E] border border-[#1D3238] text-[#9BA8A6] px-2 py-0.5 rounded">
+                    <span className="inline-block text-[10px] font-mono font-bold bg-base border border-surface-raised text-muted-custom px-2 py-0.5 rounded">
                       {item.timestamp}
                     </span>
                   </div>
@@ -321,10 +321,10 @@ export default function ProblemDetail() {
 
       <AnimatePresence>
         {actionModal && <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[90] bg-black/70 flex items-center justify-center p-4">
-          <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full max-w-md bg-[#16262A] border border-[#1D3238] rounded-xl p-6 space-y-4">
+          <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="w-full max-w-md bg-surface border border-surface-raised rounded-xl p-6 space-y-4">
             <div className="flex items-center justify-between"><h2 className="font-bold font-display">{roleAction.label}</h2><button onClick={() => setActionModal(null)} aria-label="Close"><X size={18} /></button></div>
-            <p className="text-sm text-[#9BA8A6]">Capture the next lifecycle decision for this issue.</p>
-            <textarea value={actionNote} onChange={(event) => setActionNote(event.target.value)} rows={3} placeholder="Notes, inspection findings, or pledge context" className="w-full bg-[#0F1B1E] border border-[#1D3238] rounded-lg p-3 text-sm" />
+            <p className="text-sm text-muted-custom">Capture the next lifecycle decision for this issue.</p>
+            <textarea value={actionNote} onChange={(event) => setActionNote(event.target.value)} rows={3} placeholder="Notes, inspection findings, or pledge context" className="w-full bg-base border border-surface-raised rounded-lg p-3 text-sm" />
             <div className="flex flex-wrap gap-2">{roleAction.options.map((option) => <Button key={option} variant={option === 'FAILED' ? 'danger' : 'primary'} onClick={() => completeAction(option)}>{option}</Button>)}</div>
           </motion.div>
         </motion.div>}
@@ -338,15 +338,15 @@ export default function ProblemDetail() {
           >
             <motion.div 
               initial={{ scale: 0.95, y: 10, opacity: 0 }} animate={{ scale: 1, y: 0, opacity: 1 }} exit={{ scale: 0.95, y: 10, opacity: 0 }}
-              className="w-full max-w-sm bg-[#16262A] border border-[#1D3238] rounded-2xl p-6 space-y-6 shadow-2xl"
+              className="w-full max-w-sm bg-surface border border-surface-raised rounded-2xl p-6 space-y-6 shadow-2xl"
             >
               <div className="flex flex-col items-center text-center space-y-4">
                 <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center text-red-500 border border-red-500/20">
                   <Trash2 size={32} />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-xl font-bold font-display text-white">Delete Problem?</h2>
-                  <p className="text-[#9BA8A6] text-sm">
+                  <h2 className="text-xl font-bold font-display text-primary-custom">Delete Problem?</h2>
+                  <p className="text-muted-custom text-sm">
                     Are you sure you want to delete this problem? If you delete it, all related data, evidence, and AI classifications will be lost forever.
                   </p>
                 </div>
@@ -355,7 +355,7 @@ export default function ProblemDetail() {
                 <Button variant="outline" className="flex-1" onClick={() => setShowDeleteModal(false)}>
                   Cancel
                 </Button>
-                <Button variant="danger" className="flex-1 bg-red-600 hover:bg-red-700 text-white border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.2)]" onClick={confirmDelete}>
+                <Button variant="danger" className="flex-1 bg-red-600 hover:bg-red-700 text-primary-custom border-red-600 shadow-[0_0_15px_rgba(220,38,38,0.2)]" onClick={confirmDelete}>
                   Delete Forever
                 </Button>
               </div>
@@ -369,10 +369,10 @@ export default function ProblemDetail() {
         {previewImage && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0F1B1E]/95 backdrop-blur-xl p-4 md:p-12"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-base/95 backdrop-blur-xl p-4 md:p-12"
             onClick={() => setPreviewImage(null)}
           >
-            <button className="absolute top-6 right-6 text-[#9BA8A6] hover:text-white bg-[#1D3238]/50 hover:bg-[#1D3238] rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm transition-all shadow-lg border border-[#1D3238]">
+            <button className="absolute top-6 right-6 text-muted-custom hover:text-primary-custom bg-surface-raised/50 hover:bg-surface-raised rounded-full w-12 h-12 flex items-center justify-center backdrop-blur-sm transition-all shadow-lg border border-surface-raised">
               <span className="text-xl leading-none -mt-0.5">✕</span>
             </button>
             <motion.img 
@@ -380,7 +380,7 @@ export default function ProblemDetail() {
               transition={{ type: "spring", bounce: 0.35 }}
               src={previewImage} 
               alt="Full Preview" 
-              className="max-w-full max-h-full object-contain rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-[#1D3238]"
+              className="max-w-full max-h-full object-contain rounded-xl shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-surface-raised"
               onClick={(e) => e.stopPropagation()}
             />
           </motion.div>

@@ -13,7 +13,7 @@ export default function SignalDot({ status = 'unresolved', size = 'md' }) {
 
   if (isResolved) {
     return (
-      <div className={`rounded-full bg-[#2F9E8F] flex items-center justify-center text-[#0F1B1E] ${sizeClasses[size]}`}>
+      <div className={`rounded-full bg-[var(--accent-secondary)] flex items-center justify-center text-[var(--surface)] shadow-md ${sizeClasses[size]}`}>
         <Check size={size === 'sm' ? 10 : size === 'md' ? 12 : 16} strokeWidth={3} />
       </div>
     );
@@ -25,10 +25,10 @@ export default function SignalDot({ status = 'unresolved', size = 'md' }) {
       <motion.span
         animate={{ scale: [1, 1.8, 1], opacity: [0.7, 0, 0.7] }}
         transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-        className={`absolute rounded-full bg-[#E8A33D] ${sizeClasses[size]}`}
+        className={`absolute rounded-full bg-[var(--accent-primary)] ${sizeClasses[size]}`}
       />
       {/* Inner solid amber core */}
-      <span className={`relative rounded-full bg-[#E8A33D] ${sizeClasses[size]}`} />
+      <span className={`relative rounded-full bg-[var(--accent-primary)] shadow-md ${sizeClasses[size]}`} />
     </div>
   );
 }
