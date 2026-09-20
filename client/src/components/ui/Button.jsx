@@ -5,9 +5,9 @@ export default function Button({ children, variant = 'primary', className = '', 
   
   const variants = {
     primary: "bg-[#E8A33D] hover:bg-[#d49232] text-[#0F1B1E] font-semibold",
-    secondary: "bg-[#1D3238] hover:bg-[#28434a] text-[#F2EFE9] border border-[#2F9E8F]/30",
-    danger: "bg-[#C1443B] hover:bg-[#a83a32] text-[#F2EFE9]",
-    outline: "border border-[#9BA8A6]/40 text-[#F2EFE9] hover:bg-[#16262A]"
+    secondary: "bg-surface-raised hover:bg-[#28434a] text-primary-custom border border-[#2F9E8F]/30",
+    danger: "bg-[#C1443B] hover:bg-[#a83a32] text-primary-custom",
+    outline: "border border-[#9BA8A6]/40 text-primary-custom hover:bg-surface"
   };
 
   return (

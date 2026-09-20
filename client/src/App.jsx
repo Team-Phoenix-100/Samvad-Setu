@@ -35,15 +35,15 @@ import ChatbotWidget from "./components/chat/ChatbotWidget";
 
 // Temporary placeholder wrapper for project pages during Phase 1 setup[cite: 1]
 const PageStub = ({ title, category }) => (
-  <div className="min-h-screen bg-[#0F1B1E] text-[#F2EFE9] p-8">
-    <div className="max-w-4xl mx-auto space-y-4 border border-[#1D3238] p-6 rounded-lg bg-[#16262A]">
-      <span className="text-xs font-mono uppercase tracking-widest text-[#E8A33D] bg-[#E8A33D]/10 px-2 py-1 rounded">
+  <div className="min-h-screen bg-base text-primary-custom p-8">
+    <div className="max-w-4xl mx-auto space-y-4 border border-surface-raised p-6 rounded-lg bg-surface">
+      <span className="text-xs font-mono uppercase tracking-widest text-accent-primary bg-[#E8A33D]/10 px-2 py-1 rounded">
         {category}
       </span>
       <h1 className="text-3xl font-bold font-display">{title}</h1>
-      <p className="text-[#9BA8A6]">
+      <p className="text-muted-custom">
         Route configured successfully. Implement page components inside{" "}
-        <code className="text-[#2F9E8F]">src/pages/</code>.
+        <code className="text-accent-secondary">src/pages/</code>.
       </p>
     </div>
   </div>

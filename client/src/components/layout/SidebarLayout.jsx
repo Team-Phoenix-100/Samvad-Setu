@@ -55,12 +55,12 @@ export default function SidebarLayout() {
   const navItems = getNavItems();
 
   return (
-    <div className="min-h-screen bg-[#0F1B1E] text-[#F2EFE9] flex">
+    <div className="min-h-screen bg-base text-primary-custom flex">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#16262A] border-r border-[#1D3238] hidden md:flex flex-col">
-        <div className="p-6 border-b border-[#1D3238]">
-          <h2 className="text-2xl font-bold font-display text-[#E8A33D]">Samvad Setu</h2>
-          <p className="text-xs text-[#9BA8A6] mt-1 tracking-wider uppercase">{getPortalTitle()}</p>
+      <aside className="w-64 bg-surface border-r border-surface-raised hidden md:flex flex-col">
+        <div className="p-6 border-b border-surface-raised">
+          <h2 className="text-2xl font-bold font-display text-accent-primary">Samvad Setu</h2>
+          <p className="text-xs text-muted-custom mt-1 tracking-wider uppercase">{getPortalTitle()}</p>
         </div>
 
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -71,8 +71,8 @@ export default function SidebarLayout() {
               className={({ isActive }) =>
                 `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                   isActive
-                    ? 'bg-[#1D3238] text-[#E8A33D] font-medium border border-[#1D3238]'
-                    : 'text-[#9BA8A6] hover:bg-[#1D3238]/50 hover:text-[#F2EFE9] border border-transparent'
+                    ? 'bg-surface-raised text-accent-primary font-medium border border-surface-raised'
+                    : 'text-muted-custom hover:bg-surface-raised/50 hover:text-primary-custom border border-transparent'
                 }`
               }
             >
@@ -82,14 +82,14 @@ export default function SidebarLayout() {
           ))}
         </nav>
 
-        <div className="p-4 border-t border-[#1D3238]">
-          <div className="flex items-center gap-3 px-4 py-3 mb-2 bg-[#0F1B1E] rounded-lg border border-[#1D3238]">
-            <div className="w-8 h-8 rounded-full bg-[#1D3238] flex items-center justify-center text-[#E8A33D] font-bold">
+        <div className="p-4 border-t border-surface-raised">
+          <div className="flex items-center gap-3 px-4 py-3 mb-2 bg-base rounded-lg border border-surface-raised">
+            <div className="w-8 h-8 rounded-full bg-surface-raised flex items-center justify-center text-accent-primary font-bold">
               {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-[#F2EFE9] truncate">{user?.name || 'Citizen User'}</p>
-              <p className="text-xs text-[#9BA8A6] truncate">{user?.email || 'citizen@example.com'}</p>
+              <p className="text-sm font-medium text-primary-custom truncate">{user?.name || 'Citizen User'}</p>
+              <p className="text-xs text-muted-custom truncate">{user?.email || 'citizen@example.com'}</p>
             </div>
           </div>
           <button
@@ -103,14 +103,14 @@ export default function SidebarLayout() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[#0F1B1E]">
+      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-base">
         {/* Mobile Header */}
-        <div className="md:hidden bg-[#16262A] border-b border-[#1D3238] p-4 flex justify-between items-center">
+        <div className="md:hidden bg-surface border-b border-surface-raised p-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <Menu className="text-[#9BA8A6]" size={24} />
-            <h2 className="text-lg font-bold font-display text-[#E8A33D]">Samvad Setu</h2>
+            <Menu className="text-muted-custom" size={24} />
+            <h2 className="text-lg font-bold font-display text-accent-primary">Samvad Setu</h2>
           </div>
-          <div className="w-8 h-8 rounded-full bg-[#1D3238] flex items-center justify-center text-[#E8A33D] font-bold text-sm">
+          <div className="w-8 h-8 rounded-full bg-surface-raised flex items-center justify-center text-accent-primary font-bold text-sm">
             {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
           </div>
         </div>

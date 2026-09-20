@@ -32,28 +32,28 @@ export default function HeiProblemReview() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F1B1E] text-[#F2EFE9] p-6 max-w-6xl mx-auto space-y-6">
-      <div className="space-y-2 border-b border-[#1D3238] pb-4">
-        <span className="text-xs font-mono text-[#2F9E8F] uppercase">Phase 5 • Institutional Workflow</span>
+    <div className="min-h-screen bg-base text-primary-custom p-6 max-w-6xl mx-auto space-y-6">
+      <div className="space-y-2 border-b border-surface-raised pb-4">
+        <span className="text-xs font-mono text-accent-secondary uppercase">Phase 5 • Institutional Workflow</span>
         <h1 className="text-3xl font-bold font-display">Problem Review & Claim Queue</h1>
-        <p className="text-xs text-[#9BA8A6]">Select AI-categorized civic problems near your institution to adopt as student Capstone / R&D projects.</p>
+        <p className="text-xs text-muted-custom">Select AI-categorized civic problems near your institution to adopt as student Capstone / R&D projects.</p>
       </div>
 
-      <div className="flex items-start gap-3 p-4 rounded-xl border border-[#C1443B]/40 bg-[#C1443B]/10 text-sm text-red-200"><ShieldAlert size={18} className="shrink-0 text-[#C1443B]" /><span><strong>1st-year safety guardrail:</strong> Tier 3 and Tier 4 R&D briefs require senior faculty supervision and are hidden from junior-only teams.</span></div>
+      <div className="flex items-start gap-3 p-4 rounded-xl border border-[#C1443B]/40 bg-[#C1443B]/10 text-sm text-red-200"><ShieldAlert size={18} className="shrink-0 text-accent-urgent" /><span><strong>1st-year safety guardrail:</strong> Tier 3 and Tier 4 R&D briefs require senior faculty supervision and are hidden from junior-only teams.</span></div>
 
       {/* Filter Toolbar */}
-      <div className="flex items-center gap-3 bg-[#16262A] p-3 rounded-lg border border-[#1D3238] text-xs">
-        <Filter size={16} className="text-[#E8A33D]" />
-        <span className="text-[#9BA8A6]">Domain Filter:</span>
+      <div className="flex items-center gap-3 bg-surface p-3 rounded-lg border border-surface-raised text-xs">
+        <Filter size={16} className="text-accent-primary" />
+        <span className="text-muted-custom">Domain Filter:</span>
         <button
           onClick={() => setSelectedFilter('all')}
-          className={`px-3 py-1 rounded-md transition-colors ${selectedFilter === 'all' ? 'bg-[#1D3238] text-[#E8A33D] font-bold' : 'text-[#9BA8A6]'}`}
+          className={`px-3 py-1 rounded-md transition-colors ${selectedFilter === 'all' ? 'bg-surface-raised text-accent-primary font-bold' : 'text-muted-custom'}`}
         >
           All Open Issues
         </button>
         <button
           onClick={() => setSelectedFilter('energy')}
-          className={`px-3 py-1 rounded-md transition-colors ${selectedFilter === 'energy' ? 'bg-[#1D3238] text-[#2F9E8F] font-bold' : 'text-[#9BA8A6]'}`}
+          className={`px-3 py-1 rounded-md transition-colors ${selectedFilter === 'energy' ? 'bg-surface-raised text-accent-secondary font-bold' : 'text-muted-custom'}`}
         >
           Renewable Energy & Water
         </button>
@@ -62,32 +62,32 @@ export default function HeiProblemReview() {
       {/* Problem Queue List */}
       <div className="space-y-4">
         {problems.map((item) => (
-          <div key={item.id} className="p-6 bg-[#16262A] border border-[#1D3238] rounded-xl space-y-4 hover:border-[#2F9E8F]/40 transition-all">
+          <div key={item.id} className="p-6 bg-surface border border-surface-raised rounded-xl space-y-4 hover:border-[#2F9E8F]/40 transition-all">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <div className="flex items-center gap-3">
                 <SignalDot status={item.status} size="md" />
-                <span className="text-xs font-mono text-[#9BA8A6]">{item.id}</span>
+                <span className="text-xs font-mono text-muted-custom">{item.id}</span>
                 <Badge status={item.status} />
               </div>
-              <span className="text-xs font-mono text-[#E8A33D] bg-[#E8A33D]/10 px-2.5 py-1 rounded w-fit">
+              <span className="text-xs font-mono text-accent-primary bg-[#E8A33D]/10 px-2.5 py-1 rounded w-fit">
                 AI Urgency: {item.urgency || 'Urgent'}
               </span>
-                <span className="text-xs font-mono text-[#2F9E8F] bg-[#2F9E8F]/10 px-2.5 py-1 rounded w-fit">Tier {getTier(item)} {getTier(item) === 4 ? 'R&D' : getTier(item) === 3 ? 'Advanced' : getTier(item) === 2 ? 'Applied' : 'Foundation'}</span>
+                <span className="text-xs font-mono text-accent-secondary bg-[#2F9E8F]/10 px-2.5 py-1 rounded w-fit">Tier {getTier(item)} {getTier(item) === 4 ? 'R&D' : getTier(item) === 3 ? 'Advanced' : getTier(item) === 2 ? 'Applied' : 'Foundation'}</span>
             </div>
 
             <div>
-              <h3 className="text-lg font-bold text-[#F2EFE9]">{item.title}</h3>
-              <p className="text-xs text-[#9BA8A6] mt-1 line-clamp-2">{item.description}</p>
+              <h3 className="text-lg font-bold text-primary-custom">{item.title}</h3>
+              <p className="text-xs text-muted-custom mt-1 line-clamp-2">{item.description}</p>
             </div>
 
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-[#1D3238] text-xs text-[#9BA8A6]">
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-surface-raised text-xs text-muted-custom">
               <span className="flex items-center gap-1">
-                <MapPin size={14} className="text-[#E8A33D]" /> District: {item.location?.district || 'Jharkhand'}
+                <MapPin size={14} className="text-accent-primary" /> District: {item.location?.district || 'Jharkhand'}
               </span>
 
               <div className="flex items-center gap-3">
                 <Button variant="outline" className="py-1.5 text-xs" onClick={() => downloadDossier(item)}><Download size={14} /> Dossier</Button>
-                <Link to={`/problem/${item.id}`} className="hover:text-[#F2EFE9]">
+                <Link to={`/problem/${item.id}`} className="hover:text-primary-custom">
                   View Details
                 </Link>
                 <Button variant="primary" className="py-1.5 text-xs" onClick={() => handleClaim(item.id)}>

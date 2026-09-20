@@ -51,7 +51,7 @@ export default function ModerationReview() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <button onClick={() => navigate(-1)} className="text-[#9BA8A6] hover:text-[#F2EFE9] flex items-center gap-2 text-sm">
+      <button onClick={() => navigate(-1)} className="text-muted-custom hover:text-primary-custom flex items-center gap-2 text-sm">
         <ArrowLeft size={16} /> Back to Queue
       </button>
 
@@ -60,7 +60,7 @@ export default function ModerationReview() {
         <div className="md:col-span-2 space-y-6">
           <div className="bg-[#16272B] p-8 rounded-xl border border-[#233E44]">
             <h1 className="text-2xl font-bold font-display mb-4">{problem.title}</h1>
-            <p className="text-[#9BA8A6] mb-6">{problem.description}</p>
+            <p className="text-muted-custom mb-6">{problem.description}</p>
             {problem.images && problem.images.length > 0 && (
               <img src={problem.images[0].url} alt="Evidence" className="w-full h-64 object-cover rounded-lg border border-[#233E44]" />
             )}
@@ -69,22 +69,22 @@ export default function ModerationReview() {
 
         {/* Right Col: AI Analysis & Actions */}
         <div className="space-y-6">
-          <div className="bg-[#0F1B1E] p-6 rounded-xl border border-[#E8A33D]/50 shadow-[0_0_15px_rgba(232,163,61,0.1)]">
-            <h3 className="font-bold font-display flex items-center gap-2 text-[#E8A33D] mb-4">
+          <div className="bg-base p-6 rounded-xl border border-[#E8A33D]/50 shadow-[0_0_15px_rgba(232,163,61,0.1)]">
+            <h3 className="font-bold font-display flex items-center gap-2 text-accent-primary mb-4">
               <AlertTriangle size={18} /> AI Analysis
             </h3>
             <div className="space-y-3 text-sm">
               <div className="flex justify-between border-b border-[#233E44] pb-2">
-                <span className="text-[#9BA8A6]">Category</span>
-                <span className="font-medium text-white">{problem.aiMetadata?.category}</span>
+                <span className="text-muted-custom">Category</span>
+                <span className="font-medium text-primary-custom">{problem.aiMetadata?.category}</span>
               </div>
               <div className="flex justify-between border-b border-[#233E44] pb-2">
-                <span className="text-[#9BA8A6]">Confidence</span>
-                <span className="font-mono text-[#C1443B] font-bold">{Math.round((problem.aiMetadata?.confidence || 0)*100)}%</span>
+                <span className="text-muted-custom">Confidence</span>
+                <span className="font-mono text-accent-urgent font-bold">{Math.round((problem.aiMetadata?.confidence || 0)*100)}%</span>
               </div>
               <div className="flex justify-between border-b border-[#233E44] pb-2">
-                <span className="text-[#9BA8A6]">Reason</span>
-                <span className="font-mono text-[#E8A33D] text-xs">{problem.aiMetadata?.flagReason}</span>
+                <span className="text-muted-custom">Reason</span>
+                <span className="font-mono text-accent-primary text-xs">{problem.aiMetadata?.flagReason}</span>
               </div>
             </div>
           </div>
@@ -93,13 +93,13 @@ export default function ModerationReview() {
             <textarea 
               placeholder="Moderation notes (required for rejection)" 
               value={note} onChange={e => setNote(e.target.value)}
-              className="w-full bg-[#0F1B1E] border border-[#233E44] rounded-lg p-3 text-sm focus:outline-none focus:border-[#2F9E8F] text-white"
+              className="w-full bg-base border border-[#233E44] rounded-lg p-3 text-sm focus:outline-none focus:border-[#2F9E8F] text-primary-custom"
               rows={3}
             />
             <button onClick={() => handleAction('approve')} className="w-full flex items-center justify-center gap-2 bg-[#2F9E8F] text-[#0F1B1E] font-bold py-2 rounded-lg hover:bg-[#2F9E8F]/90 transition">
               <Check size={18} /> Approve AI Classification
             </button>
-            <button onClick={() => handleAction('reject')} className="w-full flex items-center justify-center gap-2 bg-transparent border border-[#C1443B] text-[#C1443B] font-bold py-2 rounded-lg hover:bg-[#C1443B]/10 transition">
+            <button onClick={() => handleAction('reject')} className="w-full flex items-center justify-center gap-2 bg-transparent border border-[#C1443B] text-accent-urgent font-bold py-2 rounded-lg hover:bg-[#C1443B]/10 transition">
               <X size={18} /> Reject Submission
             </button>
           </div>

@@ -57,14 +57,44 @@ body { transition: background-color 180ms ease, color 180ms ease; }
 .theme-switcher-compact .theme-option { width: 30px; padding: 0; }
 
 /* Custom background & text helper classes matching design tokens */
-.bg-base { background-color: #0F1B1E; }
-.bg-surface { background-color: #16262A; }
-.bg-surface-raised { background-color: #1D3238; }
+.bg-base { background-color: var(--bg-base); }
+.bg-surface { background-color: var(--surface); }
+.bg-surface-raised { background-color: var(--surface-raised); }
 
-.text-accent-primary { color: #E8A33D; }
-.text-accent-secondary { color: #2F9E8F; }
-.text-accent-urgent { color: #C1443B; }
-.text-primary-custom { color: #F2EFE9; }
-.text-muted-custom { color: #9BA8A6; }
+.text-accent-primary { color: var(--accent-primary); }
+.text-accent-secondary { color: var(--accent-secondary); }
+.text-accent-urgent { color: var(--accent-urgent); }
+.text-primary-custom { color: var(--text-primary); }
+.text-muted-custom { color: var(--text-muted); }
 
-.border-surface-raised { border-color: #1D3238; }
+.border-surface-raised { border-color: var(--border-color); }
+
+/* Premium Surface and Elevation Utilities */
+.card-premium {
+  background-color: var(--surface);
+  border: 1px solid var(--border-color);
+  border-radius: 0.75rem;
+  transition: all 0.2s ease-in-out;
+}
+.card-premium:hover {
+  border-color: var(--accent-primary);
+  opacity: 0.95;
+}
+
+/* Light Mode / Dark Mode Elevation Shadows */
+.elevate-sm { box-shadow: 0 2px 8px -2px rgba(232, 163, 61, 0.05); }
+.elevate-md { box-shadow: 0 4px 16px -4px rgba(232, 163, 61, 0.1); }
+.elevate-lg { box-shadow: 0 8px 30px -6px rgba(232, 163, 61, 0.15); }
+
+[data-theme='light'] .card-premium {
+  background-color: var(--surface);
+  border: 1px solid var(--surface-raised);
+}
+[data-theme='light'] .card-premium:hover {
+  border-color: var(--border-color);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.08);
+}
+[data-theme='light'] .elevate-sm { box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05); }
+[data-theme='light'] .elevate-md { box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.08); }
+[data-theme='light'] .elevate-lg { box-shadow: 0 8px 30px -6px rgba(0, 0, 0, 0.12); }

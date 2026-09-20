@@ -36,11 +36,11 @@ export default function GovernmentLayout() {
   }, []); // Empty deps to prevent infinite reconnection loop
 
   return (
-    <div className="flex h-screen bg-[#0F1B1E] overflow-hidden text-[#F2EFE9] font-body">
+    <div className="flex h-screen bg-base overflow-hidden text-primary-custom font-body">
       <GovSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <GovTopbar />
-        <main className="flex-1 overflow-y-auto p-6 bg-[#0F1B1E]">
+        <main className="flex-1 overflow-y-auto p-6 bg-base">
           <Outlet />
         </main>
       </div>
