@@ -13,6 +13,16 @@ app.use(cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+const authRoutes = require("./routes/authRoutes");
+const problemRoutes = require("./routes/problemRoutes");
+const adminRoutes = require("./routes/adminRoutes");
+const chatbotRoutes = require("./routes/chatbotRoutes");
+
+app.use("/api/auth", authRoutes);
+app.use("/api/problems", problemRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/chatbot", chatbotRoutes);
+
 app.get("/", (req, res) => {
   res.send("Samvad Setu backend is up and running 🏃‍♂️");
 });

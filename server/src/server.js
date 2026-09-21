@@ -1,12 +1,6 @@
-const authRoutes = require("./routes/authRoutes");
-const problemRoutes = require("./routes/problemRoutes");
-const adminRoutes = require("./routes/adminRoutes");
-
 const { app } = require("./app");
 
-app.use("/api/auth", authRoutes);
-app.use("/api/problems", problemRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/chatbot", require("./routes/chatbotRoutes"));
+// app.js handles the express app initialization, route mounting, and server listening.
+// This file is kept for compatibility with scripts running `node src/server.js`.
 
 module.exports = app;
