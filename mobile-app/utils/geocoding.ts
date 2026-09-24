@@ -4,6 +4,9 @@ export interface GeocodedLocation {
   state: string;
   district: string;
   block: string;
+  street?: string;
+  ward?: string;
+  pincode?: string;
   formattedAddress: string;
 }
 
@@ -93,6 +96,9 @@ export async function reverseGeocodeCoords(latitude: number, longitude: number):
         const state = cleanStateName(item.region);
         const rawDistrict = cleanDistrictName(item.district || item.subregion || item.city);
         const rawBlock = item.name || item.street || item.subregion || item.city || 'Central';
+        const street = item.street || '';
+        const ward = item.subregion || item.name || '';
+        const pincode = item.postalCode || '';
 
       const parts = [
         item.name,
@@ -100,6 +106,7 @@ export async function reverseGeocodeCoords(latitude: number, longitude: number):
         rawDistrict,
         state,
         item.country || 'India',
+        pincode
       ].filter(Boolean);
 
       if (state && rawDistrict) {
@@ -107,6 +114,9 @@ export async function reverseGeocodeCoords(latitude: number, longitude: number):
           state,
           district: rawDistrict,
           block: rawBlock,
+          street,
+          ward,
+          pincode,
           formattedAddress: parts.join(', '),
         };
       }
@@ -148,14 +158,21 @@ export async function reverseGeocodeCoords(latitude: number, longitude: number):
           addr.road ||
           addr.municipality ||
           'Central';
+        
+        const street = addr.road || addr.pedestrian || addr.path || '';
+        const ward = addr.suburb || addr.neighbourhood || addr.village || addr.residential || '';
+        const pincode = addr.postcode || '';
 
         if (state && district) {
-          const parts = [block, district, state, 'India'].filter(Boolean);
+          const parts = [block, district, state, 'India', pincode].filter(Boolean);
           return {
             state,
             district,
             block,
-            formattedAddress: data.display_name?.split(',').slice(0, 3).join(', ') || parts.join(', '),
+            street,
+            ward,
+            pincode,
+            formattedAddress: data.display_name?.split(',').slice(0, 4).join(', ') || parts.join(', '),
           };
         }
       }

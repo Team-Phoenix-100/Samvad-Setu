@@ -41,25 +41,25 @@ export const useProblemStore = create((set, get) => ({
 
       if (hasImages) {
         payload = new FormData();
-        payload.append('title', data.title || '');
-        payload.append('description', data.description || '');
-        payload.append('category', data.category || 'Infrastructure & Safety');
-        payload.append('urgency', data.urgency || 'medium');
+        payload.append('title', String(data.title || ''));
+        payload.append('description', String(data.description || ''));
+        payload.append('category', String(data.category || 'Infrastructure & Safety'));
+        payload.append('urgency', String(data.urgency || 'medium'));
         payload.append('location', JSON.stringify(data.location || {}));
 
         data.images.forEach((image: any, index: number) => {
-          let uri = image.uri || image;
-          if (Platform.OS === 'android' && typeof uri === 'string' && !uri.startsWith('file://') && !uri.startsWith('content://')) {
+          let uri = String(image.uri || image);
+          if (Platform.OS === 'android' && !uri.startsWith('file://') && !uri.startsWith('content://')) {
             uri = `file://${uri}`;
           }
-          const fileName = image.fileName || (typeof uri === 'string' ? uri.split('/').pop() : '') || `proof_${index + 1}.jpg`;
+          const fileName = String(image.fileName || image.name || uri.split('/').pop() || `proof_${index + 1}.jpg`);
           const extension = fileName.split('.').pop()?.toLowerCase();
-          const type = image.mimeType || (extension === 'png' ? 'image/png' : 'image/jpeg');
+          const type = String(image.mimeType || image.type || (extension === 'png' ? 'image/png' : 'image/jpeg'));
 
           payload.append('images', {
-            uri: uri,
+            uri,
             name: fileName,
-            type: type,
+            type,
           } as any);
         });
 
