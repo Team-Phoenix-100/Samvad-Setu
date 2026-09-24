@@ -23,7 +23,12 @@
         "googleMaps": {
           "apiKey": "AIzaSyAPnTY4LLzusJgZc1d2oxPH4zfqhpG1T6Y"
         }
-      }
+      },
+      "permissions": [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "static",
@@ -46,7 +51,21 @@
       "expo-font",
       "expo-image",
       "expo-status-bar",
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Samvad Setu to use your location to pin exact grievance reports."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Samvad Setu to access your photos to attach visual evidence.",
+          "cameraPermission": "Allow Samvad Setu to access your camera to capture evidence."
+        }
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -55,9 +74,8 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "b871bed4-0494-488b-b9d7-fb48c893194d"
+        "projectId": "a0239790-22c6-4420-b905-e269d8075b5d"
       }
-    },
-    "owner": "rishav_dev10"
+    }
   }
 }
