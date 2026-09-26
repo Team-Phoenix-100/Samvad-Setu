@@ -525,3 +525,15 @@ The following components and layouts were recently added via an Agentic Workflow
 - **Reporter Details**: A new top-level UI component maps `problem.reportedBy.name` and the formatted timestamp, providing exact traceability for who created the issue and when.
 - **AI Classification Grid**: Replaced raw string output with a modern, glassmorphic 3x2 Grid UI that dynamically visualizes the NLP predictions (Confidence Score, Priority Index, Severity, Human Review requirement, and Category).
 - **Custom Delete Modal**: Replaced the native `window.confirm` popup with an animated Framer Motion Tailwind modal providing explicit destructive warnings before soft/hard deleting the problem.
+ 
++## New Feature: Mobile App Download Page
++### 1. Dedicated Public Download Portal (`/download-app`)
++- Created a highly immersive and animated landing page (`DownloadApp.jsx`) leveraging Framer Motion and modern Tailwind CSS v4 variables.
++- Integrated specific UI tokens (colors, typography, spacing) inside `index.css` via custom CSS variables scoped with a `dl-` prefix to safely isolate the design from the rest of the app's global base theme.
++- Features a 2-column layout on desktop: the left side highlights the core value propositions and direct `.apk` downloads, while the right side features a prominent QR code for Desktop-to-Mobile fast syncing.
+- **Authentic Prototype Messaging**: Removed hypothetical/fake government approvals and technical metrics (e.g., Package ID, architecture). Content is now 100% aligned with the actual project scope, highlighting the React Native nature of the app, secure offline capabilities, and genuine privacy commitments. 
+- **Simplified Installation Guide**: Replaced complex text instructions with a clear 3-step installation guide, featuring placeholder slots specifically designed for upcoming tutorial screenshots.
+- **Interactive QR Code Modal**: The QR code on the desktop view is now clickable. It triggers a responsive, fullscreen glassmorphic modal with a blurred backdrop (`bg-black/70 backdrop-blur-md`), powered by `framer-motion`'s `<AnimatePresence>` for smooth ease-in-out and spring-based scaling. Includes an accessible close (`<X>`) button.
++### 2. Navigation Integration
++- Linked the new `/download-app` route in the public `Navbar.jsx`.
++- Added the `DownloadApp` component route to `App.jsx` under the `PublicLayout` so it inherits the standard header and footer while presenting the immersive application download experience.
