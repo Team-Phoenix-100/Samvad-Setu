@@ -47,7 +47,8 @@ export const useProblemStore = create((set, get) => ({
         payload.append('urgency', String(data.urgency || 'medium'));
         payload.append('location', JSON.stringify(data.location || {}));
 
-        data.images.forEach((image: any, index: number) => {
+        for (let index = 0; index < data.images.length; index++) {
+          const image = data.images[index];
           let uri = String(image.uri || image);
           if (Platform.OS === 'android' && !uri.startsWith('file://') && !uri.startsWith('content://')) {
             uri = `file://${uri}`;
@@ -56,12 +57,23 @@ export const useProblemStore = create((set, get) => ({
           const extension = fileName.split('.').pop()?.toLowerCase();
           const type = String(image.mimeType || image.type || (extension === 'png' ? 'image/png' : 'image/jpeg'));
 
-          payload.append('images', {
-            uri,
-            name: fileName,
-            type,
-          } as any);
-        });
+          try {
+            // Modern React Native / Expo WinterCG fetch expects Blob/File instances
+            const blobRes = await fetch(uri);
+            const blob = await blobRes.blob();
+            const filePart = typeof File !== 'undefined'
+              ? new File([blob], fileName, { type })
+              : Object.assign(blob, { name: fileName, filename: fileName, type });
+            payload.append('images', filePart);
+          } catch (fileErr) {
+            // Fallback for older runtime engines
+            payload.append('images', {
+              uri,
+              name: fileName,
+              type,
+            } as any);
+          }
+        }
 
         if (data.audio) {
           const audioUri = data.audio.uri || data.audio;
@@ -71,11 +83,21 @@ export const useProblemStore = create((set, get) => ({
 
           if (isRealLocalFile) {
             const audioName = data.audio.name || `voice_${Date.now()}.m4a`;
-            payload.append('audio', {
-              uri: audioUri,
-              name: audioName,
-              type: data.audio.type || 'audio/m4a',
-            } as any);
+            const audioType = data.audio.type || 'audio/m4a';
+            try {
+              const audioRes = await fetch(audioUri);
+              const audioBlob = await audioRes.blob();
+              const audioFile = typeof File !== 'undefined'
+                ? new File([audioBlob], audioName, { type: audioType })
+                : Object.assign(audioBlob, { name: audioName, filename: audioName, type: audioType });
+              payload.append('audio', audioFile);
+            } catch (aErr) {
+              payload.append('audio', {
+                uri: audioUri,
+                name: audioName,
+                type: audioType,
+              } as any);
+            }
           } else {
             payload.append('audioNote', typeof data.audio === 'string' ? data.audio : JSON.stringify(data.audio));
           }

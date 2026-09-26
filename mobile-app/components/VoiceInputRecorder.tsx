@@ -4,14 +4,8 @@ import { Mic, MicOff, Play, Pause, RotateCcw, Volume2, Sparkles, Radio } from 'l
 import { useTheme } from '../context/ThemeContext';
 import { useToastStore } from '../store/toastStore';
 
-// Safe dynamic loader for Audio to prevent ExponentAV crashes on unsupported platforms / Expo Go
-let Audio: any = null;
-try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  Audio = require('expo-av')?.Audio;
-} catch {
-  // Graceful fallback
-}
+// Voice recording and smart speech assist uses simulated civic voice-to-text engine
+const Audio: any = null;
 
 interface VoiceInputRecorderProps {
   onTranscriptionComplete: (text: string, audioData?: any) => void;

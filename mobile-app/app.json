@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "Samvad Setu",
-    "slug": "MyFirstApp",
+    "slug": "samvad-setu",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "myfirstapp",
+    "scheme": "samvadsetu",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true
@@ -18,12 +18,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.souvojit.MyFirstApp",
-      "config": {
-        "googleMaps": {
-          "apiKey": "AIzaSyAPnTY4LLzusJgZc1d2oxPH4zfqhpG1T6Y"
-        }
-      },
+      "package": "com.rishav.samvadsetu",
       "permissions": [
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_FINE_LOCATION",
@@ -65,17 +60,19 @@
           "cameraPermission": "Allow Samvad Setu to access your camera to capture evidence."
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "./plugins/withV1Signing"
     ],
     "experiments": {
       "typedRoutes": true,
-      "reactCompiler": true
+      "reactCompiler": false
     },
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "a0239790-22c6-4420-b905-e269d8075b5d"
+        "projectId": "5921a2ac-09fc-433f-8b22-b79633139bcc"
       }
-    }
+    },
+    "owner": "rishav_dev10"
   }
 }
