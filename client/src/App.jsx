@@ -4,6 +4,7 @@ import ComponentLibrary from "./pages/dev/ComponentLibrary";
 import Landing from "./pages/public/Landing";
 import Login from "./pages/public/Login";
 import Signup from "./pages/public/Signup";
+import DownloadApp from "./pages/public/DownloadApp";
 import CitizenDashboard from "./pages/citizen/CitizenDashboard";
 import SubmitProblem from "./pages/citizen/SubmitProblem";
 import ProblemDetail from "./pages/public/ProblemDetail";
@@ -67,6 +68,7 @@ export default function App() {
           />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/download-app" element={<DownloadApp />} />
           <Route path="/map" element={<PublicMap />} />
         </Route>
 

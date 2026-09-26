@@ -43,6 +43,9 @@ export default function Navbar() {
         <Link to="/map" className={`text-sm font-medium transition-colors ${location.pathname === '/map' ? 'text-accent-primary' : 'text-muted-custom hover:text-primary-custom'}`}>
           Public Map
         </Link>
+        <Link to="/download-app" className={`text-sm font-medium transition-colors ${location.pathname === '/download-app' ? 'text-accent-primary' : 'text-muted-custom hover:text-primary-custom'}`}>
+          Download Mobile App
+        </Link>
         
         <div className="flex items-center gap-3 pl-4 border-l border-surface-raised">
           <button
