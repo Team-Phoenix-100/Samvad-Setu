@@ -1,8 +1,13 @@
 import React from 'react';
+import { LogBox } from 'react-native';
 import { Stack } from 'expo-router';
 import OfflineBanner from '../components/OfflineBanner'; // Import the banner
 import { ThemeProvider } from '../context/ThemeContext'; // Import the ThemeProvider
 import Toast from '../components/ui/Toast';
+import ChatbotWidget from '../components/ChatbotWidget';
+
+// Suppress yellow warning popups on the mobile screen
+LogBox.ignoreAllLogs(true);
 
 export default function RootLayout() {
   return (
@@ -22,6 +27,9 @@ export default function RootLayout() {
         <Stack.Screen name="(hei)" />
         <Stack.Screen name="(industry)" />
       </Stack>
+
+      {/* Global AI Civic Assistant Chatbot */}
+      <ChatbotWidget />
     </ThemeProvider>
   );
 }

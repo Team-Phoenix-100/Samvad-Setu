@@ -14,7 +14,8 @@ export default function GovernmentLayout() {
 
   useEffect(() => {
     // Connect to Socket.io for live updates
-    const socket = io('http://localhost:5001');
+    const socketOrigin = (import.meta.env.VITE_API_URL || 'http://localhost:5001/api').replace(/\/api\/?$/, '');
+    const socket = io(socketOrigin);
 
     socket.on('connect', () => {
       socket.emit('join_admin');

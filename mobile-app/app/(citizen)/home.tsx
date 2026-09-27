@@ -62,15 +62,19 @@ export default function CitizenHomeScreen() {
     setRefreshing(false);
   };
 
-  const filteredProblems = useMemo(() => {
+  const myProblems = useMemo(() => {
     return problems.filter((p: any) => {
       const authorId = p.reportedBy?._id || p.reportedBy?.id || p.reportedBy || p.userId;
       const currentUserId = user?._id || user?.id;
       const isOfflineTicket = String(p._id || p.id).startsWith('offline_');
       
-      const isMyProblem = (authorId && currentUserId && String(authorId) === String(currentUserId)) || isOfflineTicket;
-      if (!isMyProblem) return false;
+      const isMyProblem = (authorId && currentUserId && String(authorId) === String(currentUserId)) || isOfflineTicket || !authorId;
+      return isMyProblem;
+    });
+  }, [problems, user]);
 
+  const filteredProblems = useMemo(() => {
+    return myProblems.filter((p: any) => {
       const matchesSearch = searchQuery === '' || 
         p.title?.toLowerCase().includes(searchQuery.toLowerCase()) || 
         p.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -78,16 +82,16 @@ export default function CitizenHomeScreen() {
 
       if (!matchesSearch) return false;
       if (selectedFilter === 'all') return true;
-      if (selectedFilter === 'open') return p.status === 'new' || p.status === 'open';
+      if (selectedFilter === 'open') return p.status === 'new' || p.status === 'open' || p.status === 'unresolved';
       if (selectedFilter === 'in-progress') return p.status === 'in-progress';
       if (selectedFilter === 'resolved') return p.status === 'resolved' || p.status === 'closed';
       return true;
     });
-  }, [problems, searchQuery, selectedFilter]);
+  }, [myProblems, searchQuery, selectedFilter]);
 
-  const totalReported = problems.length;
-  const resolvedCount = problems.filter((p: any) => p.status === 'resolved' || p.status === 'closed').length;
-  const inProgressCount = problems.filter((p: any) => p.status === 'in-progress' || p.status === 'new' || p.status === 'open').length;
+  const totalReported = myProblems.length;
+  const resolvedCount = myProblems.filter((p: any) => p.status === 'resolved' || p.status === 'closed').length;
+  const inProgressCount = myProblems.filter((p: any) => p.status === 'in-progress').length;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>

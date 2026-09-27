@@ -27,10 +27,8 @@ export default function ChatbotWidget() {
     setIsLoading(true);
 
     try {
-      // Get the token from local storage if available
-      const token = localStorage.getItem("token") || "";
-
-      const res = await fetch("http://localhost:5001/api/chatbot/message", {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+      const res = await fetch(`${apiUrl}/chatbot/message`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -40,17 +38,17 @@ export default function ChatbotWidget() {
       });
 
       const data = await res.json();
-      
+
       setMessages((prev) => [
-        ...prev, 
-        { 
-          text: data.answer || data.response || "Sorry, I couldn't process your request.", 
-          isBot: true 
+        ...prev,
+        {
+          text: data.answer || data.response || "Sorry, I couldn't process your request.",
+          isBot: true
         }
       ]);
     } catch (err) {
       setMessages((prev) => [
-        ...prev, 
+        ...prev,
         { text: "Sorry, the AI service is currently unavailable.", isBot: true }
       ]);
     } finally {
@@ -104,12 +102,11 @@ export default function ChatbotWidget() {
           <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-surface/50">
             {messages.map((msg, i) => (
               <div key={i} className={`flex ${msg.isBot ? "justify-start" : "justify-end"}`}>
-                <div 
-                  className={`max-w-[80%] rounded-2xl p-3 text-sm ${
-                    msg.isBot 
-                      ? "bg-surface-raised text-primary-custom rounded-tl-none" 
+                <div
+                  className={`max-w-[80%] rounded-2xl p-3 text-sm ${msg.isBot
+                      ? "bg-surface-raised text-primary-custom rounded-tl-none"
                       : "bg-[#2F9E8F] text-primary-custom rounded-tr-none"
-                  }`}
+                    }`}
                 >
                   {msg.text}
                 </div>
@@ -137,7 +134,7 @@ export default function ChatbotWidget() {
                 placeholder="Ask a question..."
                 className="flex-1 bg-surface border border-surface-raised text-primary-custom rounded-full px-4 py-2 focus:outline-none focus:border-[#E8A33D] text-sm"
               />
-              <button 
+              <button
                 type="submit"
                 disabled={isLoading || !input.trim()}
                 className="w-10 h-10 rounded-full bg-[#E8A33D] text-[#0F1B1E] flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#d99532] transition-colors"

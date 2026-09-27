@@ -85,6 +85,7 @@ mobile-app/
 │   └── index.tsx              # Role-aware routing & landing redirection
 ├── assets/images/             # Icons, splash screens, and adaptive Android icons
 ├── components/
+│   ├── ChatbotWidget.tsx      # Global floating AI Civic Assistant Chatbot
 │   ├── LeafletMap.tsx         # Interactive OpenStreetMap geo-component
 │   ├── VoiceInputRecorder.tsx # Voice dictation modal with pulsing wave UI
 │   ├── WorkflowTracker.tsx    # 5-stage civic-to-tech dynamic resolution tracker
@@ -93,7 +94,7 @@ mobile-app/
 │   └── withV1Signing.js       # Android Gradle plugin for dual V1/V2 APK signing & cleartext traffic
 ├── store/
 │   ├── authStore.ts           # Global user authentication & role credentials
-│   ├── problemStore.ts        # Grievance CRUD, offline fallback, & W3C Blob multipart uploads
+│   ├── problemStore.ts        # Grievance CRUD, offline fallback, & native 2-way sync
 │   └── toastStore.ts          # Custom global animated notifications
 ├── utils/
 │   └── geocoding.ts           # Reverse geocoding & coordinate calculations
@@ -119,8 +120,7 @@ npm install
 
 ### 3. Configure Backend Connection
 Open [`api/client.ts`](./api/client.ts) and ensure `BASE_URL` points to your development machine's local Wi-Fi IP address (since `localhost` inside a mobile phone resolves to the phone itself):
-```typescript
-const BASE_URL = 'http://192.168.43.12:5001/api'; // Replace with your computer's local IP
+const BASE_URL = 'http://localhost:5001/api'; // Local Development Server
 ```
 
 ### 4. Start Metro Development Server
