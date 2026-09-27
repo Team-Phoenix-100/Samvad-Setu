@@ -23,7 +23,7 @@ export default function SubmitProblemScreen() {
   const [geocoding, setGeocoding] = useState(false);
   const [detectedAddress, setDetectedAddress] = useState<string>('');
   const geocodeTimeoutRef = useRef<any>(null);
-  
+
   const [aiPrediction, setAiPrediction] = useState({ category: '', severity: '', confidence: 0, loading: false });
   const [visionPrediction, setVisionPrediction] = useState<any>(null);
   const [showOverride, setShowOverride] = useState(false);
@@ -71,7 +71,7 @@ export default function SubmitProblemScreen() {
       if (res.district) {
         setFormData(prev => ({ ...prev, state: res.state, district: res.district, block: res.block }));
       }
-    }).catch(() => {});
+    }).catch(() => { });
 
     return () => {
       if (geocodeTimeoutRef.current) clearTimeout(geocodeTimeoutRef.current);
@@ -84,14 +84,14 @@ export default function SubmitProblemScreen() {
     if (formData.title.length > 5 || formData.description.length > 10) {
       setAiPrediction(prev => ({ ...prev, loading: true }));
       if (predictionTimeoutRef.current) clearTimeout(predictionTimeoutRef.current);
-      
+
       predictionTimeoutRef.current = setTimeout(() => {
         // Mock API call to Part-A model
         let predCat = 'General Civic Issue';
         let predSev = 'low';
         let conf = 0.82;
         const txt = (formData.title + ' ' + formData.description).toLowerCase();
-        
+
         if (txt.includes('water') || txt.includes('pump') || txt.includes('pipe')) { predCat = 'Renewable Energy & Water'; predSev = 'urgent'; conf = 0.94; }
         else if (txt.includes('road') || txt.includes('pothole') || txt.includes('bridge')) { predCat = 'Civil Infrastructure'; predSev = 'high'; conf = 0.89; }
         else if (txt.includes('electricity') || txt.includes('wire')) { predCat = 'Electrical Safety'; predSev = 'critical'; conf = 0.91; }
@@ -99,7 +99,7 @@ export default function SubmitProblemScreen() {
         else if (txt.includes('school') || txt.includes('education')) { predCat = 'Educational Infrastructure'; predSev = 'high'; conf = 0.88; }
 
         setAiPrediction({ category: predCat, severity: predSev, confidence: conf, loading: false });
-        
+
         // Auto-apply if user hasn't opened manual override
         if (!showOverride) {
           setFormData(prev => ({ ...prev, category: predCat, urgency: predSev }));
@@ -169,7 +169,7 @@ export default function SubmitProblemScreen() {
       newCategory = 'Civil Infrastructure';
       newUrgency = 'high';
     }
-    
+
     setFormData(prev => ({ ...prev, category: newCategory, urgency: newUrgency }));
     setStep(4);
   };
@@ -203,7 +203,7 @@ export default function SubmitProblemScreen() {
 
       if (!result.canceled && result.assets[0]) {
         setVisionPrediction({ loading: true });
-        
+
         // 1. Client-side Image Compression via expo-image-manipulator
         const manipResult = await ImageManipulator.manipulateAsync(
           result.assets[0].uri,
@@ -225,7 +225,7 @@ export default function SubmitProblemScreen() {
           images: [asset],
           previewUrls: [manipResult.uri]
         }));
-        
+
         // 2. Mock Part-B Vision Service processing
         setTimeout(() => {
           let visCategory = 'Pothole Damage';
@@ -259,20 +259,20 @@ export default function SubmitProblemScreen() {
       description: formData.description,
       category: formData.category,
       urgency: formData.urgency,
-      location: { 
-        state: formData.state, 
-        district: formData.district, 
-        block: formData.block, 
-        lat: formData.lat, 
+      location: {
+        state: formData.state,
+        district: formData.district,
+        block: formData.block,
+        lat: formData.lat,
         lng: formData.lng,
         address: detectedAddress || `${formData.block}, ${formData.district}, ${formData.state}`
       },
       images: formData.images,
       audio: formData.audio,
     };
-    
+
     const created = await addProblem(payload);
-    
+
     if (created && !created.error) {
       showToast("Problem reported successfully!", "success");
       router.replace('/(citizen)/home');
@@ -289,14 +289,14 @@ export default function SubmitProblemScreen() {
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 60 }}>
-          
+
           {/* Header */}
           <View style={{ marginBottom: 24, borderBottomWidth: 1, borderBottomColor: theme.border, paddingBottom: 16 }}>
             <Text style={{ fontSize: 10, color: theme.citizenPrimary, fontWeight: 'bold', letterSpacing: 1, marginBottom: 4, fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace' }}>
               PHASE 3 • STEP {step} OF 5
             </Text>
             <Text style={{ fontSize: 24, fontWeight: '800', color: theme.text, marginBottom: 12 }}>Report Civic Problem</Text>
-            
+
             {/* Progress Bar */}
             <View style={{ flexDirection: 'row', height: 4, gap: 4 }}>
               {[1, 2, 3, 4, 5].map((i) => (
@@ -306,14 +306,14 @@ export default function SubmitProblemScreen() {
           </View>
 
           <View style={{ backgroundColor: theme.card, borderRadius: 20, padding: 20, borderWidth: 1, borderColor: theme.border }}>
-            
+
             {/* STEP 1 */}
             {step === 1 && (
               <View>
                 <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.text, marginBottom: 16 }}>1. Issue Information</Text>
-                
+
                 {/* Voice Input & Speech Dictation Assist */}
-                <VoiceInputRecorder 
+                <VoiceInputRecorder
                   onTranscriptionComplete={handleVoiceTranscription}
                   onAudioAttached={handleAudioAttached}
                   existingDescription={formData.description}
@@ -362,16 +362,16 @@ export default function SubmitProblemScreen() {
                         <Text style={{ fontSize: 10, color: theme.subtext, marginBottom: 2 }}>Severity</Text>
                         <Text style={{ fontSize: 12, fontWeight: '700', color: theme.text, textTransform: 'uppercase' }}>{aiPrediction.loading ? '...' : formData.urgency}</Text>
                       </View>
-                      
+
                       {!showOverride ? (
-                        <TouchableOpacity 
+                        <TouchableOpacity
                           onPress={() => setShowOverride(true)}
                           style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', paddingHorizontal: 10, paddingVertical: 10, borderRadius: 8, marginLeft: 'auto' }}
                         >
                           <Text style={{ fontSize: 11, fontWeight: '700', color: '#EF4444' }}>Override</Text>
                         </TouchableOpacity>
                       ) : (
-                        <TouchableOpacity 
+                        <TouchableOpacity
                           onPress={() => {
                             setShowOverride(false);
                             setFormData(prev => ({ ...prev, category: aiPrediction.category, urgency: aiPrediction.severity }));
@@ -387,26 +387,26 @@ export default function SubmitProblemScreen() {
                     {showOverride && (
                       <View style={{ marginTop: 12, borderTopWidth: 1, borderTopColor: theme.border, paddingTop: 12, gap: 12 }}>
                         <Text style={{ fontSize: 10, color: '#EF4444', fontWeight: '700', marginBottom: 4 }}>MANUAL OVERRIDE (LOGS DELTA FOR RETRAINING)</Text>
-                        <TextInput 
-                          value={formData.category} 
-                          onChangeText={t => setFormData({ ...formData, category: t })} 
-                          style={inputStyle} 
+                        <TextInput
+                          value={formData.category}
+                          onChangeText={t => setFormData({ ...formData, category: t })}
+                          style={inputStyle}
                           placeholder="Manual Category..."
-                          placeholderTextColor={theme.subtext} 
+                          placeholderTextColor={theme.subtext}
                         />
-                        <TextInput 
-                          value={formData.urgency} 
-                          onChangeText={t => setFormData({ ...formData, urgency: t })} 
-                          style={inputStyle} 
+                        <TextInput
+                          value={formData.urgency}
+                          onChangeText={t => setFormData({ ...formData, urgency: t })}
+                          style={inputStyle}
                           placeholder="Manual Severity (low, medium, high, critical)..."
-                          placeholderTextColor={theme.subtext} 
+                          placeholderTextColor={theme.subtext}
                         />
                       </View>
                     )}
                   </View>
                 )}
 
-                <TouchableOpacity 
+                <TouchableOpacity
                   onPress={() => {
                     if (!formData.title.trim()) {
                       showToast("Please provide a title.", "error");
@@ -426,7 +426,7 @@ export default function SubmitProblemScreen() {
             {step === 2 && (
               <View>
                 <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.text, marginBottom: 16 }}>2. Pin Location (OpenStreetMap)</Text>
-                
+
                 <View style={{ gap: 12, marginBottom: 16 }}>
                   {/* Row 1: State & District */}
                   <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -435,24 +435,24 @@ export default function SubmitProblemScreen() {
                         <Text style={labelStyle}>STATE</Text>
                         {geocoding && <ActivityIndicator size="small" color="#2F9E8F" style={{ transform: [{ scale: 0.7 }] }} />}
                       </View>
-                      <TextInput 
-                        value={formData.state} 
-                        onChangeText={t => setFormData({ ...formData, state: t })} 
-                        style={inputStyle} 
+                      <TextInput
+                        value={formData.state}
+                        onChangeText={t => setFormData({ ...formData, state: t })}
+                        style={inputStyle}
                         placeholder="e.g. Jharkhand, Bihar, WB"
-                        placeholderTextColor="#9BA8A6" 
+                        placeholderTextColor="#9BA8A6"
                       />
                     </View>
                     <View style={{ flex: 1 }}>
                       <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
                         <Text style={labelStyle}>DISTRICT</Text>
                       </View>
-                      <TextInput 
-                        value={formData.district} 
-                        onChangeText={t => setFormData({ ...formData, district: t })} 
-                        style={inputStyle} 
+                      <TextInput
+                        value={formData.district}
+                        onChangeText={t => setFormData({ ...formData, district: t })}
+                        style={inputStyle}
                         placeholder="e.g. Ranchi, Patna, Kolkata"
-                        placeholderTextColor="#9BA8A6" 
+                        placeholderTextColor="#9BA8A6"
                       />
                     </View>
                   </View>
@@ -463,12 +463,12 @@ export default function SubmitProblemScreen() {
                       <Text style={labelStyle}>BLOCK / LOCALITY</Text>
                       {geocoding && <Text style={{ color: '#2F9E8F', fontSize: 9 }}>Detecting across India...</Text>}
                     </View>
-                    <TextInput 
-                      value={formData.block} 
-                      onChangeText={t => setFormData({ ...formData, block: t })} 
-                      style={inputStyle} 
+                    <TextInput
+                      value={formData.block}
+                      onChangeText={t => setFormData({ ...formData, block: t })}
+                      style={inputStyle}
                       placeholder="e.g. Kanke, Salt Lake, Bandra..."
-                      placeholderTextColor="#9BA8A6" 
+                      placeholderTextColor="#9BA8A6"
                     />
                   </View>
                 </View>
@@ -479,17 +479,17 @@ export default function SubmitProblemScreen() {
                     <Text style={{ color: '#E8A33D', fontSize: 11, fontWeight: '800', letterSpacing: 1 }}>
                       LEAFLET OPENSTREETMAP POINTER
                     </Text>
-                    <TouchableOpacity 
-                      onPress={handleGetLocation} 
+                    <TouchableOpacity
+                      onPress={handleGetLocation}
                       disabled={geocoding}
-                      style={{ 
-                        flexDirection: 'row', 
-                        alignItems: 'center', 
-                        gap: 4, 
-                        backgroundColor: '#2F9E8F', 
-                        paddingHorizontal: 10, 
-                        paddingVertical: 5, 
-                        borderRadius: 8 
+                      style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        gap: 4,
+                        backgroundColor: '#2F9E8F',
+                        paddingHorizontal: 10,
+                        paddingVertical: 5,
+                        borderRadius: 8
                       }}
                     >
                       {geocoding ? (
@@ -579,7 +579,7 @@ export default function SubmitProblemScreen() {
                 {formData.imageUploaded && formData.previewUrls.length > 0 ? (
                   <View style={{ backgroundColor: theme.surface, borderWidth: 1, borderColor: theme.border, borderRadius: 16, padding: 16, marginBottom: 24 }}>
                     <Image source={{ uri: formData.previewUrls[0] }} style={{ width: '100%', height: 200, borderRadius: 12, marginBottom: 16 }} resizeMode="cover" />
-                    
+
                     {/* Vision AI Badge */}
                     {visionPrediction && (
                       <View style={{ backgroundColor: theme.background, padding: 12, borderRadius: 10, borderWidth: 1, borderColor: theme.border, marginBottom: 16, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -680,7 +680,7 @@ export default function SubmitProblemScreen() {
             {step === 5 && (
               <View>
                 <Text style={{ fontSize: 18, fontWeight: 'bold', color: theme.text, marginBottom: 16 }}>5. Review Your Report</Text>
-                
+
                 <View style={{ backgroundColor: theme.surface, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: theme.border, marginBottom: 24, gap: 12 }}>
                   <Text style={{ color: theme.text, fontSize: 13 }}><Text style={{ color: theme.subtext }}>Title:</Text> {formData.title}</Text>
                   <Text style={{ color: theme.text, fontSize: 13 }}><Text style={{ color: theme.subtext }}>Description:</Text> {formData.description}</Text>

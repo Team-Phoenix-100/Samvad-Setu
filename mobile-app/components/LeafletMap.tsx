@@ -299,7 +299,7 @@ export default function LeafletMap({
         onMarkerPress(data.markerId);
       }
     } catch (e) {
-      console.warn('LeafletMap message error:', e);
+      console.log('LeafletMap message handled:', e);
     }
   };
 
@@ -338,7 +338,7 @@ export default function LeafletMap({
         onLocationChange(latitude, longitude);
       }
     } catch (err) {
-      console.warn('Failed to obtain current location', err);
+      console.log('Location detection note:', err);
       Alert.alert(
         'GPS Unavailable',
         'Could not detect your current location. Please make sure location / GPS is turned on in your device settings.'

@@ -31,11 +31,14 @@ export const useProblemStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       let payload = data;
+      const validDescription = (data.description && String(data.description).trim()) 
+        ? String(data.description).trim() 
+        : (data.title || "Reported via citizen portal");
 
       if (data.images && data.images.length > 0) {
         payload = new FormData();
         payload.append('title', data.title);
-        payload.append('description', data.description);
+        payload.append('description', validDescription);
         payload.append('category', data.category);
         payload.append('urgency', data.urgency);
         payload.append('location', JSON.stringify(data.location));
@@ -46,6 +49,11 @@ export const useProblemStore = create((set, get) => ({
           const fileName = image.name || `proof_${index + 1}.jpg`;
           payload.append('images', image, fileName);
         });
+      } else {
+        payload = {
+          ...data,
+          description: validDescription
+        };
       }
 
       const response = await api.post('/problems', payload);
@@ -53,9 +61,12 @@ export const useProblemStore = create((set, get) => ({
       set({ problems: [newProblem, ...get().problems], isLoading: false });
       return newProblem;
     } catch (error) {
-      console.error("Failed to submit problem", error);
+      console.error("Failed to submit problem", error.response?.data || error);
       set({ isLoading: false });
-      const errorMessage = error.response?.data?.message || error.message || "Failed to submit problem.";
+      const serverDetail = error.response?.data?.error;
+      const errorMessage = serverDetail 
+        ? `${error.response?.data?.message || 'Server Error'}: ${serverDetail}` 
+        : (error.response?.data?.message || error.message || "Failed to submit problem.");
       return { error: errorMessage };
     }
   },

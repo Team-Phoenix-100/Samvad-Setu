@@ -85,7 +85,8 @@ export default function SubmitProblem() {
     setIsClassifying(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:5001/api/problems/classify", {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+      const res = await fetch(`${apiUrl}/problems/classify`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -100,10 +101,10 @@ export default function SubmitProblem() {
       if (res.ok) {
         const data = await res.json();
         setAiClassification(data);
-        setFormData(prev => ({ 
-          ...prev, 
-          category: data.category, 
-          urgency: data.severity?.toLowerCase() || 'medium' 
+        setFormData(prev => ({
+          ...prev,
+          category: data.category,
+          urgency: data.severity?.toLowerCase() || 'medium'
         }));
       } else {
         showToast("AI Classification failed. Using defaults.", "warning");
@@ -310,6 +311,12 @@ export default function SubmitProblem() {
       return;
     }
 
+    if (!formData.description?.trim()) {
+      showToast("Please enter a problem description.", "error");
+      setStep(1);
+      return;
+    }
+
     if (!formData.imageUploaded || formData.images.length === 0) {
       showToast("Please provide photo proof before submitting.", "error");
       setStep(3);
@@ -317,8 +324,8 @@ export default function SubmitProblem() {
     }
 
     const payload = {
-      title: formData.title,
-      description: formData.description,
+      title: formData.title.trim(),
+      description: formData.description.trim(),
       category: formData.category,
       urgency: formData.urgency,
       location: { district: formData.district, block: formData.block, lat: formData.lat, lng: formData.lng },
@@ -326,9 +333,9 @@ export default function SubmitProblem() {
       audio: audioFile,
       aiMetadata: aiClassification
     };
-    
+
     const created = await addProblem(payload);
-    
+
     if (created && !created.error) {
       showToast("Problem reported successfully!", "success");
       navigate(`/problem/${created.id || created._id}`);
@@ -356,9 +363,8 @@ export default function SubmitProblem() {
           {[1, 2, 3, 4, 5].map((i) => (
             <div
               key={i}
-              className={`h-full flex-1 transition-all duration-300 ${
-                i <= step ? 'bg-[#E8A33D]' : 'bg-surface-raised'
-              }`}
+              className={`h-full flex-1 transition-all duration-300 ${i <= step ? 'bg-[#E8A33D]' : 'bg-surface-raised'
+                }`}
             />
           ))}
         </div>
@@ -381,9 +387,10 @@ export default function SubmitProblem() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-mono text-muted-custom">Detailed Description</label>
+            <label className="text-xs font-mono text-muted-custom">Detailed Description *</label>
             <textarea
               rows={4}
+              required
               placeholder="Describe the issue, how long it has been present, and who is affected..."
               value={formData.description}
               onChange={(e) => setFormData({ ...formData, description: e.target.value })}
@@ -397,6 +404,10 @@ export default function SubmitProblem() {
             onClick={() => {
               if (!formData.title.trim()) {
                 showToast("Please provide a title for the issue.", "error");
+                return;
+              }
+              if (!formData.description?.trim()) {
+                showToast("Please provide a description of the issue.", "error");
                 return;
               }
               setStep(2);
@@ -549,11 +560,10 @@ export default function SubmitProblem() {
               onDragLeave={handleDragLeave}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`p-8 sm:p-10 border-2 border-dashed rounded-xl text-center space-y-3 cursor-pointer transition-all duration-200 ${
-                isDragging
+              className={`p-8 sm:p-10 border-2 border-dashed rounded-xl text-center space-y-3 cursor-pointer transition-all duration-200 ${isDragging
                   ? 'border-[#E8A33D] bg-[#E8A33D]/10 scale-[1.01]'
                   : 'border-surface-raised hover:border-[#E8A33D] bg-base'
-              }`}
+                }`}
             >
               {isProcessingImage ? (
                 <div className="space-y-2 py-4">
@@ -664,7 +674,7 @@ export default function SubmitProblem() {
       {step === 5 && (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.3 }} className="bg-surface p-5 sm:p-6 rounded-xl border border-surface-raised space-y-4">
           <h2 className="text-lg font-bold font-display">5. Review Your Report</h2>
-          
+
           <div className="p-4 bg-base rounded-lg space-y-3 text-xs border border-surface-raised">
             <p><strong className="text-muted-custom">Title:</strong> {formData.title}</p>
             {formData.description && (
@@ -673,7 +683,7 @@ export default function SubmitProblem() {
             <p><strong className="text-muted-custom">Location:</strong> {formData.district}, {formData.block}</p>
             <p><strong className="text-muted-custom">Category:</strong> {formData.category}</p>
             <p><strong className="text-muted-custom">Municipal SLA:</strong> {formData.urgency === 'urgent' ? '7 days' : '14 days'}</p>
-            
+
             {/* Image Preview in Review */}
             {formData.previewUrls.length > 0 && (
               <div className="pt-2 border-t border-surface-raised flex items-center gap-3">
@@ -710,13 +720,13 @@ export default function SubmitProblem() {
       {/* RESPONSIVE CROP MODAL (Safe for all laptops, MacBook, 1366x768 screens, and high scaling) */}
       <AnimatePresence>
         {cropModalOpen && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4 overflow-y-auto"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
@@ -736,7 +746,7 @@ export default function SubmitProblem() {
                   ✕
                 </button>
               </div>
-              
+
               {/* Cropper Viewport with flexible height */}
               <div className="relative w-full h-[220px] sm:h-[320px] max-h-[35vh] bg-base shrink-0">
                 <Cropper
@@ -768,50 +778,46 @@ export default function SubmitProblem() {
                     className="w-full accent-[#E8A33D] cursor-pointer"
                   />
                 </div>
-                
+
                 <div>
                   <label className="text-xs font-mono text-muted-custom mb-1.5 block">Aspect Ratio</label>
                   <div className="flex gap-2">
                     <button
                       type="button"
-                      className={`flex-1 text-xs py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer border ${
-                        aspect === 1
+                      className={`flex-1 text-xs py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer border ${aspect === 1
                           ? 'bg-[#E8A33D] text-[#0F1B1E] border-[#E8A33D]'
                           : 'bg-base text-muted-custom border-surface-raised hover:border-[#9BA8A6]'
-                      }`}
+                        }`}
                       onClick={() => setAspect(1)}
                     >
                       1:1 (Square)
                     </button>
                     <button
                       type="button"
-                      className={`flex-1 text-xs py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer border ${
-                        aspect === 4/3
+                      className={`flex-1 text-xs py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer border ${aspect === 4 / 3
                           ? 'bg-[#E8A33D] text-[#0F1B1E] border-[#E8A33D]'
                           : 'bg-base text-muted-custom border-surface-raised hover:border-[#9BA8A6]'
-                      }`}
-                      onClick={() => setAspect(4/3)}
+                        }`}
+                      onClick={() => setAspect(4 / 3)}
                     >
                       4:3
                     </button>
                     <button
                       type="button"
-                      className={`flex-1 text-xs py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer border ${
-                        aspect === 16/9
+                      className={`flex-1 text-xs py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer border ${aspect === 16 / 9
                           ? 'bg-[#E8A33D] text-[#0F1B1E] border-[#E8A33D]'
                           : 'bg-base text-muted-custom border-surface-raised hover:border-[#9BA8A6]'
-                      }`}
-                      onClick={() => setAspect(16/9)}
+                        }`}
+                      onClick={() => setAspect(16 / 9)}
                     >
                       16:9
                     </button>
                     <button
                       type="button"
-                      className={`flex-1 text-xs py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer border ${
-                        !aspect
+                      className={`flex-1 text-xs py-1.5 px-2 rounded-lg font-medium transition-colors cursor-pointer border ${!aspect
                           ? 'bg-[#E8A33D] text-[#0F1B1E] border-[#E8A33D]'
                           : 'bg-base text-muted-custom border-surface-raised hover:border-[#9BA8A6]'
-                      }`}
+                        }`}
                       onClick={() => setAspect(undefined)}
                     >
                       Free
@@ -845,7 +851,7 @@ export default function SubmitProblem() {
       {/* FULL PREVIEW MODAL */}
       <AnimatePresence>
         {previewModalOpen && formData.previewUrls.length > 0 && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -859,12 +865,12 @@ export default function SubmitProblem() {
             >
               ✕
             </button>
-            <motion.img 
+            <motion.img
               initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.85, opacity: 0 }}
-              src={formData.previewUrls[0]} 
-              alt="Full Preview" 
+              src={formData.previewUrls[0]}
+              alt="Full Preview"
               className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />

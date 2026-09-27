@@ -12,24 +12,50 @@ export const useProblemStore = create((set, get) => ({
   fetchProblems: async () => {
     set({ isLoading: true });
     try {
-      const response = await api.get('/problems/public');
+      let response;
+      try {
+        // Attempt authenticated role-specific problems (for citizen dashboard)
+        response = await api.get('/problems');
+      } catch (authErr) {
+        // Fallback to public endpoint if unauthenticated or error
+        response = await api.get('/problems/public');
+      }
+
       const backendProblems = response.data || [];
 
-      // Also merge with locally saved tickets from AsyncStorage if any
+      // Also read locally saved tickets from AsyncStorage
       const localTicketsStr = await AsyncStorage.getItem('@citizen_tickets');
       const localTickets = localTicketsStr ? JSON.parse(localTicketsStr) : [];
 
-      // Merge unique
-      const allProblems = [...localTickets, ...backendProblems.filter(
-        (bp: any) => !localTickets.some((lp: any) => (lp._id || lp.id) === (bp._id || bp.id))
-      )];
+      // Keep only genuine pending offline tickets (created without network connection)
+      const pendingOfflineTickets = localTickets.filter((lp: any) => {
+        const id = String(lp._id || lp.id || '');
+        return id.startsWith('offline_');
+      });
+
+      // Overwrite @citizen_tickets so deleted/synced backend tickets are never resurrected locally
+      await AsyncStorage.setItem('@citizen_tickets', JSON.stringify(pendingOfflineTickets));
+
+      // Combine live backend problems with any pending offline tickets
+      const allProblems = [...backendProblems, ...pendingOfflineTickets];
 
       set({ problems: allProblems, isLoading: false });
     } catch (error) {
-      console.warn("Failed to fetch problems from backend, loading local cache", error);
+      console.log("Loading local cache:", error);
       const localTicketsStr = await AsyncStorage.getItem('@citizen_tickets');
       const localTickets = localTicketsStr ? JSON.parse(localTicketsStr) : [];
       set({ problems: localTickets, isLoading: false });
+    }
+  },
+
+  fetchPublicProblems: async () => {
+    set({ isLoading: true });
+    try {
+      const response = await api.get('/problems/public');
+      set({ problems: response.data || [], isLoading: false });
+    } catch (error) {
+      console.log("Failed to fetch public problems", error);
+      set({ isLoading: false });
     }
   },
 
@@ -40,9 +66,10 @@ export const useProblemStore = create((set, get) => ({
       const hasImages = data.images && data.images.length > 0;
 
       if (hasImages) {
+        const safeDescription = String((data.description && String(data.description).trim()) ? String(data.description).trim() : (data.title || 'Reported via mobile app'));
         payload = new FormData();
         payload.append('title', String(data.title || ''));
-        payload.append('description', String(data.description || ''));
+        payload.append('description', safeDescription);
         payload.append('category', String(data.category || 'Infrastructure & Safety'));
         payload.append('urgency', String(data.urgency || 'medium'));
         payload.append('location', JSON.stringify(data.location || {}));
@@ -57,22 +84,12 @@ export const useProblemStore = create((set, get) => ({
           const extension = fileName.split('.').pop()?.toLowerCase();
           const type = String(image.mimeType || image.type || (extension === 'png' ? 'image/png' : 'image/jpeg'));
 
-          try {
-            // Modern React Native / Expo WinterCG fetch expects Blob/File instances
-            const blobRes = await fetch(uri);
-            const blob = await blobRes.blob();
-            const filePart = typeof File !== 'undefined'
-              ? new File([blob], fileName, { type })
-              : Object.assign(blob, { name: fileName, filename: fileName, type });
-            payload.append('images', filePart);
-          } catch (fileErr) {
-            // Fallback for older runtime engines
-            payload.append('images', {
-              uri,
-              name: fileName,
-              type,
-            } as any);
-          }
+          // React Native native FormData part
+          payload.append('images', {
+            uri,
+            name: fileName,
+            type,
+          } as any);
         }
 
         if (data.audio) {
@@ -84,20 +101,11 @@ export const useProblemStore = create((set, get) => ({
           if (isRealLocalFile) {
             const audioName = data.audio.name || `voice_${Date.now()}.m4a`;
             const audioType = data.audio.type || 'audio/m4a';
-            try {
-              const audioRes = await fetch(audioUri);
-              const audioBlob = await audioRes.blob();
-              const audioFile = typeof File !== 'undefined'
-                ? new File([audioBlob], audioName, { type: audioType })
-                : Object.assign(audioBlob, { name: audioName, filename: audioName, type: audioType });
-              payload.append('audio', audioFile);
-            } catch (aErr) {
-              payload.append('audio', {
-                uri: audioUri,
-                name: audioName,
-                type: audioType,
-              } as any);
-            }
+            payload.append('audio', {
+              uri: audioUri,
+              name: audioName,
+              type: audioType,
+            } as any);
           } else {
             payload.append('audioNote', typeof data.audio === 'string' ? data.audio : JSON.stringify(data.audio));
           }
@@ -108,19 +116,38 @@ export const useProblemStore = create((set, get) => ({
       const token = await SecureStore.getItemAsync('userToken');
 
       try {
-        let res: Response;
         if (hasImages) {
-          // In React Native, fetch() natively handles FormData and appends the required multipart boundary
-          res = await fetch(`${API_URL}/problems`, {
-            method: 'POST',
-            headers: {
-              ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: payload,
+          // Use native XMLHttpRequest which natively supports React Native { uri, name, type } parts
+          newProblem = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', `${API_URL}/problems`);
+            if (token) {
+              xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+            }
+            xhr.onload = () => {
+              if (xhr.status >= 200 && xhr.status < 300) {
+                try {
+                  const json = JSON.parse(xhr.responseText);
+                  resolve(json.problem || json);
+                } catch {
+                  resolve(xhr.responseText);
+                }
+              } else {
+                try {
+                  const errJson = JSON.parse(xhr.responseText);
+                  reject(new Error(errJson.message || `Backend returned status ${xhr.status}`));
+                } catch {
+                  reject(new Error(`Backend returned status ${xhr.status}`));
+                }
+              }
+            };
+            xhr.onerror = () => reject(new Error('Network request failed or server unreachable'));
+            xhr.ontimeout = () => reject(new Error('Network request timed out'));
+            xhr.send(payload);
           });
         } else {
           // Plain JSON request
-          res = await fetch(`${API_URL}/problems`, {
+          const res = await fetch(`${API_URL}/problems`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -128,17 +155,15 @@ export const useProblemStore = create((set, get) => ({
             },
             body: JSON.stringify(data),
           });
-        }
-
-        if (res.ok) {
-          newProblem = await res.json();
-        } else {
-          const errData = await res.json().catch(() => ({}));
-          console.warn("Backend rejected submission:", res.status, errData);
-          throw new Error(errData.message || `Backend returned status ${res.status}`);
+          if (res.ok) {
+            newProblem = await res.json();
+          } else {
+            const errData = await res.json().catch(() => ({}));
+            throw new Error(errData.message || `Backend returned status ${res.status}`);
+          }
         }
       } catch (uploadError: any) {
-        console.warn("Backend submission failed or offline, saving report locally:", uploadError.message);
+        console.log("Backend offline or local fallback:", uploadError.message);
         const currentUser = useAuthStore.getState().user;
         const authorInfo = currentUser ? {
           _id: currentUser._id || currentUser.id,
@@ -194,26 +219,28 @@ export const useProblemStore = create((set, get) => ({
         isLoading: false,
       }));
 
-      // Sync to AsyncStorage for map.tsx and offline persistence
-      try {
-        const existingStr = await AsyncStorage.getItem('@citizen_tickets');
-        const existing = existingStr ? JSON.parse(existingStr) : [];
-        const mapTicket = {
-          ...newProblem,
-          id: newProblem._id || newProblem.id,
-          title: newProblem.title,
-          category: newProblem.category,
-          status: newProblem.status || 'In Progress',
-          latitude: newProblem.location?.lat || data.location?.lat,
-          longitude: newProblem.location?.lng || data.location?.lng,
-          urgency: newProblem.urgency,
-          reportedBy: newProblem.reportedBy,
-          isOffline: true,
-          createdAt: newProblem.createdAt || new Date().toISOString(),
-        };
-        await AsyncStorage.setItem('@citizen_tickets', JSON.stringify([mapTicket, ...existing]));
-      } catch (storageErr) {
-        console.error("Failed saving ticket to AsyncStorage", storageErr);
+      // Sync to AsyncStorage ONLY if this is an offline fallback ticket
+      if (newProblem.isOffline || String(newProblem._id || newProblem.id || '').startsWith('offline_')) {
+        try {
+          const existingStr = await AsyncStorage.getItem('@citizen_tickets');
+          const existing = existingStr ? JSON.parse(existingStr) : [];
+          const mapTicket = {
+            ...newProblem,
+            id: newProblem._id || newProblem.id,
+            title: newProblem.title,
+            category: newProblem.category,
+            status: newProblem.status || 'In Progress',
+            latitude: newProblem.location?.lat || data.location?.lat,
+            longitude: newProblem.location?.lng || data.location?.lng,
+            urgency: newProblem.urgency,
+            reportedBy: newProblem.reportedBy,
+            isOffline: true,
+            createdAt: newProblem.createdAt || new Date().toISOString(),
+          };
+          await AsyncStorage.setItem('@citizen_tickets', JSON.stringify([mapTicket, ...existing]));
+        } catch (storageErr) {
+          console.error("Failed saving offline ticket to AsyncStorage", storageErr);
+        }
       }
 
       return newProblem;
@@ -244,10 +271,10 @@ export const useProblemStore = create((set, get) => ({
           updatedProblem = await res.json();
         } else {
           const errJson = await res.json().catch(() => ({}));
-          console.warn("Backend update response warning:", res.status, errJson);
+          console.log("Backend update note:", res.status, errJson);
         }
       } catch (apiErr: any) {
-        console.warn("Backend update failed or offline, updating locally:", apiErr.message);
+        console.log("Backend update local sync:", apiErr.message);
       }
 
       // Update Zustand state
@@ -306,7 +333,7 @@ export const useProblemStore = create((set, get) => ({
         try {
           await api.delete(`/problems/${id}`);
         } catch (apiErr: any) {
-          console.warn("Backend delete warning or server offline, removing locally:", apiErr.message);
+          console.log("Backend delete handled:", apiErr.message);
         }
       }
 

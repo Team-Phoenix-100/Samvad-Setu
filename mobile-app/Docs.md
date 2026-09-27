@@ -34,7 +34,7 @@ Session tokens are encrypted natively using Android Keystore / iOS Keychain via 
 
 ### Axios Client & Interceptor (`api/client.ts`)
 All network interactions pass through a unified Axios instance:
-- **Base URL Binding**: Set to the local network IP of the development host (e.g., `http://192.168.43.12:5001/api`).
+- **Base URL Binding**: Bound to the local backend server (`http://localhost:5001/api` or auto-detected LAN IP).
 - **Request Interceptor**: Automatically pulls the encrypted JWT from `SecureStore` and injects `Authorization: Bearer <token>` into outgoing request headers.
 - **Cleartext Traffic**: Enabled via custom Android configuration plugin for local HTTP communication.
 

@@ -133,7 +133,7 @@ export default function VoiceInputRecorder({
             await newRecording.startAsync();
           }
         } catch (nativeAudioErr) {
-          console.warn("Hardware audio recording unavailable in this environment, using smart speech recognition simulation:", nativeAudioErr);
+          console.log("Using smart speech recognition assist:", nativeAudioErr);
           newRecording = null;
         }
       }
