@@ -1,12 +1,14 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, User, Settings as SettingsIcon, LogOut, Menu, ShieldCheck, Building2, Briefcase } from 'lucide-react';
+import { LayoutDashboard, User, Settings as SettingsIcon, LogOut, Menu, ShieldCheck, Building2, Briefcase, Info } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
 import { useToastStore } from '../../store/toastStore';
+import AboutPortalModal from '../ui/AboutPortalModal';
 
 export default function SidebarLayout() {
   const { logout, user } = useAuthStore();
   const navigate = useNavigate();
+  const [isAboutOpen, setIsAboutOpen] = React.useState(false);
 
   const { showToast } = useToastStore();
 
@@ -58,9 +60,18 @@ export default function SidebarLayout() {
     <div className="min-h-screen bg-base text-primary-custom flex">
       {/* Sidebar */}
       <aside className="w-64 bg-surface border-r border-surface-raised hidden md:flex flex-col">
-        <div className="p-6 border-b border-surface-raised">
-          <h2 className="text-2xl font-bold font-display text-accent-primary">Samvad Setu</h2>
-          <p className="text-xs text-muted-custom mt-1 tracking-wider uppercase">{getPortalTitle()}</p>
+        <div className="p-6 border-b border-surface-raised flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold font-display text-accent-primary">Samvad Setu</h2>
+            <p className="text-xs text-muted-custom mt-1 tracking-wider uppercase">{getPortalTitle()}</p>
+          </div>
+          <button 
+            onClick={() => setIsAboutOpen(true)}
+            className="w-8 h-8 rounded-full bg-surface-raised flex items-center justify-center text-muted-custom hover:text-accent-primary transition-colors"
+            title="About this Portal"
+          >
+            <Info size={16} />
+          </button>
         </div>
 
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
@@ -110,8 +121,16 @@ export default function SidebarLayout() {
             <Menu className="text-muted-custom" size={24} />
             <h2 className="text-lg font-bold font-display text-accent-primary">Samvad Setu</h2>
           </div>
-          <div className="w-8 h-8 rounded-full bg-surface-raised flex items-center justify-center text-accent-primary font-bold text-sm">
-            {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => setIsAboutOpen(true)}
+              className="w-8 h-8 rounded-full bg-surface-raised flex items-center justify-center text-muted-custom hover:text-accent-primary transition-colors"
+            >
+              <Info size={16} />
+            </button>
+            <div className="w-8 h-8 rounded-full bg-surface-raised flex items-center justify-center text-accent-primary font-bold text-sm">
+              {user?.name ? user.name.charAt(0).toUpperCase() : 'C'}
+            </div>
           </div>
         </div>
 
@@ -123,6 +142,12 @@ export default function SidebarLayout() {
           <Outlet />
         </div>
       </main>
+
+      <AboutPortalModal 
+        isOpen={isAboutOpen} 
+        onClose={() => setIsAboutOpen(false)} 
+        role={user?.role} 
+      />
     </div>
   );
 }

@@ -151,20 +151,20 @@ export default function DownloadApp() {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="group relative flex items-center justify-between rounded-xl transition-all duration-300 shadow-[0_0_24px_rgba(232,163,61,0.25)] hover:shadow-[0_0_36px_rgba(232,163,61,0.45)] cursor-pointer bg-accent-primary p-4 px-6 border border-accent-primary"
-                    href="https://github.com/YOUR_GITHUB_USERNAME/YOUR_REPO_NAME/releases/latest/download/samvad-setu.apk"
+                    href="https://github.com/Team-Phoenix-100/Samvad-Setu/releases/download/1.0.0/Samvad-Setu.apk"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-base/30 text-primary-custom">
-                        <Download size={28} className="text-white group-hover:translate-y-0.5 transition-transform" />
+                      <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-on-accent text-accent-primary shadow-inner">
+                        <Download size={28} className="group-hover:translate-y-0.5 transition-transform" />
                       </div>
                       <div className="flex flex-col text-left">
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-white text-xl">Download APK</span>
+                          <span className="font-bold text-on-accent text-xl">Download APK</span>
                         </div>
-                        <span className="text-white/90 text-sm">Direct, secure download for Android</span>
+                        <span className="text-on-accent opacity-90 font-medium text-sm">Direct, secure download for Android</span>
                       </div>
                     </div>
-                    <ArrowRight size={24} className="text-white ml-6" />
+                    <ArrowRight size={24} className="text-on-accent ml-6" />
                   </motion.a>
 
                   <div className="flex items-center rounded-xl shadow-sm gap-4 p-4 bg-surface border border-surface-raised w-fit">
