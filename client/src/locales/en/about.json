@@ -1,0 +1,133 @@
+{
+  "hero": {
+    "title": "Samvad Setu",
+    "tagline": "Connect · Resolve · Build",
+    "description": "A digital platform that connects citizens, government, universities, and industry on one system, turning civic complaints into tracked, fundable, resolvable action — built for Smart India Hackathon 2026."
+  },
+  "problem": {
+    "title": "The Problem",
+    "p1": "Citizens across Jharkhand encounter local challenges (education, healthcare, agriculture, water, sanitation, environment, rural livelihoods, accessibility, urban infrastructure, public service delivery) but have no structured way to submit them for systematic resolution.",
+    "p2": "Universities have research expertise and student capacity; industry has technical/financial resources — but citizen–university–industry collaboration today is fragmented and ad hoc.",
+    "p3": "NEP 2020 calls for exactly this kind of experiential, multidisciplinary, community-engaged model — Samvad Setu is built to deliver it."
+  },
+  "solution": {
+    "title": "Our Solution",
+    "pillars": [
+      {
+        "title": "Multimodal Citizen Reporting",
+        "description": "Voice, photo, geotag, and text reporting via app, WhatsApp, IVR, and web."
+      },
+      {
+        "title": "Geospatial Mapping & Smart Routing",
+        "description": "Vulnerability hotspot mapping across all 24 districts of Jharkhand, auto-forwarding verified issues to 447+ HEIs (e.g. IIT-ISM, BAU)."
+      },
+      {
+        "title": "Actionable R&D Pipelines",
+        "description": "Converts raw complaints into structured, fundable engineering research projects instead of one-off repairs."
+      },
+      {
+        "title": "CSR Funding Bridge",
+        "description": "Connects validated community challenges to regional industrial CSR funds for rapid prototyping and deployment."
+      },
+      {
+        "title": "Proactive Prevention & Transparency",
+        "description": "Catches slow-building disasters early and sends citizens live progress updates to build public trust."
+      }
+    ]
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "steps": [
+      "Citizen Input (App / WhatsApp / IVR / Image / Voice)",
+      "Language Layer (Hindi / Hinglish / English normalization + translation)",
+      "AI Engine (category classification, severity detection, duplicate detection, department routing)",
+      "Decision Layer (confidence + priority → Auto-Route or Human Review)",
+      "Model Improvement loop (feedback → retraining)"
+    ],
+    "example": "Citizen reports \"no water for 3 days\" in Hindi → AI classifies it as Category: Water, Severity: High, Department: Water Supply, Confidence: 94% → auto-routed and tracked, with status updates sent back to the citizen."
+  },
+  "pipelines": {
+    "title": "The R&D and CSR Pipelines",
+    "rnd": {
+      "title": "R&D Pipeline",
+      "flow": "Citizen Reporting → AI & Validation → Geospatial Mapping → R&D Matching Engine → Funding Bridge → Prototype Development → Field Deployment → Monitoring & Impact → Citizen Feedback → Better Communities"
+    },
+    "csr": {
+      "title": "CSR Funding Pipeline",
+      "flow": "Identify Validated Issue → Find Relevant CSR Partners → Proposal Preparation → Approval & Funding Allocation → Project Implementation → Monitoring & Reporting → Scale & Sustain"
+    }
+  },
+  "audiences": {
+    "title": "Built For Four Audiences",
+    "cards": [
+      {
+        "title": "Citizens",
+        "desc": "Report problems, track resolution in real time."
+      },
+      {
+        "title": "HEIs & Universities",
+        "desc": "Adopt real civic challenges as NEP-2020-aligned capstone/R&D projects, assign student and faculty teams, access engineering dossiers."
+      },
+      {
+        "title": "Industry & CSR",
+        "desc": "Discover lab-ready solutions seeking funding, commit milestone-based CSR escrow, certify civic handovers (MCA Section 135 alignment)."
+      },
+      {
+        "title": "Government / State Authorities",
+        "desc": "Get district-wise dashboards, prioritize and assign complaints, track SLAs (e.g. the 48-hour average resolution target shown on the portal screen)."
+      }
+    ]
+  },
+  "techStack": {
+    "title": "Technology Stack",
+    "categories": [
+      { "name": "Frontend", "items": "React.js, Tailwind CSS, Axios" },
+      { "name": "Mobile", "items": "React Native, Expo, NativeWind" },
+      { "name": "Backend & AI services", "items": "Node.js/Express (API gateway) with Python/FastAPI AI services behind it" },
+      { "name": "AI/ML", "items": "Multilingual NLP (IndicBERT/MuRIL-class models), Sentence-Transformers + FAISS for deduplication, PyTorch, scikit-learn, spaCy/NLTK" },
+      { "name": "Database & storage", "items": "PostgreSQL + MongoDB Atlas (dual-database), Redis + BullMQ (job queue), Cloudinary" },
+      { "name": "Infrastructure", "items": "Docker, Nginx, cloud hosting" },
+      { "name": "Voice/regional language", "items": "Bhashini integration (including Santali support)" }
+    ]
+  },
+  "comparison": {
+    "title": "Why Samvad Setu Is Different",
+    "desc": "Compared to Jharkhand Jan Samvad, SACHET (NDMA), and Bhuvan (ISRO), Samvad Setu is the only platform offering university/HEI routing with NEP 2020 credit transfer, an industry/CSR funding bridge, multimodal AI cross-language deduplication, and offline-first voice input with Santali support."
+  },
+  "impact": {
+    "title": "Impact We're Building Toward",
+    "items": [
+      { "title": "Social", "desc": "Restores public trust, builds resilient communities" },
+      { "title": "Academic & Innovation", "desc": "Real-world learning, research opportunities" },
+      { "title": "Environmental & Disaster", "desc": "Mitigates risk early, supports sustainable ecosystems" },
+      { "title": "Economic", "desc": "Reduces repair costs, unlocks CSR investment, supports the local economy" }
+    ]
+  },
+  "team": {
+    "title": "Team Phoenix",
+    "subtitle": "SVIST (Swami Vivekananda Institute of Science & Technology)",
+    "details": "Team ID 167423, registered as \"Team Phoenix_SVIST\" for SIH 2026. Team lead: Soumabha Majumder (backend and AI-integrated platform architecture). Note this is a Smart India Hackathon 2026 project, currently under active development."
+  },
+  "footer": {
+    "status": "Samvad Setu is under active development. Our web application is live; our mobile app and AI severity-detection engine are in progress. We'll keep shipping.",
+    "cta": "Return to Portal Selection"
+  },
+  "portalModals": {
+    "citizen": {
+      "title": "About Citizen Portal",
+      "content": "As a citizen, you can report local issues using photos, voice notes, and geotags. Track the real-time status of your grievances and see the SLA countdown. Our AI automatically classifies and routes your report. Note that complex problems may be routed to universities or industry for deeper R&D solutions."
+    },
+    "hei": {
+      "title": "About HEI Portal",
+      "content": "Universities and HEIs can 'adopt' civic challenges as NEP-2020-aligned capstone or R&D projects. Assign student and faculty teams to build prototypes, earn academic credits, and submit solution proposals for CSR funding."
+    },
+    "industry": {
+      "title": "About Industry & CSR Portal",
+      "content": "Discover lab-ready solutions engineered by universities. Commit milestone-based CSR escrow funding (30/40/30 structure), monitor field deployment, and seamlessly certify civic handovers in alignment with MCA Section 135."
+    },
+    "government": {
+      "title": "About Government Portal",
+      "content": "Access district-wise analytics and dashboards showing domain-wise distribution, institutional participation, and industry engagement. Prioritize complaints, review workflows, and track SLA compliance across the state."
+    }
+  }
+}

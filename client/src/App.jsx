@@ -2,6 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ComponentLibrary from "./pages/dev/ComponentLibrary";
 import Landing from "./pages/public/Landing";
+import About from "./pages/public/About";
 import Login from "./pages/public/Login";
 import Signup from "./pages/public/Signup";
 import DownloadApp from "./pages/public/DownloadApp";
@@ -62,6 +63,7 @@ export default function App() {
         {/* Public Module Routes */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Landing />} />
+          <Route path="/about" element={<About />} />
           <Route
             path="/how-it-works"
             element={<PageStub title="How It Works" category="Public (P1)" />}
