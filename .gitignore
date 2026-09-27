@@ -56,3 +56,6 @@ dataset/
 runs/
 *.pt.backup
 *.cache
+
+# Diagrams
+*.drawio
