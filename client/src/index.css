@@ -11,6 +11,7 @@
     --text-primary: #F2EFE9;
     --text-muted: #9BA8A6;
     --border-color: #1D3238;
+    --on-accent: #0F1B1E;
   }
 
   [data-theme='light'] {
@@ -23,6 +24,7 @@
     --text-primary: #172522;
     --text-muted: #5C6D68;
     --border-color: #D4E1DD;
+    --on-accent: #FFFFFF;
   }
 
   body {
@@ -60,12 +62,17 @@ body { transition: background-color 180ms ease, color 180ms ease; }
 .bg-base { background-color: var(--bg-base); }
 .bg-surface { background-color: var(--surface); }
 .bg-surface-raised { background-color: var(--surface-raised); }
+.bg-accent-primary { background-color: var(--accent-primary); }
+.bg-accent-secondary { background-color: var(--accent-secondary); }
+.bg-accent-urgent { background-color: var(--accent-urgent); }
 
 .text-accent-primary { color: var(--accent-primary); }
 .text-accent-secondary { color: var(--accent-secondary); }
 .text-accent-urgent { color: var(--accent-urgent); }
 .text-primary-custom { color: var(--text-primary); }
 .text-muted-custom { color: var(--text-muted); }
+.text-on-accent { color: var(--on-accent); }
+.bg-on-accent { background-color: var(--on-accent); }
 
 .border-surface-raised { border-color: var(--border-color); }
 

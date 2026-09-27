@@ -37,8 +37,8 @@ export default function Navbar() {
         <Link to="/" className={`text-sm font-medium transition-colors ${location.pathname === '/' ? 'text-accent-primary' : 'text-muted-custom hover:text-primary-custom'}`}>
           Home
         </Link>
-        <Link to="/how-it-works" className={`text-sm font-medium transition-colors ${location.pathname === '/how-it-works' ? 'text-accent-primary' : 'text-muted-custom hover:text-primary-custom'}`}>
-          About
+        <Link to="/about" className={`text-sm font-medium transition-colors ${location.pathname === '/about' ? 'text-accent-primary' : 'text-muted-custom hover:text-primary-custom'}`}>
+          About Us
         </Link>
         <Link to="/map" className={`text-sm font-medium transition-colors ${location.pathname === '/map' ? 'text-accent-primary' : 'text-muted-custom hover:text-primary-custom'}`}>
           Public Map

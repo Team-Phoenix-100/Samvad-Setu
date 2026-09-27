@@ -1,9 +1,11 @@
 import React from 'react';
-import { Bell } from 'lucide-react';
+import { Bell, Info } from 'lucide-react';
 import { useAuthStore } from '../../store/authStore';
+import AboutPortalModal from '../ui/AboutPortalModal';
 
 export default function GovTopbar() {
   const { user } = useAuthStore();
+  const [isAboutOpen, setIsAboutOpen] = React.useState(false);
 
   return (
     <header className="h-16 flex-shrink-0 bg-[#16272B] border-b border-[#233E44] flex items-center justify-between px-6 z-10 sticky top-0">
@@ -12,6 +14,13 @@ export default function GovTopbar() {
       </div>
       
       <div className="flex items-center gap-4">
+        <button 
+          onClick={() => setIsAboutOpen(true)}
+          className="relative p-2 text-muted-custom hover:text-accent-primary transition-colors rounded-full hover:bg-[#233E44]"
+          title="About this Portal"
+        >
+          <Info size={20} />
+        </button>
         <button className="relative p-2 text-muted-custom hover:text-primary-custom transition-colors rounded-full hover:bg-[#233E44]">
           <Bell size={20} />
           <span className="absolute top-1 right-1 w-2 h-2 bg-[#E8A33D] rounded-full border border-[#16272B]"></span>
@@ -29,6 +38,11 @@ export default function GovTopbar() {
           </div>
         </div>
       </div>
+      <AboutPortalModal 
+        isOpen={isAboutOpen} 
+        onClose={() => setIsAboutOpen(false)} 
+        role={user?.role || 'government_admin'} 
+      />
     </header>
   );
 }
