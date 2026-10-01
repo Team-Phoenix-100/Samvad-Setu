@@ -7,7 +7,7 @@ const { upload, uploadToCloudinary } = require("../middleware/upload");
 const cloudinary = require("../config/cloudinary");
 
 const AI_ENGINE = process.env.AI_ENGINE_URL || "http://localhost:8000";
-const CHATBOT_ENGINE = process.env.AI_CHATBOT_URI || process.env.CHATBOT_ENGINE_URL || "http://127.0.0.1:8001";
+const CHATBOT_ENGINE = process.env.CHATBOT_ENGINE_URL || "http://127.0.0.1:8001";
 
 // Public Route: Anyone can view public problems (for Map etc.)
 router.get("/public", async (req, res) => {

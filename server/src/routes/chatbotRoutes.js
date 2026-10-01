@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const axios = require("axios");
 
-const CHATBOT_ENGINE = process.env.AI_CHATBOT_URI || process.env.CHATBOT_ENGINE_URL || "http://127.0.0.1:8001";
+const CHATBOT_ENGINE = process.env.CHATBOT_ENGINE_URL || "http://127.0.0.1:8001";
 
 router.post("/message", async (req, res) => {
   try {
