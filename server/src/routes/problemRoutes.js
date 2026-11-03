@@ -6,7 +6,7 @@ const Problem = require("../models/Problem");
 const { upload, uploadToCloudinary } = require("../middleware/upload");
 const cloudinary = require("../config/cloudinary");
 
-const AI_ENGINE = process.env.AI_ENGINE_URL || "http://localhost:8000";
+const AI_ENGINE = process.env.AI_ENGINE_URL || "http://127.0.0.1:8001";
 const CHATBOT_ENGINE = process.env.CHATBOT_ENGINE_URL || "http://127.0.0.1:8001";
 
 // Public Route: Anyone can view public problems (for Map etc.)
@@ -150,7 +150,7 @@ router.post("/", protect, authorize("citizen"), upload.array("images", 3), async
 
     if (savedProblem.aiMetadata.flaggedForReview) {
       try {
-        const io = require('../../app').io;
+        const io = require('../app').io;
         if (io) io.to('admin_alerts').emit('moderation:new_item', savedProblem);
       } catch (err) {
         console.error("Socket error:", err);
