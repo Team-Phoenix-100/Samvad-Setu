@@ -47,7 +47,22 @@ export default function Signup() {
   const initialRole = searchParams.get("role") || "citizen";
   
   const { showToast } = useToastStore();
-  const { signup, isLoading, error } = useAuthStore();
+  const { signup, isLoading, error, user, token } = useAuthStore();
+
+  React.useEffect(() => {
+    if (user || token) {
+      const userRole = user?.role;
+      if (userRole === "hei" || userRole === "hei_admin") {
+        navigate("/hei/dashboard");
+      } else if (userRole === "industry_csr" || userRole === "industry_admin") {
+        navigate("/industry/dashboard");
+      } else if (userRole === "government_admin" || userRole === "admin" || userRole === "govt_admin" || userRole === "platform_admin") {
+        navigate("/admin/analytics");
+      } else {
+        navigate("/citizen/dashboard");
+      }
+    }
+  }, [user, token, navigate]);
 
   const [role, setRole] = useState(initialRole);
   const [step, setStep] = useState(1);
