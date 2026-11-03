@@ -67,8 +67,9 @@ export default function SidebarLayout() {
           </div>
           <button 
             onClick={() => setIsAboutOpen(true)}
-            className="w-8 h-8 rounded-full bg-surface-raised flex items-center justify-center text-muted-custom hover:text-accent-primary transition-colors"
-            title="About this Portal"
+            className="w-8 h-8 rounded-full bg-surface-raised flex items-center justify-center text-muted-custom hover:text-accent-primary transition-colors focus:outline-none focus:ring-2 focus:ring-accent-primary"
+            title={`About ${getPortalTitle()} & Architecture`}
+            aria-label={`About ${getPortalTitle()} & Architecture`}
           >
             <Info size={16} />
           </button>
@@ -124,7 +125,9 @@ export default function SidebarLayout() {
           <div className="flex items-center gap-3">
             <button 
               onClick={() => setIsAboutOpen(true)}
-              className="w-8 h-8 rounded-full bg-surface-raised flex items-center justify-center text-muted-custom hover:text-accent-primary transition-colors"
+              className="w-8 h-8 rounded-full bg-surface-raised flex items-center justify-center text-muted-custom hover:text-accent-primary transition-colors focus:outline-none focus:ring-2 focus:ring-accent-primary"
+              title={`About ${getPortalTitle()} & Architecture`}
+              aria-label={`About ${getPortalTitle()} & Architecture`}
             >
               <Info size={16} />
             </button>

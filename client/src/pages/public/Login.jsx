@@ -20,8 +20,25 @@ export default function Login() {
   const [searchParams] = useSearchParams();
   const returnTo = searchParams.get("returnTo");
   
-  const { login, isLoading, error } = useAuthStore();
+  const { login, isLoading, error, user, token } = useAuthStore();
   const { showToast } = useToastStore();
+
+  React.useEffect(() => {
+    if (user || token) {
+      const userRole = user?.role;
+      if (returnTo) {
+        navigate(returnTo);
+      } else if (userRole === "hei" || userRole === "hei_admin") {
+        navigate("/hei/dashboard");
+      } else if (userRole === "industry_csr" || userRole === "industry_admin") {
+        navigate("/industry/dashboard");
+      } else if (userRole === "government_admin" || userRole === "admin" || userRole === "govt_admin" || userRole === "platform_admin") {
+        navigate("/admin/analytics");
+      } else {
+        navigate("/citizen/dashboard");
+      }
+    }
+  }, [user, token, navigate, returnTo]);
 
   const {
     register,

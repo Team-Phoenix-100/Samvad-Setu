@@ -4,11 +4,28 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
   Users, Building2, Briefcase, ShieldCheck, 
-  Map, Activity, Code, Database, Globe, Network, Cpu, ArrowRight 
+  Map, Activity, Code, Database, Globe, Network, Cpu, ArrowRight, LayoutDashboard 
 } from 'lucide-react';
+import { useAuthStore } from '../../store/authStore';
 
 export default function About() {
   const { t } = useTranslation('about');
+  const { user } = useAuthStore();
+
+  const getDashboardPath = () => {
+    if (!user) return '/citizen/dashboard';
+    const role = user.role;
+    if (role === 'government_admin' || role === 'admin' || role === 'govt_admin' || role === 'platform_admin') {
+      return '/admin/analytics';
+    }
+    if (role === 'hei' || role === 'hei_admin') {
+      return '/hei/dashboard';
+    }
+    if (role === 'industry_csr' || role === 'industry_admin') {
+      return '/industry/dashboard';
+    }
+    return '/citizen/dashboard';
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -25,6 +42,22 @@ export default function About() {
 
   return (
     <main className="w-full bg-base min-h-screen text-primary-custom overflow-hidden">
+      {/* Logged-in helper banner */}
+      {user && (
+        <div className="bg-surface-raised/95 border-b border-surface-raised px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-sm sticky top-[65px] z-40 backdrop-blur-md">
+          <span className="text-muted-custom flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-accent-secondary animate-pulse"></span>
+            Browsing platform documentation while logged in as <strong className="text-primary-custom">{user.name || user.email}</strong>
+          </span>
+          <Link
+            to={getDashboardPath()}
+            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-accent-primary text-on-accent text-xs font-semibold hover:bg-accent-primary/90 transition-all shadow-sm"
+          >
+            <LayoutDashboard size={14} /> Return to Dashboard
+          </Link>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="relative w-full pt-20 pb-16 px-6 lg:px-10 flex flex-col items-center text-center">
         <div className="absolute top-10 left-1/4 w-[400px] h-[400px] rounded-full blur-[120px] bg-accent-primary/10 pointer-events-none"></div>
@@ -316,8 +349,19 @@ export default function About() {
         <p className="max-w-2xl text-muted-custom text-sm">
           {t('footer.status')}
         </p>
-        <Link to="/" className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent-primary text-on-accent font-bold hover:bg-accent-primary/90 transition-colors shadow-lg">
-          {t('footer.cta')} <ArrowRight size={20} />
+        <Link 
+          to={user ? getDashboardPath() : "/"} 
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-accent-primary text-on-accent font-bold hover:bg-accent-primary/90 transition-colors shadow-lg"
+        >
+          {user ? (
+            <>
+              <LayoutDashboard size={18} /> Return to Dashboard
+            </>
+          ) : (
+            <>
+              {t('footer.cta')} <ArrowRight size={20} />
+            </>
+          )}
         </Link>
       </footer>
     </main>

@@ -537,3 +537,22 @@ The following components and layouts were recently added via an Agentic Workflow
 +### 2. Navigation Integration
 +- Linked the new `/download-app` route in the public `Navbar.jsx`.
 +- Added the `DownloadApp` component route to `App.jsx` under the `PublicLayout` so it inherits the standard header and footer while presenting the immersive application download experience.
+
+## In-Portal Architecture Explorer & Navigation State Fix
+### 1. In-Portal Full Details Modal (`AboutPortalModal.jsx`)
+- **Bug Fixed**: Resolved an issue where clicking "View Full Platform Details" in the sidebar information drawer triggered a route transition to `/about`, unmounting `SidebarLayout` and dumping authenticated citizens onto the public marketing site with no way back to their dashboard.
+- **In-Place Architecture Explorer**: Refactored `AboutPortalModal` to support dual display modes:
+  - **Compact Summary Mode**: Displays concise, role-tailored capabilities (Multimodal reporting, 48-hour SLAs, AI triage) and an "Explore Full Platform Details" interactive expand button.
+  - **Expanded Deep Dive Mode**: Smoothly expands the slide-over panel into a responsive, tabbed explorer (`max-w-2xl` / `max-w-3xl`) featuring:
+    1. *5 Core Pillars*: Interactive cards detailing Multimodal Reporting, Geospatial Mapping across 24 Jharkhand districts and 447+ HEIs, Actionable R&D Pipelines, CSR Funding Bridge, and Proactive Transparency.
+    2. *AI Workflow*: Visual 5-step diagram outlining citizen ingestion, language normalization (Hindi/Hinglish/English), IndicBERT + FAISS classification, automated decision layer, and feedback loop.
+    3. *Stakeholders*: Role breakdowns for Citizens, HEIs, Industry CSR, and Government Authorities.
+    4. *Tech Stack*: Frontend, Mobile, Backend Gateway, AI/ML services, and dual databases.
+- **In-Portal Retention**: Added "Return to Dashboard" action buttons in both header and footer, plus keyboard Escape key handling, guaranteeing the user never leaves their authenticated dashboard view.
+- **Smooth Uniform Animation**: Refactored the Framer Motion slide-in transition from non-linear spring physics (`type: 'spring'`) to a smooth, uniform easing curve (`ease: 'easeInOut', duration: 0.32s`), eliminating the "slow-then-fast" snapping behavior and removing CSS transition conflicts with inline motion transforms.
+
+### 2. Authenticated State Preservation across Public Routes
+- **Public Navbar (`Navbar.jsx`)**: Connected `Navbar` to Zustand's `authStore`. When an authenticated user browses public routes (`/`, `/about`, `/map`, `/download-app`), the "Sign In" and "Register" buttons are replaced with a persistent "Go to Dashboard" button that dynamically routes to their role's dashboard (`/citizen/dashboard`, `/hei/dashboard`, `/industry/dashboard`, or `/admin/analytics`).
+- **About Page Integration (`About.jsx`)**: Integrated an authenticated helper banner and dynamically redirected the bottom CTA button from the landing page (`/`) to the user's role-specific dashboard.
+- **Auth Page Hardening (`Login.jsx`, `Signup.jsx`)**: Added proactive `useEffect` hooks to automatically redirect authenticated sessions to their active dashboard, preventing users from getting trapped on login/signup forms.
+- **Sidebar Accessibility (`SidebarLayout.jsx`)**: Enhanced the info dot button with accessible aria labels and descriptive tooltip text (`About ${getPortalTitle()} & Architecture`).

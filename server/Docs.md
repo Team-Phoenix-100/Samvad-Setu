@@ -151,6 +151,17 @@ Content-Type: application/json
 
 ---
 
+### 🤖 AI Chatbot Routes
+
+**Base Path:** `/api/chatbot`  
+**File Location:** `routes/chatbotRoutes.js`
+
+| Method   | Endpoint                | Access Level | Description                                                               | Status        |
+| -------- | ----------------------- | ------------ | ------------------------------------------------------------------------- | ------------- |
+| **POST** | `/api/chatbot/message`  | Public       | Proxies natural language queries to the AI NLP Engine and returns replies | 🟢 Live Proxy |
+
+---
+
 ### 🛡️ Admin & Government Routes
 
 **Base Path:** `/api/admin`  
